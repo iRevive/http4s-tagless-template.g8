@@ -9,8 +9,8 @@ import cats.~>
 import $organization$.ApplicationLoader
 import $organization$.ApplicationLoader.Application
 import $organization$.util.logging.TraceId
-import $organization$.util.syntax.resources._
-import $organization$.util.{ClassUtils, TracedLike, TracedResultT}
+import $organization$.util.syntax.mapK._
+import $organization$.util.{ClassUtils, ResourceOps, TracedLike, TracedResultT}
 import eu.timepit.refined.types.string.NonEmptyString
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -34,15 +34,15 @@ trait ITSpec extends WordSpecLike with Matchers with EitherValues with OptionVal
   protected def randomString(): String                 = Random.alphanumeric.take(10).map(_.toLower).mkString
 
   protected implicit val taskToTask: Task ~> Task  = FunctionK.id
-  protected implicit val effectToTask: Eff ~> Task = TracedLike.tracedResultToTask.transformer(traceId)
+  protected implicit val effectToTask: Eff ~> Task = TracedLike.tracedResultToTask.arrow(traceId)
 
   protected def withApplication[F[_], A](
       timeout: Duration = DefaultTimeout
   )(program: Application[Task] => F[A])(implicit transformer: F ~> Task): Unit = {
     DefaultApplicationLoader
       .loadApplication()
-      .mapK(effectToTask)
-      .use(app => transformer.apply(program(app)))
+      .mapK(ResourceOps.arrow(effectToTask))
+      .use(app => program(app).mapK(transformer))
       .void
       .runSyncUnsafe(timeout)
   }
@@ -50,7 +50,7 @@ trait ITSpec extends WordSpecLike with Matchers with EitherValues with OptionVal
   object EffectAssertion {
 
     def apply[F[_], A](timeout: Duration = DefaultTimeout)(program: F[A])(implicit transformer: F ~> Task): Unit = {
-      transformer(program).void.runSyncUnsafe(timeout)
+      program.mapK(transformer).void.runSyncUnsafe(timeout)
     }
 
   }

@@ -10,12 +10,6 @@ import io.circe.{Decoder, Error, ParsingFailure}
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
-trait ConfigSyntax {
-
-  implicit def toRichConfig(config: Config): RichConfig = new RichConfig(config)
-
-}
-
 final class RichConfig(private val config: Config) extends AnyVal {
   import io.circe.config.syntax._
 
@@ -34,6 +28,12 @@ final class RichConfig(private val config: Config) extends AnyVal {
       .catchNonFatal(ConfigFactory.parseString(input))
       .leftMap(e => ParsingFailure(log"Couldn't parse [\$input] as config", e))
   }
+
+}
+
+trait ToConfigOps {
+
+  final implicit def toRichConfig(config: Config): RichConfig = new RichConfig(config)
 
 }
 

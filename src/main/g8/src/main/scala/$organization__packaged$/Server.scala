@@ -10,7 +10,7 @@ import $organization$.util._
 import $organization$.util.error.ErrorHandle
 import $organization$.util.logging.Loggable.InterpolatorOps._
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
-import $organization$.util.syntax.resources._
+import $organization$.util.syntax.mapK._
 import eu.timepit.refined.auto.autoUnwrap
 import monix.eval.{Task, TaskApp}
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -42,7 +42,7 @@ class Runner[F[_]: Concurrent: Timer: ContextShift: TraceProvider: ErrorHandle, 
   def startApp(applicationLoader: ApplicationLoader[F, G], traceId: TraceId): Resource[G, Unit] = {
     for {
       _   <- Resource.liftF(logger.info("Starting the [$name$] service").run(traceId))
-      app <- applicationLoader.loadApplication().mapK(tracedLike.transformer(traceId))
+      app <- applicationLoader.loadApplication().mapK(ResourceOps.arrow(tracedLike.arrow(traceId)))
       _   <- startApi(app, traceId)
     } yield ()
   }

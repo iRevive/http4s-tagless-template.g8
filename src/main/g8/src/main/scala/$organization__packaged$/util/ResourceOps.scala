@@ -8,13 +8,6 @@ import cats.{~>, Functor}
 /**
   * Taken from https://github.com/tpolecat/skunk/blob/master/modules/core/src/main/scala/syntax/ResourceOps.scala
   */
-final class ResourceOps[F[_], A](rsrc: Resource[F, A]) {
-
-  def mapK[G[_]](fk: F ~> G)(implicit F: Functor[F]): Resource[G, A] =
-    ResourceOps.mapK(rsrc)(fk)
-
-}
-
 object ResourceOps {
 
   // Really we can implement this if either is a functor, so I flipped a coin.
@@ -30,8 +23,11 @@ object ResourceOps {
       case Suspend(fr) => Suspend(fk(fr.map(mapK(_)(fk))))
     }
 
-}
+  def arrow[F[_]: Functor, G[_]](fk: F ~> G): Resource[F, ?] ~> Resource[G, ?] =
+    new (Resource[F, ?] ~> Resource[G, ?]) {
+      override def apply[A](fa: Resource[F, A]): Resource[G, A] = {
+        mapK(fa)(fk)
+      }
+    }
 
-trait ToResourceOps {
-  implicit def toResourceOps[F[_], A](rsrc: Resource[F, A]): ResourceOps[F, A] = new ResourceOps(rsrc)
 }

@@ -6,7 +6,7 @@ import io.circe.Decoder
 /**
   * See https://github.com/circe/circe-config/issues/12
   */
-final case class ConfigBoolean(value: Boolean)
+final case class ConfigBoolean(value: Boolean) extends AnyVal
 
 object ConfigBoolean {
 
