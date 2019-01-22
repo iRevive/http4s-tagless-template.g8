@@ -12,6 +12,7 @@ object Versions {
   val circe             = "$circe_version$"
   val circeConfig       = "$circe_config_version$"
   val cats              = "$cats_version$"
+  val catsEffect        = "$cats_effect_version$"
   val catsMTL           = "$cats_mtl_version$"
   val monix             = "$monix_version$"
   $if(useMongo.truthy)$
@@ -35,6 +36,7 @@ object Dependencies {
     "org.http4s"                 %% "http4s-circe"         % Versions.http4s,
     "io.monix"                   %% "monix"                % Versions.monix,
     "org.typelevel"              %% "cats-core"            % Versions.cats,
+    "org.typelevel"              %% "cats-effect"          % Versions.catsEffect,
     "org.typelevel"              %% "cats-mtl-core"        % Versions.catsMTL,
     "io.circe"                   %% "circe-core"           % Versions.circe,
     "io.circe"                   %% "circe-jawn"           % Versions.circe,

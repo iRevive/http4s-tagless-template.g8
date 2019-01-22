@@ -42,7 +42,7 @@ class Runner[F[_]: Concurrent: Timer: ContextShift: TraceProvider: ErrorHandle, 
   def startApp(applicationLoader: ApplicationLoader[F, G], traceId: TraceId): Resource[G, Unit] = {
     for {
       _   <- Resource.liftF(logger.info("Starting the [$name$] service").run(traceId))
-      app <- applicationLoader.loadApplication().mapK(ResourceOps.arrow(tracedLike.arrow(traceId)))
+      app <- applicationLoader.loadApplication().mapK(tracedLike.arrow(traceId))
       _   <- startApi(app, traceId)
     } yield ()
   }

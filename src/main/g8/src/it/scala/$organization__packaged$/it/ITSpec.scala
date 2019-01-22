@@ -10,7 +10,7 @@ import $organization$.ApplicationLoader
 import $organization$.ApplicationLoader.Application
 import $organization$.util.logging.TraceId
 import $organization$.util.syntax.mapK._
-import $organization$.util.{ClassUtils, ResourceOps, TracedLike, TracedResultT}
+import $organization$.util.{ClassUtils, TracedLike, TracedResultT}
 import eu.timepit.refined.types.string.NonEmptyString
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -34,14 +34,14 @@ trait ITSpec extends WordSpecLike with Matchers with EitherValues with OptionVal
   protected def randomString(): String                 = Random.alphanumeric.take(10).map(_.toLower).mkString
 
   protected implicit val taskToTask: Task ~> Task  = FunctionK.id
-  protected implicit val effectToTask: Eff ~> Task = TracedLike.tracedResultToTask.arrow(traceId)
+  protected implicit val effectToTask: Eff ~> Task = TracedLike[Eff, Task].arrow(traceId)
 
   protected def withApplication[F[_], A](
       timeout: Duration = DefaultTimeout
   )(program: Application[Task] => F[A])(implicit transformer: F ~> Task): Unit = {
     DefaultApplicationLoader
       .loadApplication()
-      .mapK(ResourceOps.arrow(effectToTask))
+      .mapK(effectToTask)
       .use(app => program(app).mapK(transformer))
       .void
       .runSyncUnsafe(timeout)
