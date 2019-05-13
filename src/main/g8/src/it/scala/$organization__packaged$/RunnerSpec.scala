@@ -1,9 +1,10 @@
 package $organization$
 
+import cats.effect.syntax.concurrent._
 import cats.mtl.implicits._
+import cats.syntax.applicativeError._
 import $organization$.it.ITSpec
-import $organization$.util.logging.TraceId
-import monix.eval.Task
+import $organization$.util.error.ErrorHandle
 
 import scala.concurrent.duration._
 
@@ -11,18 +12,20 @@ class RunnerSpec extends ITSpec {
 
   "Runner" should {
 
-    "start application" in {
+    "start application" in EffectAssertion(40.seconds) {
       val loader    = DefaultApplicationLoader
-      val runner    = new Runner[Eff, Task]
-      val startFlow = runner.startApp(loader, TraceId.randomUuid()).use(_ => Task.unit)
+      val runner    = new Runner[Eff]
 
-      noException shouldBe thrownBy(startFlow.runSyncUnsafe(40.seconds))
+      for {
+        result <- ErrorHandle[Eff].attempt(runner.startApp(loader).use(_ => Eff.unit))
+      } yield result should beRight(())
     }
 
-    "return error if process was cancel" in {
-      val fiber = new Runner[Eff, Task].run(traceId).start.runSyncUnsafe()
-
-      noException shouldBe thrownBy(fiber.cancel.runSyncUnsafe(DefaultTimeout))
+    "return error if process was cancel" in EffectAssertion() {
+      for {
+        fiber         <- new Runner[Eff].serve(ApplicationLoader.default).start
+        cancelAttempt <- fiber.cancel.attempt
+      } yield cancelAttempt should beRight(())
     }
 
   }

@@ -19,6 +19,7 @@ object Versions {
   val mongoScalaDriver  = "$mongo_scala_driver_version$"
   val netty             = "$netty_version$"
   $endif$
+  val scalazDeriving    = "$scalaz_deriving_version$"
   val refined           = "$refined_version$"
   val sourcecode        = "$sourcecode_version$"
   val magnolia          = "$magnorlia_version$"
@@ -38,6 +39,7 @@ object Dependencies {
     "org.typelevel"              %% "cats-core"            % Versions.cats,
     "org.typelevel"              %% "cats-effect"          % Versions.catsEffect,
     "org.typelevel"              %% "cats-mtl-core"        % Versions.catsMTL,
+    "org.scalaz"                 %% "deriving-macro"       % Versions.scalazDeriving,
     "io.circe"                   %% "circe-core"           % Versions.circe,
     "io.circe"                   %% "circe-jawn"           % Versions.circe,
     "io.circe"                   %% "circe-generic"        % Versions.circe,

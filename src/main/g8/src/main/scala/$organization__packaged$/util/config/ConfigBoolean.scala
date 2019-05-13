@@ -23,6 +23,6 @@ object ConfigBoolean {
     booleanDecoder.or(stringDecoder)
   }
 
-  implicit val loggableInstance: Loggable[ConfigBoolean] = Loggable.instance(_.value.toString)
+  implicit val loggableInstance: Loggable[ConfigBoolean] = _.value.toString
 
 }

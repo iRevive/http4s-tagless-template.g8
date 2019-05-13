@@ -7,7 +7,7 @@ import scala.util.control.NonFatal
 
 class PositionSpec extends BaseSpec {
 
-  "Position" must {
+  "Position" should {
 
     "correctly extract enclosing class & method" in {
       val pkg = "$organization$.util"

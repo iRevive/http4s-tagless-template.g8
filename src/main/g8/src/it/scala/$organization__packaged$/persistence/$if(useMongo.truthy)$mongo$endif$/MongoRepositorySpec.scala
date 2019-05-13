@@ -15,7 +15,7 @@ class MongoRepositorySpec extends ITSpec {
 
     "persist and retrieve a value" in withApplication() { app =>
       val collectionName = randomNonEmptyString()
-      val repository     = new MongoRepository[Eff, Entity](app.persistenceModule.mongoDatabase, collectionName)
+      val repository     = new MongoRepository[Eff](app.persistenceModule.mongoDatabase, collectionName)
 
       val name   = randomString()
       val number = Random.nextInt()
@@ -24,7 +24,7 @@ class MongoRepositorySpec extends ITSpec {
 
       for {
         _      <- repository.insertOne(document)
-        result <- repository.findOne(eQual("name", name))
+        result <- repository.findOne[Entity](eQual("name", name))
       } yield {
         result shouldBe document
       }

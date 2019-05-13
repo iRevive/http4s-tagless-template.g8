@@ -1,55 +1,45 @@
 package $organization$
 
 import cats.effect._
-import cats.syntax.functor._
+import $organization$.ApplicationLoader.Application
 import $organization$.api.{ApiModule, ApiModuleLoader}
+$if(useMongo.truthy)$
+import $organization$.persistence.mongo.MongoLoader
+$endif$
 import $organization$.persistence.{PersistenceModule, PersistenceModuleLoader}
 import $organization$.processing.{ProcessingModule, ProcessingModuleLoader}
 import $organization$.util.error.ErrorHandle
 import $organization$.util.logging.TraceProvider
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
 
-class ApplicationLoader[F[_]: Timer: ContextShift: TraceProvider: ErrorHandle, G[_]: Sync](implicit F: Concurrent[F]) {
+class ApplicationLoader[F[_]: Concurrent: Timer: ContextShift: TraceProvider: ErrorHandle](
+    persistenceModuleLoader: PersistenceModuleLoader[F],
+    processingModuleLoader: ProcessingModuleLoader[F],
+    apiModuleLoader: ApiModuleLoader[F]
+) {
 
-  import ApplicationLoader._
-
-  def loadApplication(): Resource[F, Application[G]] = {
+  def load(config: Config): Resource[F, Application[F]] =
     for {
-      config            <- Resource.liftF(loadConfig())
-      persistenceModule <- persistenceModuleLoader(config).loadPersistenceModule()
-      processingModule  <- processingModuleLoader(config, persistenceModule).loadProcessingModule()
-      apiModule         <- Resource.liftF(apiModuleLoader(config).loadApiModule())
-
-      application = Application(
-        persistenceModule = persistenceModule,
-        processingModule = processingModule,
-        apiModule = apiModule
-      )
-    } yield application
-  }
-
-  protected def loadConfig(): F[Config] = Sync[F].delay(ConfigFactory.load())
-
-  protected def persistenceModuleLoader(config: Config): PersistenceModuleLoader[F] = {
-    new PersistenceModuleLoader[F](config)
-  }
-
-  protected def apiModuleLoader(config: Config): ApiModuleLoader[F, G] = {
-    new ApiModuleLoader(config)
-  }
-
-  protected def processingModuleLoader(config: Config, persistenceModule: PersistenceModule): ProcessingModuleLoader[F] = {
-    new ProcessingModuleLoader(config, persistenceModule)
-  }
+      persistenceModule <- persistenceModuleLoader.load(config)
+      processingModule  <- processingModuleLoader.load(config, persistenceModule)
+      apiModule         <- Resource.liftF(apiModuleLoader.load(config))
+    } yield Application(persistenceModule, processingModule, apiModule)
 
 }
 
 object ApplicationLoader {
 
-  final case class Application[G[_]](
+  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider]: ApplicationLoader[F] =
+    new ApplicationLoader[F](
+      new PersistenceModuleLoader[F](MongoLoader.default),
+      new ProcessingModuleLoader[F],
+      new ApiModuleLoader[F]
+    )
+
+  final case class Application[F[_]](
       persistenceModule: PersistenceModule,
       processingModule: ProcessingModule,
-      apiModule: ApiModule[G]
+      apiModule: ApiModule[F]
   )
 
 }

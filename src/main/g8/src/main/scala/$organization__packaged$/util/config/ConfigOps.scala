@@ -1,8 +1,10 @@
 package $organization$.util
 package config
 
-import $organization$.util.error.BaseError
-import $organization$.util.logging.Loggable.InterpolatorOps._
+import cats.effect.Sync
+import cats.syntax.flatMap._
+import $organization$.util.error.{BaseError, ErrorRaise}
+import $organization$.util.syntax.logging._
 import cats.syntax.either._
 import com.typesafe.config.{Config, ConfigFactory}
 import io.circe.{Decoder, Error, ParsingFailure}
@@ -12,6 +14,12 @@ import scala.reflect.ClassTag
 
 final class RichConfig(private val config: Config) extends AnyVal {
   import io.circe.config.syntax._
+
+  def loadF[F[_]: Sync: ErrorRaise, A: Decoder: ClassTag](path: String): F[A] =
+    Sync[F].delay(load[A](path)).flatMap(v => v.fold(ErrorRaise[F].raise, Sync[F].pure))
+
+  def loadMetaF[F[_]: Sync: ErrorRaise, A: Decoder: ClassTag](path: String): F[A] =
+    Sync[F].delay(loadMeta[A](path)).flatMap(v => v.fold(ErrorRaise[F].raise, Sync[F].pure))
 
   def load[A: Decoder: ClassTag](path: String): Either[BaseError, A] = {
     config.as[A](path).leftMap(error => ConfigParsingError(path, ClassUtils.classSimpleName, error))

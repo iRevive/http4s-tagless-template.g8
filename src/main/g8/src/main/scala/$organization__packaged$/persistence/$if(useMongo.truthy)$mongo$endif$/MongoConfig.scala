@@ -1,13 +1,14 @@
 package $organization$.persistence.mongo
 
 import $organization$.util.RetryPolicy
-import $organization$.util.logging.{Loggable, LoggableDerivation}
+import $organization$.util.logging.Loggable
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.string.Uri
 import eu.timepit.refined.types.string.NonEmptyString
 
 import scala.concurrent.duration.FiniteDuration
 
+@scalaz.deriving(Loggable)
 final case class MongoConfig(
     uri: String Refined Uri,
     database: NonEmptyString,
@@ -25,6 +26,5 @@ object MongoConfig {
 
   implicit val configuration: Configuration            = Configuration.default.withKebabCaseMemberNames
   implicit val decoder: Decoder[MongoConfig]           = exportDecoder[MongoConfig].instance
-  implicit val loggableInstance: Loggable[MongoConfig] = LoggableDerivation.derive
 
 }

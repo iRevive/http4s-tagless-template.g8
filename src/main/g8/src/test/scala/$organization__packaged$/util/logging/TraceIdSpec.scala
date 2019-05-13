@@ -8,22 +8,18 @@ class TraceIdSpec extends BaseSpec {
 
   "TraceId" should {
 
-    "TraceId" should {
+    "generate a value from random uuid" in {
+      val traceId = TraceId.randomUuid()
 
-      "generate a value from random uuid" in {
-        val traceId = TraceId.randomUuid()
+      noException shouldBe thrownBy(UUID.fromString(traceId.value))
+    }
 
-        noException shouldBe thrownBy(UUID.fromString(traceId.value))
-      }
+    "generate a correct sub id" in {
+      val traceId = TraceId.randomUuid()
 
-      "generate a correct sub id" in {
-        val traceId = TraceId.randomUuid()
+      val expectedTraceId = traceId.value + "#" + 1
 
-        val expectedTraceId = traceId.value + "#" + 1
-
-        traceId.subId(1).value shouldBe expectedTraceId
-      }
-
+      traceId.subId(1).value shouldBe expectedTraceId
     }
 
   }

@@ -1,22 +1,12 @@
 package $organization$.util
 
-import $organization$.util.logging.{Loggable, LoggableDerivation}
+import $organization$.util.logging.Loggable
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.Decoder
-import io.circe.generic.extras.Configuration
-import io.circe.generic.extras.auto.exportDecoder
+import io.circe.config.syntax.durationDecoder
+import io.circe.refined._
 
 import scala.concurrent.duration.FiniteDuration
 
+@scalaz.deriving(Decoder, Loggable)
 final case class RetryPolicy(retries: NonNegInt, delay: FiniteDuration, timeout: FiniteDuration)
-
-object RetryPolicy {
-
-  import io.circe.config.syntax.durationDecoder
-  import io.circe.refined._
-
-  implicit val configuration: Configuration               = Configuration.default.withKebabCaseMemberNames
-  implicit val retryPolicyDecoder: Decoder[RetryPolicy]   = exportDecoder[RetryPolicy].instance
-  implicit val retryPolicyLoggable: Loggable[RetryPolicy] = LoggableDerivation.derive
-
-}

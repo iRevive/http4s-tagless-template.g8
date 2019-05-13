@@ -3,8 +3,8 @@ package $organization$.util.json
 import java.nio.charset.StandardCharsets
 
 import $organization$.test.BaseSpec
-import $organization$.util.logging.Loggable.InterpolatorOps._
 import $organization$.util.json.JsonParsingError._
+import $organization$.util.syntax.logging._
 import io.circe.Json
 import io.circe.generic.auto._
 

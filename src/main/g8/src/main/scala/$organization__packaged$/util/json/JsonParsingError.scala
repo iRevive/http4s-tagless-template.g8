@@ -5,13 +5,12 @@ import java.nio.charset.Charset
 
 import cats.data.NonEmptyList
 import $organization$.util.error.{BaseError, ThrowableError}
+import $organization$.util.syntax.logging._
 import io.circe.{DecodingFailure, Json, ParsingFailure}
 
 sealed trait JsonParsingError extends BaseError
 
 object JsonParsingError {
-
-  import $organization$.util.logging.Loggable.InterpolatorOps._
 
   @SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
   final case class UnsupportedString(input: Array[Byte], charset: Charset, cause: Throwable)(implicit val pos: Position)

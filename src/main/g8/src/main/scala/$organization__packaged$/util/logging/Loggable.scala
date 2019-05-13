@@ -33,8 +33,7 @@ object Loggable extends LoggableInstances {
   def instance[A](op: A => String): Loggable[A] = (value: A) => op(value)
 
   @SuppressWarnings(Array("org.wartremover.warts.ToString"))
-  def fromToString[A]: Loggable[A] =
-    Loggable.instance(_.toString)
+  def fromToString[A]: Loggable[A] = _.toString
 
   final case class Shown(override val toString: String) extends AnyVal
 
@@ -66,70 +65,51 @@ trait LoggableInstances {
   implicit val booleanLoggable: Loggable[Boolean] = Loggable.fromToString
   implicit val uuidLoggable: Loggable[UUID]       = Loggable.fromToString
 
-  implicit val positionLoggable: Loggable[Position] = Loggable.instance(v => s"Position(\${v.fullPosition})")
+  implicit val positionLoggable: Loggable[Position] = v => s"Position(\${v.fullPosition})"
 
   $if(useMongo.truthy)$
   implicit val dbObjectLoggable: Loggable[DBObject] = Loggable.fromToString
   $endif$
 
-  implicit def enumLoggable[E <: Enum[E]]: Loggable[E] = Loggable.instance(_.name())
-
+  implicit def enumLoggable[E <: Enum[E]]: Loggable[E]                  = v => v.name()
   implicit def enumerationLoggable[E <: Enumeration]: Loggable[E#Value] = Loggable.fromToString
+  implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime]           = Loggable.fromToString
+  implicit val finiteDurationLoggable: Loggable[FiniteDuration]         = Loggable.fromToString
+  implicit val circeJsonLoggable: Loggable[io.circe.Json]               = v => v.noSpaces
 
-  implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime] = Loggable.fromToString
+  implicit val throwableLoggable: Loggable[Throwable] = throwable => {
+    val className = ClassUtils.getClassSimpleName(throwable.getClass)
+    val message   = Option(throwable.getMessage).getOrElse("<empty message>")
 
-  implicit val finiteDurationLoggable: Loggable[FiniteDuration] = Loggable.fromToString
-
-  implicit val circeJsonLoggable: Loggable[io.circe.Json] = Loggable.instance(_.noSpaces)
-
-  implicit val throwableLoggable: Loggable[Throwable] =
-    Loggable instance { throwable =>
-      val className = ClassUtils.getClassSimpleName(throwable.getClass)
-      val message   = Option(throwable.getMessage).getOrElse("<empty message>")
-
-      s"\$className(\$message)"
-    }
+    s"\$className(\$message)"
+  }
 
   implicit def listLoggable[A: Loggable]: Loggable[List[A]] = traversableLoggable
-
   implicit def seqLoggable[A: Loggable]: Loggable[Seq[A]] = traversableLoggable
-
   implicit def setLoggable[A: Loggable]: Loggable[Set[A]] = traversableLoggable
 
   implicit def nelLoggable[A: Loggable]: Loggable[NonEmptyList[A]] =
-    Loggable.instance { value =>
-      traversableLoggable[A, List].show(value.toList)
-    }
+    value => traversableLoggable[A, List].show(value.toList)
 
   implicit def mapLoggable[A: Loggable, B: Loggable]: Loggable[Map[A, B]] =
-    Loggable instance { value =>
-      traversableLoggable[(A, B), List].show(value.toList)
-    }
+    value => traversableLoggable[(A, B), List].show(value.toList)
 
   implicit def optionLoggable[A: Loggable]: Loggable[Option[A]] =
-    Loggable instance { value =>
-      value.fold("None")(Loggable[A].show)
-    }
+    value => value.fold("None")(Loggable[A].show)
 
-  implicit def tuple2[A, B](implicit a: Loggable[A], b: Loggable[B]): Loggable[(A, B)] =
-    Loggable instance {
-      case (first, second) =>
-        s"(\${a.show(first)}, \${b.show(second)})"
-    }
+  implicit def tuple2[A, B](implicit a: Loggable[A], b: Loggable[B]): Loggable[(A, B)] = {
+    case (first, second) =>
+      s"(\${a.show(first)}, \${b.show(second)})"
+  }
 
   implicit def eitherLoggable[A, B](implicit left: Loggable[A], right: Loggable[B]): Loggable[Either[A, B]] =
-    Loggable instance {
-      case Left(value)  => s"Left(\${left.show(value)})"
-      case Right(value) => s"Right(\${right.show(value)})"
-    }
+    v => v.fold(l => s"Left(\${left.show(l)})", r => s"Right(\${right.show(r)})")
 
   implicit def refinedLoggable[T, P, F[_, _]](implicit underlying: Loggable[T], refType: RefType[F]): Loggable[F[T, P]] =
-    Loggable instance { value =>
-      underlying.show(refType.unwrap(value))
-    }
+    value => underlying.show(refType.unwrap(value))
 
   def traversableLoggable[A, M[X] <: TraversableOnce[X]](implicit ev: Loggable[A]): Loggable[M[A]] =
-    Loggable.instance(value => value.map(ev.show).mkString("[", ", ", "]"))
+    value => value.map(ev.show).mkString("[", ", ", "]")
 
 }
 
@@ -137,7 +117,7 @@ object LoggableDerivation {
 
   type Typeclass[T] = Loggable[T]
 
-  def combine[T](ctx: CaseClass[Typeclass, T]): Loggable[T] = Loggable.instance { value =>
+  def combine[T](ctx: CaseClass[Typeclass, T]): Loggable[T] = value => {
     if (ctx.isValueClass) {
       ctx.parameters.headOption.fold("")(param => param.typeclass.show(param.dereference(value)))
     } else {
@@ -158,10 +138,8 @@ object LoggableDerivation {
     }
   }
 
-  def dispatch[T](ctx: SealedTrait[Typeclass, T]): Typeclass[T] = Loggable.instance { value =>
-    ctx.dispatch(value) { sub =>
-      sub.typeclass.show(sub.cast(value))
-    }
+  def dispatch[T](ctx: SealedTrait[Typeclass, T]): Typeclass[T] = value => {
+    ctx.dispatch(value)(sub => sub.typeclass.show(sub.cast(value)))
   }
 
   implicit def derive[T]: Typeclass[T] = macro Magnolia.gen[T]

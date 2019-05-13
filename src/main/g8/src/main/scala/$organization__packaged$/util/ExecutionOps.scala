@@ -6,7 +6,8 @@ import cats.syntax.flatMap._
 import cats.syntax.apply._
 import $organization$.util.error.ErrorHandle
 import $organization$.util.logging.{TraceProvider, TracedLogger}
-import $organization$.util.logging.Loggable.InterpolatorOps._
+import $organization$.util.syntax.logging._
+import $organization$.util.syntax.mtl.handle._
 import eu.timepit.refined.types.numeric.NonNegInt
 
 import scala.concurrent.duration.FiniteDuration
@@ -25,7 +26,7 @@ object ExecutionOps {
   ): F[A] = {
     val logger = TracedLogger.create[F](getClass)
 
-    val result = ErrorHandle[F].handleWith(flow) {
+    val result = ErrorHandle[F].handleWith(flow.wrapUnhandled) {
       case error if retryPolicy.retries.value > 0 =>
         val newPolicy = retryPolicy.copy(retries = NonNegInt.unsafeFrom(retryPolicy.retries.value - 1))
 

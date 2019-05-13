@@ -39,7 +39,7 @@ object ThrowableError {
     Some(arg.cause)
   }
 
-  implicit val throwableErrorLoggable: Loggable[ThrowableError] = Loggable.instance { error =>
+  implicit val throwableErrorLoggable: Loggable[ThrowableError] = error => {
     val rawClassName = ClassUtils.getClassSimpleName(error.getClass)
     val className    = if (rawClassName.contains("anon")) "ThrowableError" else rawClassName
     s"\$className(message = \${error.message}, cause = \${error.cause}, pos = \${error.pos.fullPosition})"
@@ -49,13 +49,15 @@ object ThrowableError {
 
 object BaseError {
 
-  implicit val baseErrorLoggable: Loggable[BaseError] = Loggable.instance {
-    case e: ThrowableError =>
-      Loggable[ThrowableError].show(e)
+  implicit val baseErrorLoggable: Loggable[BaseError] = error => {
+    error match {
+      case e: ThrowableError =>
+        Loggable[ThrowableError].show(e)
 
-    case e =>
-      val className = ClassUtils.getClassSimpleName(e.getClass)
-      s"\$className(message = \${e.message}, pos = \${e.pos.fullPosition})"
+      case e =>
+        val className = ClassUtils.getClassSimpleName(e.getClass)
+        s"\$className(message = \${e.message}, pos = \${e.pos.fullPosition})"
+    }
   }
 
 }

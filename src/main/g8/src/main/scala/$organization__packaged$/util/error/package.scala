@@ -1,7 +1,8 @@
 package $organization$.util
 
-import cats.Applicative
+import cats.MonadError
 import cats.mtl.{ApplicativeHandle, FunctorRaise}
+import cats.syntax.applicativeError._
 
 package object error {
 
@@ -11,14 +12,6 @@ package object error {
 
     def apply[F[_]](implicit instance: ErrorRaise[F]): ErrorRaise[F] = instance
 
-    def fromEither[F[_]]: FromEitherPartiallyApplied[F] = new FromEitherPartiallyApplied[F]
-
-    @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
-    final class FromEitherPartiallyApplied[F[_]](private val dummy: Boolean = true) extends AnyVal {
-      def apply[E <: BaseError, A](value: Either[E, A])(implicit F: Applicative[F], raise: ErrorRaise[F]): F[A] =
-        value.fold[F[A]](raise.raise, F.pure)
-    }
-
   }
 
   type ErrorHandle[F[_]] = ApplicativeHandle[F, BaseError]
@@ -26,6 +19,14 @@ package object error {
   object ErrorHandle {
 
     def apply[F[_]](implicit instance: ErrorHandle[F]): ErrorHandle[F] = instance
+
+    def wrapUnhandled[F[_]]: WrapUnhandledPartiallyApplied[F] = new WrapUnhandledPartiallyApplied[F]
+
+    @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
+    final class WrapUnhandledPartiallyApplied[F[_]](private val dummy: Boolean = true) extends AnyVal {
+      def apply[A](flow: F[A])(implicit F: MonadError[F, Throwable], raise: ErrorRaise[F]): F[A] =
+        flow.handleErrorWith(e => raise.raise(ThrowableError(e)))
+    }
 
   }
 
