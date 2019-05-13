@@ -9,9 +9,7 @@ package object error {
   type ErrorRaise[F[_]] = FunctorRaise[F, BaseError]
 
   object ErrorRaise {
-
     def apply[F[_]](implicit instance: ErrorRaise[F]): ErrorRaise[F] = instance
-
   }
 
   type ErrorHandle[F[_]] = ApplicativeHandle[F, BaseError]
