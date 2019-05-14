@@ -4,15 +4,15 @@ import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
 import $organization$.persistence.postgres.PostgresError.UnhandledPostgresError
+import $organization$.test.BaseSpec
 import $organization$.util.RetryPolicy
 import $organization$.util.error.ErrorHandle
-import $organization$.it.ITSpec
 import doobie.hikari.HikariTransactor
 import eu.timepit.refined.auto._
 
 import scala.concurrent.duration._
 
-class TransactorLoaderSpec extends ITSpec {
+class TransactorLoaderSpec extends BaseSpec {
 
   "TransactorLoader" should {
 

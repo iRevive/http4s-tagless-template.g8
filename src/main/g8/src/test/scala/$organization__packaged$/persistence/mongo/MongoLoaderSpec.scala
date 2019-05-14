@@ -4,15 +4,15 @@ import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
 import $organization$.persistence.mongo.MongoError.UnhandledMongoError
+import $organization$.test.BaseSpec
 import $organization$.util.RetryPolicy
 import $organization$.util.error.ErrorHandle
-import $organization$.it.ITSpec
-import org.mongodb.scala.MongoDatabase
 import eu.timepit.refined.auto._
+import org.mongodb.scala.MongoDatabase
 
 import scala.concurrent.duration._
 
-class MongoLoaderSpec extends ITSpec {
+class MongoLoaderSpec extends BaseSpec {
 
   "MongoLoader" should {
 
