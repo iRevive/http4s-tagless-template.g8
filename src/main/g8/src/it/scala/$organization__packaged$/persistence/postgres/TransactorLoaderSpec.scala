@@ -43,7 +43,7 @@ class TransactorLoaderSpec extends ITSpec {
         } yield {
           inside(result.leftValue) {
             case UnhandledPostgresError(cause) =>
-              cause.getMessage shouldBe "Cannot acquire Postgres connection in [5 second]"
+              cause.getMessage shouldBe "Cannot acquire Postgres connection in [5 seconds]"
               retries shouldBe 6
           }
         }

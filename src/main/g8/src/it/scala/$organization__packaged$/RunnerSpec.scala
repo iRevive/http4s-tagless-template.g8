@@ -13,8 +13,8 @@ class RunnerSpec extends ITSpec {
   "Runner" should {
 
     "start application" in EffectAssertion(40.seconds) {
-      val loader    = DefaultApplicationLoader
-      val runner    = new Runner[Eff]
+      val loader = DefaultApplicationLoader
+      val runner = new Runner[Eff]
 
       for {
         result <- ErrorHandle[Eff].attempt(runner.startApp(loader).use(_ => Eff.unit))

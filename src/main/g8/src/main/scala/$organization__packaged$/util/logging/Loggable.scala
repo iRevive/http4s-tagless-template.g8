@@ -30,8 +30,6 @@ object Loggable extends LoggableInstances {
 
   def apply[A](implicit instance: Loggable[A]): Loggable[A] = instance
 
-  def instance[A](op: A => String): Loggable[A] = (value: A) => op(value)
-
   @SuppressWarnings(Array("org.wartremover.warts.ToString"))
   def fromToString[A]: Loggable[A] = _.toString
 
@@ -82,8 +80,8 @@ trait LoggableInstances {
   }
 
   implicit def listLoggable[A: Loggable]: Loggable[List[A]] = traversableLoggable
-  implicit def seqLoggable[A: Loggable]: Loggable[Seq[A]] = traversableLoggable
-  implicit def setLoggable[A: Loggable]: Loggable[Set[A]] = traversableLoggable
+  implicit def seqLoggable[A: Loggable]: Loggable[Seq[A]]   = traversableLoggable
+  implicit def setLoggable[A: Loggable]: Loggable[Set[A]]   = traversableLoggable
 
   implicit def nelLoggable[A: Loggable]: Loggable[NonEmptyList[A]] =
     value => traversableLoggable[A, List].show(value.toList)

@@ -19,7 +19,7 @@ package object util {
       private implicit val CE: Concurrent[TracedResultT] = Concurrent.catsKleisliConcurrent
 
       override def runCancelable[A](fa: TracedResultT[A])(
-        cb: Either[Throwable, A] => IO[Unit]
+          cb: Either[Throwable, A] => IO[Unit]
       ): SyncIO[CancelToken[TracedResultT]] =
         F.runCancelable(fa.run(TraceId.randomAlphanumeric("concurrent-effect")).value)(
             cb.compose(_.right.flatMap(x => x.leftMap(_.toRuntimeException)))

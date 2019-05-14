@@ -24,7 +24,7 @@ object MongoConfig {
   import io.circe.generic.extras.auto._
   import io.circe.refined._
 
-  implicit val configuration: Configuration            = Configuration.default.withKebabCaseMemberNames
-  implicit val decoder: Decoder[MongoConfig]           = exportDecoder[MongoConfig].instance
+  implicit val configuration: Configuration  = Configuration.default.withKebabCaseMemberNames
+  implicit val decoder: Decoder[MongoConfig] = exportDecoder[MongoConfig].instance
 
 }
