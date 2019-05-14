@@ -3,12 +3,10 @@ import sbtrelease.ReleaseStateTransformations._
 
 lazy val root = (project in file("."))
   .enablePlugins(JavaAppPackaging, AshScriptPlugin)
-  $if(useMongo.truthy)$
   .configs(IntegrationTest)
   .settings(Defaults.itSettings)
   .settings(inConfig(IntegrationTest)(ScalafmtPlugin.scalafmtConfigSettings))
   .settings(itEnvironment)
-  $endif$
   .settings(commonSettings)
   .settings(scalazDerivingSettings)
   .settings(wartRemoverSettings)
@@ -43,14 +41,11 @@ lazy val scalazDerivingSettings = Seq(
 lazy val testSettings = Seq(
   fork in Test := true,
   parallelExecution in Test := true,
-  $if(useMongo.truthy)$
   javaOptions in Test := Seq(
     "-Dorg.mongodb.async.type=netty"
   )
-  $endif$
 )
 
-$if(useMongo.truthy)$
 lazy val itEnvironment = {
   import scala.sys.process._
   val startMongo = TaskKey[Unit]("start-mongo", "Start a local MongoDB instance")
@@ -75,7 +70,6 @@ lazy val itEnvironment = {
     )
   )
 }
-$endif$
 
 lazy val buildSettings = Seq(
   packageName in Universal := name.value,

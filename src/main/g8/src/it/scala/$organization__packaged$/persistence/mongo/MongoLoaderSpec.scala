@@ -20,8 +20,8 @@ class MongoLoaderSpec extends ITSpec {
 
       "connection in unreachable" in EffectAssertion() {
         def mkLoader(counter: Ref[Eff, Int]): MongoLoader[Eff] = new MongoLoader[Eff] {
-          override private[mongo] def verifyConnectionOnce(db: MongoDatabase, config: MongoConfig) = {
-            counter.update(_ + 1) >> super.verifyConnectionOnce(db, config)
+          override private[mongo] def verifyConnectionOnce(db: MongoDatabase, timeout: FiniteDuration): Eff[Unit] = {
+            counter.update(_ + 1) >> super.verifyConnectionOnce(db, timeout)
           }
         }
 
@@ -41,7 +41,6 @@ class MongoLoaderSpec extends ITSpec {
           inside(result.leftValue) {
             case UnhandledMongoError(cause) =>
               cause.getMessage shouldBe "Cannot acquire MongoDB connection in [1 second]"
-
               retries shouldBe 6
           }
         }

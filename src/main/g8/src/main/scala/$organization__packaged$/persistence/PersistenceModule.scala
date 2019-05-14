@@ -1,11 +1,6 @@
 package $organization$.persistence
 
-$if(useMongo.truthy)$
 import org.mongodb.scala.MongoDatabase
-$endif$
+import doobie.hikari.HikariTransactor
 
-$if(useMongo.truthy)$
-final case class PersistenceModule(mongoDatabase: MongoDatabase)
-$else$
-final case class PersistenceModule()
-$endif$
+final case class PersistenceModule[F[_]](mongoDatabase: MongoDatabase, transactor: HikariTransactor[F])

@@ -1,22 +1,17 @@
 package $organization$.persistence
 
-$if(useMongo.truthy)$
 import cats.mtl.implicits._
 import com.typesafe.config.ConfigFactory
 import $organization$.persistence.mongo.MongoLoader
+import $organization$.persistence.postgres.TransactorLoader
 import $organization$.it.ITSpec
 import $organization$.util.config.ConfigParsingError
 import $organization$.util.error.ErrorHandle
-$else$
-import $organization$.it.ITSpec
-$endif$
-
 
 class PersistenceModuleLoaderSpec extends ITSpec {
 
   "PersistenceModuleLoader" when {
 
-    $if(useMongo.truthy)$
     "loading Mongo module" should {
 
       "return an error" when {
@@ -30,7 +25,7 @@ class PersistenceModuleLoaderSpec extends ITSpec {
             """.stripMargin
           )
 
-          val loader = new PersistenceModuleLoader[Eff](MongoLoader.default)
+          val loader = new PersistenceModuleLoader[Eff](MongoLoader.default, TransactorLoader.default)
 
           for {
             result <- ErrorHandle[Eff].attempt(loader.load(config).use(_ => Eff.unit))
@@ -59,7 +54,7 @@ class PersistenceModuleLoaderSpec extends ITSpec {
             """.stripMargin
           )
 
-          val loader = new PersistenceModuleLoader[Eff](MongoLoader.default)
+          val loader = new PersistenceModuleLoader[Eff](MongoLoader.default, TransactorLoader.default)
 
           for {
             result <- ErrorHandle[Eff].attempt(loader.load(config).use(_ => Eff.unit))
@@ -76,7 +71,6 @@ class PersistenceModuleLoaderSpec extends ITSpec {
       }
 
     }
-    $endif$
 
   }
 

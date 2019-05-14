@@ -1,4 +1,4 @@
-package $organization$.persistence.mongo
+package $organization$.persistence
 
 import $organization$.util.logging.Loggable
 import eu.timepit.refined.auto._

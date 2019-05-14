@@ -23,18 +23,19 @@ sbt new https://github.com/iRevive/http4s-tagless-template.g8
 - [Monix](https://github.com/monix/monix)
 - [Cats Effect](https://github.com/typelevel/cats-effect)
 - [Cats MTL](https://github.com/typelevel/cats-mtl)
+- [Doobie](https://github.com/tpolecat/doobie)
+- [Mongo Scala Driver](https://github.com/mongodb/mongo-scala-driver)
 
 ## Template configuration
 This template will prompt for the following parameters. Press `Enter` if the default values suit you:
 - `name`: Becomes the name of the project.
 - `organization`: Specifies the organization for this project.
 - `scala_version`: Specifies the Scala version for this project.
-- `useMongo`: If true, generates a config for Mongo Scala Driver and a config for docker.
 
 The template comes with the following sources:
 
 * `GeneralApi.scala` -- the class which handles requests.
-* `PersistenceModuleLoader.scala` -- the class which has a MongoDB initialization logic.
+* `PersistenceModuleLoader.scala` -- the class which has an initialization logic of MongoDB and PostgreSQL connectors.
 * `Server.scala` -- the main class which starts up the HTTP server.
 * `GeneralApiSpec.scala` -- the class which tests routes.
 * `PersistenceModuleLoaderSpec.scala` -- the class which has an integration test for a persistence module.

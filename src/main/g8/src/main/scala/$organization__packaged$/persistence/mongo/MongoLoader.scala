@@ -15,6 +15,7 @@ import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 
 import scala.concurrent.TimeoutException
+import scala.concurrent.duration._
 
 class MongoLoader[F[_]: Timer: ContextShift: ErrorHandle: TraceProvider](implicit F: Concurrent[F]) {
 
@@ -36,24 +37,22 @@ class MongoLoader[F[_]: Timer: ContextShift: ErrorHandle: TraceProvider](implici
   private def verifyConnection(db: MongoDatabase, config: MongoConfig): F[Unit] =
     ExecutionOps.retry(
       name = "Verify MongoDB connection",
-      flow = verifyConnectionOnce(db, config),
+      fa = verifyConnectionOnce(db, config.connectionAttemptTimeout),
       retryPolicy = config.retryPolicy,
       onTimeout = timeoutError(log"Cannot acquire MongoDB connection in [\${config.retryPolicy.timeout}]")
     )
 
-  private[mongo] def verifyConnectionOnce(db: MongoDatabase, config: MongoConfig): F[Unit] = {
-    val timeoutTo = timeoutError[Unit](
-      log"Failed attempt to acquire MongoDB connection in [\${config.connectionAttemptTimeout}]"
-    )
+  private[mongo] def verifyConnectionOnce(db: MongoDatabase, timeout: FiniteDuration): F[Unit] = {
+    val timeoutTo = timeoutError[Unit](log"Failed attempt to acquire MongoDB connection in [\$timeout]")
 
     val attempt = IO
       .fromFuture(IO.delay(db.runCommand(BsonDocument("connectionStatus" -> 1)).toFutureOption()))
       .to[F]
       .handleErrorWith(e => ErrorRaise[F].raise(UnhandledMongoError(e)))
-      .flatMap(a => implicitly[ContextShift[F]].shift.map(_ => a))
+      .flatMap(a => ContextShift[F].shift.map(_ => a))
       .void
 
-    Concurrent.timeoutTo(attempt, config.connectionAttemptTimeout, timeoutTo)
+    Concurrent.timeoutTo(attempt, timeout, timeoutTo)
   }
 
   private def timeoutError[A](cause: String): F[A] =

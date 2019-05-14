@@ -15,23 +15,23 @@ import scala.concurrent.duration.FiniteDuration
 object ExecutionOps {
 
   def delayExecution[F[_]: Monad: Timer, A](flow: F[A], timespan: FiniteDuration): F[A] =
-    implicitly[Timer[F]].sleep(timespan) >> flow
+    Timer[F].sleep(timespan) >> flow
 
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   def retry[F[_]: Concurrent: Timer: TraceProvider: ErrorHandle, A](
       name: String,
-      flow: F[A],
+      fa: F[A],
       retryPolicy: RetryPolicy,
       onTimeout: F[A]
   ): F[A] = {
     val logger = TracedLogger.create[F](getClass)
 
-    val result = ErrorHandle[F].handleWith(flow.wrapUnhandled) {
+    val result = ErrorHandle[F].handleWith(fa.wrapUnhandled) {
       case error if retryPolicy.retries.value > 0 =>
         val newPolicy = retryPolicy.copy(retries = NonNegInt.unsafeFrom(retryPolicy.retries.value - 1))
 
         logger.error(log"[\$name] Retry policy. Current policy \$retryPolicy. Error \$error") *>
-          delayExecution(retry(name, flow, newPolicy, onTimeout), retryPolicy.delay)
+          delayExecution(retry(name, fa, newPolicy, onTimeout), retryPolicy.delay)
 
       case error =>
         logger.error(log"[\$name] Retry policy. Zero retries left. Error \$error", error) >> onTimeout

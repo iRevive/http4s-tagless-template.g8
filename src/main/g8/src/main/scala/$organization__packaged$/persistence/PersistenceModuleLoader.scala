@@ -2,23 +2,24 @@ package $organization$.persistence
 
 import cats.effect._
 import com.typesafe.config.Config
-$if(useMongo.truthy)$
+import doobie.hikari.HikariTransactor
 import $organization$.persistence.mongo.{MongoConfig, MongoLoader}
+import $organization$.persistence.postgres.{PostgresConfig, TransactorLoader}
 import $organization$.util.error.ErrorHandle
 import $organization$.util.syntax.config._
 import $organization$.util.logging.TraceProvider
 import org.mongodb.scala.MongoDatabase
-$endif$
 
 class PersistenceModuleLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider](
-    $if(useMongo.truthy)$mongoLoader: MongoLoader[F]$endif$
+    mongoLoader: MongoLoader[F],
+    transactorLoader: TransactorLoader[F]
 ) {
 
-  $if(useMongo.truthy)$
-  def load(rootConfig: Config): Resource[F, PersistenceModule] =
+  def load(rootConfig: Config): Resource[F, PersistenceModule[F]] =
     for {
       mongoDatabase <- loadMongoDatabase(rootConfig)
-    } yield PersistenceModule(mongoDatabase)
+      transactor    <- loadTransactor(rootConfig)
+    } yield PersistenceModule(mongoDatabase, transactor)
 
   private def loadMongoDatabase(rootConfig: Config): Resource[F, MongoDatabase] =
     for {
@@ -26,10 +27,10 @@ class PersistenceModuleLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle
       db          <- mongoLoader.createAndVerify(mongoConfig)
     } yield db
 
-  $else$
-  def load: Resource[F, PersistenceModule] = {
-    Resource.pure(PersistenceModule())
-  }
-  $endif$
+  private def loadTransactor(rootConfig: Config): Resource[F, HikariTransactor[F]] =
+    for {
+      config <- Resource.liftF(rootConfig.loadF[F, PostgresConfig]("application.persistence.postgres"))
+      db     <- transactorLoader.createAndVerify(config)
+    } yield db
 
 }

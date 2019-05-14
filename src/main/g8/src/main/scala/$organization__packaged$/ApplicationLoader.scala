@@ -3,9 +3,8 @@ package $organization$
 import cats.effect._
 import $organization$.ApplicationLoader.Application
 import $organization$.api.{ApiModule, ApiModuleLoader}
-$if(useMongo.truthy)$
 import $organization$.persistence.mongo.MongoLoader
-$endif$
+import $organization$.persistence.postgres.TransactorLoader
 import $organization$.persistence.{PersistenceModule, PersistenceModuleLoader}
 import $organization$.processing.{ProcessingModule, ProcessingModuleLoader}
 import $organization$.util.error.ErrorHandle
@@ -31,13 +30,13 @@ object ApplicationLoader {
 
   def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider]: ApplicationLoader[F] =
     new ApplicationLoader[F](
-      new PersistenceModuleLoader[F](MongoLoader.default),
+      new PersistenceModuleLoader[F](MongoLoader.default, TransactorLoader.default),
       new ProcessingModuleLoader[F],
       new ApiModuleLoader[F]
     )
 
   final case class Application[F[_]](
-      persistenceModule: PersistenceModule,
+      persistenceModule: PersistenceModule[F],
       processingModule: ProcessingModule,
       apiModule: ApiModule[F]
   )

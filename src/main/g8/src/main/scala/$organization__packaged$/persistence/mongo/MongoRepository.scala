@@ -1,12 +1,15 @@
-package $organization$.persistence.mongo
+package $organization$.persistence
+package mongo
 
 import cats.data.NonEmptyList
 import cats.effect.{Concurrent, ContextShift, IO}
-import cats.instances.all.{catsStdInstancesForEither, catsStdInstancesForList, catsStdInstancesForOption}
-import cats.syntax.applicativeError.catsSyntaxApplicativeError
-import cats.syntax.flatMap.toFlatMapOps
-import cats.syntax.functor.toFunctorOps
-import cats.syntax.traverse.toTraverseOps
+import cats.instances.either._
+import cats.instances.list._
+import cats.instances.option._
+import cats.syntax.applicativeError._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.syntax.traverse._
 import $organization$.persistence.mongo.MongoError.UnhandledMongoError
 import $organization$.util.Position
 import $organization$.util.error.ErrorRaise
@@ -22,7 +25,6 @@ import org.mongodb.scala.{MongoCollection, MongoDatabase}
 
 import scala.concurrent.Future
 import scala.reflect.ClassTag
-import scala.util.control.NonFatal
 
 class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: MongoDatabase, collectionName: NonEmptyString) {
 
@@ -31,7 +33,7 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
 
     IO.eval(collectionEval)
       .to[F]
-      .recoverWith { case NonFatal(e) => ErrorRaise[F].raise(UnhandledMongoError(e)) }
+      .handleErrorWith(e => ErrorRaise[F].raise(UnhandledMongoError(e)))
   }
 
   final def findAndReplaceOne[A: Decoder: Encoder: ClassTag](
@@ -90,11 +92,10 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
       _ <- deferFuture(c.insertOne(BsonDocument(value.asJson.noSpaces)).toFutureOption())
     } yield ()
 
-  private def deferFuture[R](action: => Future[R])(implicit p: Position): F[R] = {
+  private def deferFuture[R](action: => Future[R])(implicit p: Position): F[R] =
     IO.fromFuture(IO(action))
       .to[F]
-      .flatMap(a => implicitly[ContextShift[F]].shift.map(_ => a))
-      .recoverWith { case NonFatal(e) => implicitly[ErrorRaise[F]].raise(UnhandledMongoError(e)) }
-  }
+      .flatMap(a => ContextShift[F].shift.map(_ => a))
+      .handleErrorWith(e => ErrorRaise[F].raise(UnhandledMongoError(e)))
 
 }

@@ -5,7 +5,7 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 import cats.data.NonEmptyList
-$if(useMongo.truthy)$import com.mongodb.DBObject$endif$
+import com.mongodb.DBObject
 import eu.timepit.refined.api.RefType
 import magnolia._
 
@@ -67,10 +67,7 @@ trait LoggableInstances {
 
   implicit val positionLoggable: Loggable[Position] = v => s"Position(\${v.fullPosition})"
 
-  $if(useMongo.truthy)$
-  implicit val dbObjectLoggable: Loggable[DBObject] = Loggable.fromToString
-  $endif$
-
+  implicit val dbObjectLoggable: Loggable[DBObject]                     = Loggable.fromToString
   implicit def enumLoggable[E <: Enum[E]]: Loggable[E]                  = v => v.name()
   implicit def enumerationLoggable[E <: Enumeration]: Loggable[E#Value] = Loggable.fromToString
   implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime]           = Loggable.fromToString

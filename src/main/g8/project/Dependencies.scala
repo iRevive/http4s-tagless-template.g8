@@ -15,10 +15,9 @@ object Versions {
   val catsEffect        = "$cats_effect_version$"
   val catsMTL           = "$cats_mtl_version$"
   val monix             = "$monix_version$"
-  $if(useMongo.truthy)$
   val mongoScalaDriver  = "$mongo_scala_driver_version$"
   val netty             = "$netty_version$"
-  $endif$
+  val doobie            = "$doobie_version$"
   val scalazDeriving    = "$scalaz_deriving_version$"
   val refined           = "$refined_version$"
   val sourcecode        = "$sourcecode_version$"
@@ -48,14 +47,17 @@ object Dependencies {
     "io.circe"                   %% "circe-config"         % Versions.circeConfig,
     "eu.timepit"                 %% "refined"              % Versions.refined,
     "eu.timepit"                 %% "refined-cats"         % Versions.refined,
-    $if(useMongo.truthy)$
+    "org.tpolecat"               %% "doobie-core"          % Versions.doobie,
+    "org.tpolecat"               %% "doobie-hikari"        % Versions.doobie,
+    "org.tpolecat"               %% "doobie-refined"       % Versions.doobie,
+    "org.tpolecat"               %% "doobie-postgres"      % Versions.doobie,
     "org.mongodb.scala"          %% "mongo-scala-driver"   % Versions.mongoScalaDriver,
     "io.netty"                   %  "netty-all"            % Versions.netty,
-    $endif$
     "com.lihaoyi"                %% "sourcecode"           % Versions.sourcecode,
     "com.propensive"             %% "magnolia"             % Versions.magnolia,
     "com.typesafe.scala-logging" %% "scala-logging"        % Versions.scalaLogging,
     "ch.qos.logback"             %  "logback-classic"      % Versions.logback,
+    "org.tpolecat"               %% "doobie-scalatest"     % Versions.doobie        % "it",
     "org.scalatest"              %% "scalatest"            % Versions.scalatest     % "it,test",
     "com.ironcorelabs"           %% "cats-scalatest"       % Versions.catsScalatest % "it,test"
   )
