@@ -21,16 +21,23 @@ class PersistenceModuleLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle
       transactor    <- loadTransactor(rootConfig)
     } yield PersistenceModule(mongoDatabase, transactor)
 
-  private def loadMongoDatabase(rootConfig: Config): Resource[F, MongoDatabase] =
+  private[persistence] def loadMongoDatabase(rootConfig: Config): Resource[F, MongoDatabase] =
     for {
       mongoConfig <- Resource.liftF(rootConfig.loadF[F, MongoConfig]("application.persistence.mongodb"))
       db          <- mongoLoader.createAndVerify(mongoConfig)
     } yield db
 
-  private def loadTransactor(rootConfig: Config): Resource[F, HikariTransactor[F]] =
+  private[persistence] def loadTransactor(rootConfig: Config): Resource[F, HikariTransactor[F]] =
     for {
       config <- Resource.liftF(rootConfig.loadF[F, PostgresConfig]("application.persistence.postgres"))
       db     <- transactorLoader.createAndVerify(config)
     } yield db
+
+}
+
+object PersistenceModuleLoader {
+
+  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider] =
+    new PersistenceModuleLoader[F](MongoLoader.default, TransactorLoader.default)
 
 }

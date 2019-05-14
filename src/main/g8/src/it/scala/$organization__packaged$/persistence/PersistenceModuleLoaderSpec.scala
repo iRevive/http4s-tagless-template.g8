@@ -1,18 +1,16 @@
 package $organization$.persistence
 
 import cats.mtl.implicits._
-import com.typesafe.config.ConfigFactory
-import $organization$.persistence.mongo.MongoLoader
-import $organization$.persistence.postgres.TransactorLoader
 import $organization$.it.ITSpec
 import $organization$.util.config.ConfigParsingError
 import $organization$.util.error.ErrorHandle
+import com.typesafe.config.ConfigFactory
 
 class PersistenceModuleLoaderSpec extends ITSpec {
 
   "PersistenceModuleLoader" when {
 
-    "loading Mongo module" should {
+    "loading MongoDatabase" should {
 
       "return an error" when {
 
@@ -25,10 +23,8 @@ class PersistenceModuleLoaderSpec extends ITSpec {
             """.stripMargin
           )
 
-          val loader = new PersistenceModuleLoader[Eff](MongoLoader.default, TransactorLoader.default)
-
           for {
-            result <- ErrorHandle[Eff].attempt(loader.load(config).use(_ => Eff.unit))
+            result <- ErrorHandle[Eff].attempt(loader.loadMongoDatabase(config).use(_ => Eff.unit))
           } yield {
             inside(result.leftValue) {
               case ConfigParsingError(path, expectedClass, err) =>
@@ -54,10 +50,8 @@ class PersistenceModuleLoaderSpec extends ITSpec {
             """.stripMargin
           )
 
-          val loader = new PersistenceModuleLoader[Eff](MongoLoader.default, TransactorLoader.default)
-
           for {
-            result <- ErrorHandle[Eff].attempt(loader.load(config).use(_ => Eff.unit))
+            result <- ErrorHandle[Eff].attempt(loader.loadMongoDatabase(config).use(_ => Eff.unit))
           } yield {
             inside(result.leftValue) {
               case ConfigParsingError(path, expectedClass, err) =>
@@ -68,10 +62,99 @@ class PersistenceModuleLoaderSpec extends ITSpec {
           }
         }
 
+        "load database" in EffectAssertion() {
+          for {
+            result <- ErrorHandle[Eff].attempt(loader.loadMongoDatabase(DefaultConfig).use(_ => Eff.unit))
+          } yield {
+            result should beRight(())
+          }
+        }
+
+      }
+
+      "load connection as a resource" in {
+        for {
+          result <- ErrorHandle[Eff].attempt(loader.loadMongoDatabase(config).use(_ => Eff.unit))
+        } yield {
+          inside(result.leftValue) {
+            case ConfigParsingError(path, expectedClass, err) =>
+              path shouldBe "application.persistence.mongodb"
+              expectedClass shouldBe "MongoConfig"
+              err.getMessage shouldBe "Path not found in config"
+          }
+        }
+      }
+
+    }
+
+    "loading Transactor" should {
+
+      "return an error" when {
+
+        "config is missing" in EffectAssertion() {
+          val config = ConfigFactory.parseString(
+            """
+              |application.persistence {
+              |
+              |}
+            """.stripMargin
+          )
+
+          for {
+            result <- ErrorHandle[Eff].attempt(loader.loadTransactor(config).use(_ => Eff.unit))
+          } yield {
+            inside(result.leftValue) {
+              case ConfigParsingError(path, expectedClass, err) =>
+                path shouldBe "application.persistence.postgres"
+                expectedClass shouldBe "PostgresConfig"
+                err.getMessage shouldBe "Path not found in config"
+            }
+          }
+        }
+
+        "config is invalid" in EffectAssertion() {
+          val config = ConfigFactory.parseString(
+            """
+              |application.persistence.postgres {
+              |  driver = "org.postgresql.Driver"
+              |  uri = "jdbc:postgresql://localhost:5432/postgres"
+              |  user = "root"
+              |  password = "root"
+              |  connection-attempt-timeout = 500 milliseconds
+              |  retry-policy {
+              |    retries = 10
+              |    timeout = 60 seconds
+              |  }
+              |}
+            """.stripMargin
+          )
+
+          for {
+            result <- ErrorHandle[Eff].attempt(loader.loadTransactor(config).use(_ => Eff.unit))
+          } yield {
+            inside(result.leftValue) {
+              case ConfigParsingError(path, expectedClass, err) =>
+                path shouldBe "application.persistence.postgres"
+                expectedClass shouldBe "PostgresConfig"
+                err.getMessage shouldBe "Attempt to decode value on failed cursor: DownField(delay),DownField(retry-policy)"
+            }
+          }
+        }
+
+      }
+
+      "load transactor" in EffectAssertion() {
+        for {
+          result <- ErrorHandle[Eff].attempt(loader.loadTransactor(DefaultConfig).use(_ => Eff.unit))
+        } yield {
+          result should beRight(())
+        }
       }
 
     }
 
   }
+
+  private val loader = PersistenceModuleLoader.default[Eff]
 
 }

@@ -8,7 +8,7 @@ import $organization$.ApplicationLoader
 import $organization$.ApplicationLoader.Application
 import $organization$.util.logging.TraceId
 import $organization$.util.{ClassUtils, TracedResultT}
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import eu.timepit.refined.types.string.NonEmptyString
 import monix.execution.Scheduler
 import org.scalatest._
@@ -47,7 +47,7 @@ trait ITSpec extends WordSpecLike with Matchers with EitherValues with OptionVal
 
   }
 
-  private lazy val DefaultConfig = ConfigFactory.load()
+  protected lazy val DefaultConfig: Config = ConfigFactory.load()
 
   private lazy val className: String = ClassUtils.getClassSimpleName(getClass)
 

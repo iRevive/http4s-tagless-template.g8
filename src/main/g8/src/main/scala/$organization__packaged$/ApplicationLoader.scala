@@ -3,8 +3,6 @@ package $organization$
 import cats.effect._
 import $organization$.ApplicationLoader.Application
 import $organization$.api.{ApiModule, ApiModuleLoader}
-import $organization$.persistence.mongo.MongoLoader
-import $organization$.persistence.postgres.TransactorLoader
 import $organization$.persistence.{PersistenceModule, PersistenceModuleLoader}
 import $organization$.processing.{ProcessingModule, ProcessingModuleLoader}
 import $organization$.util.error.ErrorHandle
@@ -30,7 +28,7 @@ object ApplicationLoader {
 
   def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider]: ApplicationLoader[F] =
     new ApplicationLoader[F](
-      new PersistenceModuleLoader[F](MongoLoader.default, TransactorLoader.default),
+      PersistenceModuleLoader.default,
       new ProcessingModuleLoader[F],
       new ApiModuleLoader[F]
     )
