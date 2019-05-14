@@ -36,7 +36,7 @@ object Loggable extends LoggableInstances {
   final case class Shown(override val toString: String) extends AnyVal
 
   object Shown {
-    implicit def mat[A](x: A)(implicit z: Loggable[A]): Shown = Shown(z show x)
+    implicit def mat[A](x: A)(implicit z: Loggable[A]): Shown = Shown(z.show(x))
   }
 
   trait InterpolatorOps {
