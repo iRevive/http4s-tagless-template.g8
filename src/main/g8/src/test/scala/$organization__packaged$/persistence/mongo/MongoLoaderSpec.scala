@@ -20,9 +20,8 @@ class MongoLoaderSpec extends BaseSpec {
 
       "connection in unreachable" in EffectAssertion() {
         def mkLoader(counter: Ref[Eff, Int]): MongoLoader[Eff] = new MongoLoader[Eff] {
-          override private[mongo] def verifyConnectionOnce(db: MongoDatabase, timeout: FiniteDuration): Eff[Unit] = {
+          override private[mongo] def verifyConnectionOnce(db: MongoDatabase, timeout: FiniteDuration): Eff[Unit] =
             counter.update(_ + 1) >> super.verifyConnectionOnce(db, timeout)
-          }
         }
 
         val config = MongoConfig(

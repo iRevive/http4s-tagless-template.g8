@@ -20,9 +20,8 @@ object TraceId {
   def randomUuid(): TraceId = TraceId(UUID.randomUUID().toString)
 
   @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
-  def randomAlphanumeric(prefix: String, length: Int = 6): TraceId = {
+  def randomAlphanumeric(prefix: String, length: Int = 6): TraceId =
     TraceId(prefix + "-" + Random.alphanumeric.take(length).map(_.toLower).mkString)
-  }
 
   implicit object CanLogTraceId extends CanLog[TraceId] {
     override def logMessage(originalMsg: String, a: TraceId): String = s"[\${a.value}] \$originalMsg"

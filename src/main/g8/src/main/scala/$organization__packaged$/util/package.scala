@@ -13,7 +13,7 @@ package object util {
 
   type TracedResultT[A] = Traced[EitherT[Task, BaseError, ?], A]
 
-  def concurrentEffect(implicit F: ConcurrentEffect[Task]): ConcurrentEffect[TracedResultT] = {
+  def concurrentEffect(implicit F: ConcurrentEffect[Task]): ConcurrentEffect[TracedResultT] =
     new ConcurrentEffect[TracedResultT] {
 
       private implicit val CE: Concurrent[TracedResultT] = Concurrent.catsKleisliConcurrent
@@ -68,6 +68,5 @@ package object util {
       override def tailRecM[A, B](a: A)(f: A => TracedResultT[Either[A, B]]): TracedResultT[B] =
         CE.tailRecM(a)(f)
     }
-  }
 
 }

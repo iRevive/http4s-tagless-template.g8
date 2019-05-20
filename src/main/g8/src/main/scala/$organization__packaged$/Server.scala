@@ -32,21 +32,19 @@ object Server extends TaskApp {
 
 class Runner[F[_]: ConcurrentEffect: Timer: ContextShift: TraceProvider: ErrorHandle] {
 
-  def serve(loader: ApplicationLoader[F]): F[ExitCode] = {
+  def serve(loader: ApplicationLoader[F]): F[ExitCode] =
     startApp(loader)
       .use(_ => Async[F].never[ExitCode])
       .handleWith[BaseError](e => logger.error(log"Application start completed with error. \$e", e).as(ExitCode.Error))
       .guaranteeCase(finalizer)
-  }
 
-  def startApp(applicationLoader: ApplicationLoader[F]): Resource[F, Unit] = {
+  def startApp(applicationLoader: ApplicationLoader[F]): Resource[F, Unit] =
     for {
       _      <- Resource.liftF(logger.info("Starting the [$name$] service"))
       config <- Resource.liftF(Sync[F].delay(ConfigFactory.load()))
       app    <- applicationLoader.load(config)
       _      <- startApi(app)
     } yield ()
-  }
 
   private def startApi(app: Application[F]): Resource[F, Unit] = {
     val apiConfig = app.apiModule.config

@@ -12,7 +12,11 @@ import io.circe.{Decoder, Error, ParsingFailure}
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
-final class RichConfig(private val config: Config) extends AnyVal {
+trait ToConfigOps {
+  final implicit def toConfigOps(config: Config): ConfigOps = new ConfigOps(config)
+}
+
+final class ConfigOps(private val config: Config) extends AnyVal {
   import io.circe.config.syntax._
 
   def loadF[F[_]: Sync: ErrorRaise, A: Decoder: ClassTag](path: String): F[A] =
@@ -21,27 +25,18 @@ final class RichConfig(private val config: Config) extends AnyVal {
   def loadMetaF[F[_]: Sync: ErrorRaise, A: Decoder: ClassTag](path: String): F[A] =
     Sync[F].delay(loadMeta[A](path)).flatMap(v => v.fold(ErrorRaise[F].raise, Sync[F].pure))
 
-  def load[A: Decoder: ClassTag](path: String): Either[BaseError, A] = {
+  def load[A: Decoder: ClassTag](path: String): Either[BaseError, A] =
     config.as[A](path).leftMap(error => ConfigParsingError(path, ClassUtils.classSimpleName, error))
-  }
 
-  def loadMeta[A: Decoder: ClassTag](path: String): Either[BaseError, A] = {
+  def loadMeta[A: Decoder: ClassTag](path: String): Either[BaseError, A] =
     parseStringAsConfig(config.getString(path))
       .flatMap(_.as[A])
       .leftMap(error => ConfigParsingError(path, ClassUtils.classSimpleName, error))
-  }
 
-  private def parseStringAsConfig(input: => String): Either[Error, Config] = {
+  private def parseStringAsConfig(input: => String): Either[Error, Config] =
     Either
       .catchNonFatal(ConfigFactory.parseString(input))
       .leftMap(e => ParsingFailure(log"Couldn't parse [\$input] as config", e))
-  }
-
-}
-
-trait ToConfigOps {
-
-  final implicit def toRichConfig(config: Config): RichConfig = new RichConfig(config)
 
 }
 

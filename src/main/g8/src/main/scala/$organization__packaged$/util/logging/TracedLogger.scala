@@ -31,17 +31,15 @@ class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync
     F.delay(logger.warn(value))
   }
 
-  private def withError(message: String, error: BaseError)(implicit traceId: TraceId): Unit = {
-    error match {
-      case ThrowableError(cause) =>
-        logger.error(message, cause)
+  private def withError(message: String, error: BaseError)(implicit traceId: TraceId): Unit = error match {
+    case ThrowableError(cause) =>
+      logger.error(message, cause)
 
-      case NonFatal(cause) =>
-        logger.error(message, cause)
+    case NonFatal(cause) =>
+      logger.error(message, cause)
 
-      case _ =>
-        logger.error(message)
-    }
+    case _ =>
+      logger.error(message)
   }
 
 }

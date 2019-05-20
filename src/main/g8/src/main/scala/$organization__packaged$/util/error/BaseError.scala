@@ -35,9 +35,7 @@ object ThrowableError {
         exception
     }
 
-  def unapply(arg: ThrowableError): Option[Throwable] = {
-    Some(arg.cause)
-  }
+  def unapply(arg: ThrowableError): Option[Throwable] = Some(arg.cause)
 
   implicit val throwableErrorLoggable: Loggable[ThrowableError] = error => {
     val rawClassName = ClassUtils.getClassSimpleName(error.getClass)
