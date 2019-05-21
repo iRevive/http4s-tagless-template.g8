@@ -6,8 +6,6 @@ import cats.syntax.flatMap._
 import $organization$.util.error._
 import com.typesafe.scalalogging.{Logger, LoggerTakingImplicit}
 
-import scala.util.control.NonFatal
-
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync[F], traceProvider: TraceProvider[F]) {
 
@@ -23,7 +21,7 @@ class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync
     F.delay(logger.error(value, cause))
   }
 
-  def error(value: String, error: BaseError): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+  def error(value: String, error: RaisedError): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
     F.delay(withError(value, error))
   }
 
@@ -31,20 +29,20 @@ class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync
     F.delay(logger.warn(value))
   }
 
-  private def withError(message: String, error: BaseError)(implicit traceId: TraceId): Unit = error match {
-    case ThrowableError(cause) =>
-      logger.error(message, cause)
+  private def withError(message: String, error: RaisedError)(implicit traceId: TraceId): Unit =
+    error.error.fold(AppError.getException) match {
+      case Some(cause) =>
+        logger.error(message, cause)
 
-    case NonFatal(cause) =>
-      logger.error(message, cause)
-
-    case _ =>
-      logger.error(message)
-  }
+      case None =>
+        logger.error(message)
+    }
 
 }
 
 object TracedLogger {
+
+  def apply[F[_]](implicit instance: TracedLogger[F]): TracedLogger[F] = instance
 
   def create[F[_]: Sync: TraceProvider](clazz: Class[_]): TracedLogger[F] =
     new TracedLogger[F](Logger.takingImplicit[TraceId](clazz))

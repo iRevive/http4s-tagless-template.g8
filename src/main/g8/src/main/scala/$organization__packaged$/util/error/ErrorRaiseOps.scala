@@ -1,15 +1,16 @@
-package $organization$.util.error
+package $organization$.util
+package error
 
 import cats.Applicative
-
-final class ErrorRaiseOps[E <: BaseError, A](val fa: Either[E, A]) extends AnyVal {
-
-  def pureOrRaise[F[_]](implicit E: ErrorRaise[F], A: Applicative[F]): F[A] = fa.fold[F[A]](E.raise, A.pure)
-
-}
+import shapeless.ops.coproduct.Inject
 
 trait ToErrorRaiseOps {
+  final implicit def toErrorRaiseOps[E, A](fa: Either[E, A]): ErrorRaiseOps[E, A] = new ErrorRaiseOps(fa)
+}
 
-  final implicit def toErrorRaiseOps[E <: BaseError, A](fa: Either[E, A]): ErrorRaiseOps[E, A] = new ErrorRaiseOps(fa)
+final class ErrorRaiseOps[E, A](val fa: Either[E, A]) extends AnyVal {
+
+  def pureOrRaise[F[_]](implicit E: ErrorRaise[F], A: Applicative[F], I: Inject[AppError, E], P: Position): F[A] =
+    fa.fold[F[A]](e => E.raise(RaisedError(I.apply(e), P)), A.pure)
 
 }

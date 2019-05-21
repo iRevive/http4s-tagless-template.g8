@@ -8,7 +8,7 @@ import cats.mtl.implicits._
 import cats.syntax.functor._
 import $organization$.ApplicationLoader.Application
 import $organization$.util._
-import $organization$.util.error.{BaseError, ErrorHandle}
+import $organization$.util.error.{ErrorHandle, RaisedError}
 import $organization$.util.syntax.logging._
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
 import com.typesafe.config.ConfigFactory
@@ -24,7 +24,7 @@ object Server extends TaskApp {
     new Runner[TracedResultT]
       .serve(ApplicationLoader.default)
       .run(TraceId(s"Startup-\${Instant.now}"))
-      .leftSemiflatMap(e => Task.raiseError(e.toRuntimeException))
+      .leftSemiflatMap(e => Task.raiseError(e.toException))
       .merge
   }
 
@@ -35,7 +35,7 @@ class Runner[F[_]: ConcurrentEffect: Timer: ContextShift: TraceProvider: ErrorHa
   def serve(loader: ApplicationLoader[F]): F[ExitCode] =
     startApp(loader)
       .use(_ => Async[F].never[ExitCode])
-      .handleWith[BaseError](e => logger.error(log"Application start completed with error. \$e", e).as(ExitCode.Error))
+      .handleWith[RaisedError](e => logger.error(log"Application start completed with error. \$e", e).as(ExitCode.Error))
       .guaranteeCase(finalizer)
 
   def startApp(applicationLoader: ApplicationLoader[F]): Resource[F, Unit] =

@@ -1,12 +1,14 @@
 package $organization$.persistence.postgres
 
-import $organization$.util.Position
-import $organization$.util.error.{BaseError, ThrowableError}
+import $organization$.util.logging.Loggable
 
-sealed trait PostgresError extends BaseError
+@scalaz.deriving(Loggable)
+sealed trait PostgresError
 
 object PostgresError {
 
-  final case class UnhandledPostgresError(cause: Throwable)(implicit val pos: Position) extends PostgresError with ThrowableError
+  final case class UnavailableConnection(cause: Throwable) extends PostgresError
+
+  final case class ConnectionAttemptTimeout(message: String) extends PostgresError
 
 }

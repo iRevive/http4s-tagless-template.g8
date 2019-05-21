@@ -26,7 +26,7 @@ class MongoRepositorySpec extends ITSpec {
         _      <- repository.insertOne(document)
         result <- repository.findOne[Entity](eQual("name", name))
       } yield {
-        result shouldBe document
+        result shouldBe Some(document)
       }
     }
 

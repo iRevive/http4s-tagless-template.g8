@@ -10,9 +10,8 @@ import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.traverse._
-import $organization$.persistence.mongo.MongoError.UnhandledMongoError
 import $organization$.util.Position
-import $organization$.util.error.ErrorRaise
+import $organization$.util.error.{ErrorRaise, RaisedError}
 import $organization$.util.json.JsonOps
 import $organization$.util.syntax.mtl.raise._
 import eu.timepit.refined.types.string.NonEmptyString
@@ -33,7 +32,7 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
 
     IO.eval(collectionEval)
       .to[F]
-      .handleErrorWith(e => ErrorRaise[F].raise(UnhandledMongoError(e)))
+      .handleErrorWith(e => ErrorRaise[F].raise(RaisedError.mongo(MongoError.ExecutionError(e))))
   }
 
   final def findAndReplaceOne[A: Decoder: Encoder: ClassTag](
@@ -96,6 +95,6 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
     IO.fromFuture(IO(action))
       .to[F]
       .flatMap(a => ContextShift[F].shift.map(_ => a))
-      .handleErrorWith(e => ErrorRaise[F].raise(UnhandledMongoError(e)))
+      .handleErrorWith(e => ErrorRaise[F].raise(RaisedError.mongo(MongoError.ExecutionError(e))))
 
 }

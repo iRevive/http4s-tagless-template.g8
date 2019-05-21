@@ -3,7 +3,6 @@ package $organization$.persistence.postgres
 import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
-import $organization$.persistence.postgres.PostgresError.UnhandledPostgresError
 import $organization$.test.BaseSpec
 import $organization$.util.RetryPolicy
 import $organization$.util.error.ErrorHandle
@@ -41,9 +40,9 @@ class TransactorLoaderSpec extends BaseSpec {
           result  <- ErrorHandle[Eff].attempt(loader.createAndVerify(config).use(_ => Eff.unit))
           retries <- counter.get
         } yield {
-          inside(result.leftValue) {
-            case UnhandledPostgresError(cause) =>
-              cause.getMessage shouldBe "Cannot acquire Postgres connection in [5 seconds]"
+          inside(result.leftValue.error.select[PostgresError].value) {
+            case PostgresError.ConnectionAttemptTimeout(cause) =>
+              cause shouldBe "Cannot acquire Postgres connection in [5 seconds]"
               retries shouldBe 6
           }
         }

@@ -54,7 +54,7 @@ class LoggableDerivationSpec extends BaseSpec {
 
 object LoggableDerivationSpec {
 
-  case class TestClass(
+  final case class TestClass(
       arg1: Option[String],
       arg2: Option[Double],
       arg3: Option[Double],
@@ -62,12 +62,12 @@ object LoggableDerivationSpec {
       arg5: List[Long]
   )
 
-  case class ValueClassTest(arg: String) extends AnyVal
+  final case class ValueClassTest(arg: String) extends AnyVal
 
   sealed trait TraitType
 
-  case class TraitType1(arg1: String) extends TraitType
+  final case class TraitType1(arg1: String) extends TraitType
 
-  case class TraitType2(arg1: Int) extends TraitType
+  final case class TraitType2(arg1: Int) extends TraitType
 
 }

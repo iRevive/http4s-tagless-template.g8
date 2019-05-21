@@ -1,12 +1,16 @@
 package $organization$.persistence.mongo
 
-import $organization$.util.Position
-import $organization$.util.error.{BaseError, ThrowableError}
+import $organization$.util.logging.Loggable
 
-sealed trait MongoError extends BaseError
+@scalaz.deriving(Loggable)
+sealed trait MongoError
 
 object MongoError {
 
-  final case class UnhandledMongoError(cause: Throwable)(implicit val pos: Position) extends MongoError with ThrowableError
+  final case class UnavailableConnection(cause: Throwable) extends MongoError
+
+  final case class ConnectionAttemptTimeout(message: String) extends MongoError
+
+  final case class ExecutionError(cause: Throwable) extends MongoError
 
 }

@@ -1,7 +1,7 @@
 package $organization$.util
 
 import $organization$.util.config.ToConfigOps
-import $organization$.util.error.{ToErrorHandleOps, ToErrorRaiseOps}
+import $organization$.util.error.ToErrorRaiseOps
 import $organization$.util.logging.Loggable.InterpolatorOps
 import $organization$.util.syntax.mtl.ToAllMtlOps
 
@@ -12,11 +12,10 @@ object syntax {
   object logging extends InterpolatorOps
 
   object mtl {
-    private[syntax] trait ToAllMtlOps extends ToErrorHandleOps with ToErrorRaiseOps
+    private[syntax] trait ToAllMtlOps extends ToErrorRaiseOps
 
-    object all    extends ToAllMtlOps
-    object handle extends ToErrorHandleOps
-    object raise  extends ToErrorRaiseOps
+    object all   extends ToAllMtlOps
+    object raise extends ToErrorRaiseOps
   }
 
 }

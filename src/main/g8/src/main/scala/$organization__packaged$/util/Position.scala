@@ -1,5 +1,6 @@
 package $organization$.util
 
+import $organization$.util.logging.Loggable
 import sourcecode.Enclosing
 
 final case class Position(enclosing: sourcecode.Enclosing, line: sourcecode.Line) {
@@ -17,5 +18,7 @@ object Position {
       .replace("#applyOrElse", "")
       .replace("applyOrElse", "")
       .trim
+
+  implicit val positionLoggable: Loggable[Position] = _.fullPosition
 
 }

@@ -47,26 +47,36 @@ lazy val testSettings = Seq(
 )
 
 lazy val itEnvironment = {
+  import DockerEnvironment.{postgres, mongodb}
   import scala.sys.process._
-  val startMongo = TaskKey[Unit]("start-mongo", "Start a local MongoDB instance")
+
+  val startItEnv = TaskKey[Unit]("start-it-env", "Create instances of Postgres and MongoDB")
 
   Seq(
-    (startMongo in IntegrationTest) := {
-      "docker rm -f $name_normalized$-it-mongo".!
-      "docker run -d -p 53123:27017 --name $name_normalized$-it-mongo mongo".!
+    (startItEnv in IntegrationTest) := {
+      postgres.commands.remove.!
+      postgres.commands.start.!
+
+      mongodb.commands.remove.!
+      mongodb.commands.start.!
     },
 
     (test in IntegrationTest) := {
-      (test in IntegrationTest).dependsOn(startMongo in IntegrationTest).andFinally {
-        "docker rm -f $name_normalized$-it-mongo".!
+      (test in IntegrationTest).dependsOn(startItEnv in IntegrationTest).andFinally {
+        postgres.commands.remove.!
+        mongodb.commands.remove.!
       }
     }.value,
 
     fork in IntegrationTest := true,
 
     javaOptions in IntegrationTest := Seq(
-      "-DMONGODB_URI=mongodb://localhost:53123/",
-      "-Dorg.mongodb.async.type=netty"
+      s"-DMONGODB_URI=mongodb://localhost:\${mongodb.container.port}/",
+      "-Dorg.mongodb.async.type=netty",
+
+      s"-DPOSTGRESQL_URI=jdbc:postgresql://localhost:\${postgres.container.port}/\${postgres.container.db}",
+      s"-DPOSTGRESQL_USER=\${postgres.container.user}",
+      s"-DPOSTGRESQL_PASSWORD=\${postgres.container.password}"
     )
   )
 }
@@ -119,5 +129,5 @@ lazy val releaseSettings = Seq(
 
 lazy val commandSettings = Seq(
   addCommandAlias("scalafmtAll", ";scalafmt;test:scalafmt;it:scalafmt"),
-  addCommandAlias("testAll", ";set coverageEnabled := true;clean;coverage;test;it:test;coverageReport")
+  addCommandAlias("testAll", ";clean;coverage;test;it:test;coverageReport")
 ).flatten

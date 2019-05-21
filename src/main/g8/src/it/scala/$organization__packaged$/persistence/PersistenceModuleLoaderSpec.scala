@@ -26,7 +26,7 @@ class PersistenceModuleLoaderSpec extends ITSpec {
           for {
             result <- ErrorHandle[Eff].attempt(loader.loadMongoDatabase(config).use(_ => Eff.unit))
           } yield {
-            inside(result.leftValue) {
+            inside(result.leftValue.error.select[ConfigParsingError].value) {
               case ConfigParsingError(path, expectedClass, err) =>
                 path shouldBe "application.persistence.mongodb"
                 expectedClass shouldBe "MongoConfig"
@@ -53,7 +53,7 @@ class PersistenceModuleLoaderSpec extends ITSpec {
           for {
             result <- ErrorHandle[Eff].attempt(loader.loadMongoDatabase(config).use(_ => Eff.unit))
           } yield {
-            inside(result.leftValue) {
+            inside(result.leftValue.error.select[ConfigParsingError].value) {
               case ConfigParsingError(path, expectedClass, err) =>
                 path shouldBe "application.persistence.mongodb"
                 expectedClass shouldBe "MongoConfig"
@@ -74,9 +74,9 @@ class PersistenceModuleLoaderSpec extends ITSpec {
 
       "load connection as a resource" in {
         for {
-          result <- ErrorHandle[Eff].attempt(loader.loadMongoDatabase(config).use(_ => Eff.unit))
+          result <- ErrorHandle[Eff].attempt(loader.loadMongoDatabase(DefaultConfig).use(_ => Eff.unit))
         } yield {
-          inside(result.leftValue) {
+          inside(result.leftValue.error.select[ConfigParsingError].value) {
             case ConfigParsingError(path, expectedClass, err) =>
               path shouldBe "application.persistence.mongodb"
               expectedClass shouldBe "MongoConfig"
@@ -103,7 +103,7 @@ class PersistenceModuleLoaderSpec extends ITSpec {
           for {
             result <- ErrorHandle[Eff].attempt(loader.loadTransactor(config).use(_ => Eff.unit))
           } yield {
-            inside(result.leftValue) {
+            inside(result.leftValue.error.select[ConfigParsingError].value) {
               case ConfigParsingError(path, expectedClass, err) =>
                 path shouldBe "application.persistence.postgres"
                 expectedClass shouldBe "PostgresConfig"
@@ -132,7 +132,7 @@ class PersistenceModuleLoaderSpec extends ITSpec {
           for {
             result <- ErrorHandle[Eff].attempt(loader.loadTransactor(config).use(_ => Eff.unit))
           } yield {
-            inside(result.leftValue) {
+            inside(result.leftValue.error.select[ConfigParsingError].value) {
               case ConfigParsingError(path, expectedClass, err) =>
                 path shouldBe "application.persistence.postgres"
                 expectedClass shouldBe "PostgresConfig"

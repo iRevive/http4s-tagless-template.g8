@@ -2,9 +2,9 @@ package $organization$.util.json
 
 import java.nio.charset.StandardCharsets
 
+import cats.data.NonEmptyList
 import $organization$.test.BaseSpec
 import $organization$.util.json.JsonParsingError._
-import $organization$.util.syntax.logging._
 import io.circe.Json
 import io.circe.generic.auto._
 
@@ -22,11 +22,9 @@ class JsonOpsSpec extends BaseSpec {
           """{"field": null"""
 
         inside(JsonOps.parseJson(input).leftValue) {
-          case error @ NonParsableJson(receivedInput, _) =>
-            val expectedMessage = log"Could not parse json from input [\$input]. Error: [exhausted input]"
-
+          case NonParsableJson(receivedInput, error) =>
             receivedInput shouldBe input
-            error.message shouldBe expectedMessage
+            error.message shouldBe "exhausted input"
         }
       }
 
@@ -52,11 +50,9 @@ class JsonOpsSpec extends BaseSpec {
         val bytes = input.getBytes(StandardCharsets.UTF_8)
 
         inside(JsonOps.decode[JsonModel](bytes).leftValue) {
-          case error @ NonParsableJson(receivedInput, _) =>
-            val expectedMessage = log"Could not parse json from input [\$input]. Error: [exhausted input]"
-
+          case NonParsableJson(receivedInput, error) =>
             receivedInput shouldBe input
-            error.message shouldBe expectedMessage
+            error.message shouldBe "exhausted input"
         }
       }
 
@@ -72,15 +68,17 @@ class JsonOpsSpec extends BaseSpec {
         val bytes = input.getBytes(StandardCharsets.UTF_8)
 
         inside(JsonOps.decode[JsonModel](bytes).leftValue) {
-          case error @ JsonDecodingError(json, className, _) =>
+          case JsonDecodingError(json, className, errors) =>
             val expectedJson = io.circe.parser.parse(input).value
 
-            val expectedMessage = s"Could not parse json as [JsonModel] from input [\${expectedJson.noSpaces}]. " +
-              "Errors: [String: DownField(field1), Attempt to decode value on failed cursor: DownField(field2)]"
+            val expectedErrors = NonEmptyList.of(
+              "String: DownField(field1)",
+              "Attempt to decode value on failed cursor: DownField(field2)"
+            )
 
             expectedJson shouldBe json
             className shouldBe "JsonModel"
-            error.message shouldBe expectedMessage
+            errors.map(_.getMessage) shouldBe expectedErrors
         }
       }
 
@@ -109,6 +107,6 @@ class JsonOpsSpec extends BaseSpec {
 
 object JsonOpsSpec {
 
-  case class JsonModel(field1: String, field2: Int, field3: Long)
+  final case class JsonModel(field1: String, field2: Int, field3: Long)
 
 }

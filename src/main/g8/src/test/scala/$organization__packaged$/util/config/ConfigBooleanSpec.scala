@@ -8,6 +8,8 @@ import org.scalatest.{Matchers, WordSpec}
 
 class ConfigBooleanSpec extends WordSpec with Matchers {
 
+  import ConfigBooleanSpec._
+
   "ConfigBoolean" should {
 
     "be parsed and decoded from string" in {
@@ -39,6 +41,10 @@ class ConfigBooleanSpec extends WordSpec with Matchers {
 
   }
 
-  case class ServerConfig(host: String, port: Int, enabled: ConfigBoolean, enabled2: ConfigBoolean)
+}
+
+object ConfigBooleanSpec {
+
+  final case class ServerConfig(host: String, port: Int, enabled: ConfigBoolean, enabled2: ConfigBoolean)
 
 }

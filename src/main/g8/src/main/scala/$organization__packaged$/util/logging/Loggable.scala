@@ -8,11 +8,10 @@ import cats.data.NonEmptyList
 import com.mongodb.DBObject
 import eu.timepit.refined.api.RefType
 import magnolia._
+import shapeless._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.duration.FiniteDuration
-import scala.language.experimental.macros
-import scala.language.implicitConversions
 
 @implicitNotFound(
   """
@@ -21,9 +20,7 @@ import scala.language.implicitConversions
     """
 )
 trait Loggable[A] {
-
   def show(value: A): String
-
 }
 
 object Loggable extends LoggableInstances {
@@ -63,14 +60,16 @@ trait LoggableInstances {
   implicit val booleanLoggable: Loggable[Boolean] = Loggable.fromToString
   implicit val uuidLoggable: Loggable[UUID]       = Loggable.fromToString
 
-  implicit val positionLoggable: Loggable[Position] = v => s"Position(\${v.fullPosition})"
-
   implicit val dbObjectLoggable: Loggable[DBObject]                     = Loggable.fromToString
   implicit def enumLoggable[E <: Enum[E]]: Loggable[E]                  = v => v.name()
   implicit def enumerationLoggable[E <: Enumeration]: Loggable[E#Value] = Loggable.fromToString
   implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime]           = Loggable.fromToString
   implicit val finiteDurationLoggable: Loggable[FiniteDuration]         = Loggable.fromToString
-  implicit val circeJsonLoggable: Loggable[io.circe.Json]               = v => v.noSpaces
+
+  implicit val circeJsonLoggable: Loggable[io.circe.Json]                = v => v.noSpaces
+  implicit val circeErrorLoggable: Loggable[io.circe.Error]              = v => v.getMessage
+  implicit val circeParsingLoggable: Loggable[io.circe.ParsingFailure]   = v => v.getMessage
+  implicit val circeDecodingLoggable: Loggable[io.circe.DecodingFailure] = v => v.getMessage
 
   implicit val throwableLoggable: Loggable[Throwable] = throwable => {
     val className = ClassUtils.getClassSimpleName(throwable.getClass)
@@ -105,6 +104,12 @@ trait LoggableInstances {
 
   def traversableLoggable[A, M[X] <: TraversableOnce[X]](implicit ev: Loggable[A]): Loggable[M[A]] =
     value => value.map(ev.show).mkString("[", ", ", "]")
+
+  implicit val cnilLoggable: Loggable[CNil] =
+    cnil => sys.error(s"Unreachable \$cnil")
+
+  implicit def coproductLoggable[H, T <: Coproduct](implicit h: Lazy[Loggable[H]], t: Loggable[T]): Loggable[H :+: T] =
+    value => value.eliminate(h.value.show, t.show)
 
 }
 

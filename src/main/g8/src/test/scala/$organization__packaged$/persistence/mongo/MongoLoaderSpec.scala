@@ -3,7 +3,6 @@ package $organization$.persistence.mongo
 import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
-import $organization$.persistence.mongo.MongoError.UnhandledMongoError
 import $organization$.test.BaseSpec
 import $organization$.util.RetryPolicy
 import $organization$.util.error.ErrorHandle
@@ -37,9 +36,9 @@ class MongoLoaderSpec extends BaseSpec {
           result  <- ErrorHandle[Eff].attempt(loader.createAndVerify(config).use(_ => Eff.unit))
           retries <- counter.get
         } yield {
-          inside(result.leftValue) {
-            case UnhandledMongoError(cause) =>
-              cause.getMessage shouldBe "Cannot acquire MongoDB connection in [1 second]"
+          inside(result.leftValue.error.select[MongoError].value) {
+            case MongoError.ConnectionAttemptTimeout(cause) =>
+              cause shouldBe "Cannot acquire MongoDB connection in [1 second]"
               retries shouldBe 6
           }
         }

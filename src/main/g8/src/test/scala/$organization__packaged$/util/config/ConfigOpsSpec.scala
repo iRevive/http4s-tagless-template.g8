@@ -44,10 +44,9 @@ class ConfigOpsSpec extends BaseSpec {
 
         val result = config.load[ConfigModel]("service").leftValue
 
-        val expectedMessage = "Couldn't load [ConfigModel] at path [service]. Error [" +
-          "Attempt to decode value on failed cursor: DownField(stringField)]"
-
-        result.message shouldBe expectedMessage
+        result.path shouldBe "service"
+        result.expectedClass shouldBe "ConfigModel"
+        result.error.getMessage shouldBe "Attempt to decode value on failed cursor: DownField(stringField)"
       }
 
     }
@@ -72,13 +71,10 @@ class ConfigOpsSpec extends BaseSpec {
           val result = config.loadMeta[ConfigModel]("service").leftValue
 
           inside(result) {
-            case error @ ConfigParsingError(path, expectedClass, _) =>
-              val errorMessage    = s"Error [Couldn't parse [\$input] as config]"
-              val expectedMessage = s"Couldn't load [ConfigModel] at path [service]. \$errorMessage"
-
+            case ConfigParsingError(path, expectedClass, error) =>
               path shouldBe "service"
               expectedClass shouldBe "ConfigModel"
-              error.message shouldBe expectedMessage
+              error.getMessage shouldBe s"Couldn't parse [\$input] as config"
           }
         }
 
@@ -96,10 +92,12 @@ class ConfigOpsSpec extends BaseSpec {
 
           val result = config.loadMeta[ConfigModel]("service").leftValue
 
-          val expectedMessage = "Couldn't load [ConfigModel] at path [service]. Error [" +
-            "Attempt to decode value on failed cursor: DownField(stringField)]"
-
-          result.message shouldBe expectedMessage
+          inside(result) {
+            case ConfigParsingError(path, expectedClass, error) =>
+              path shouldBe "service"
+              expectedClass shouldBe "ConfigModel"
+              error.getMessage shouldBe "Attempt to decode value on failed cursor: DownField(stringField)"
+          }
         }
 
       }
@@ -128,6 +126,6 @@ class ConfigOpsSpec extends BaseSpec {
 
 object ConfigOpsSpec {
 
-  case class ConfigModel(stringField: String, intField: Int)
+  final case class ConfigModel(stringField: String, intField: Int)
 
 }

@@ -32,7 +32,7 @@ class LoggableSpec extends BaseSpec {
 
 object LoggableSpec {
 
-  case class TestClass(
+  final case class TestClass(
       arg1: Option[String],
       arg2: Option[Double],
       arg3: Option[Double],
@@ -40,6 +40,6 @@ object LoggableSpec {
       arg5: List[Long]
   )
 
-  case class ValueClassTest(arg: String) extends AnyVal
+  final case class ValueClassTest(arg: String) extends AnyVal
 
 }
