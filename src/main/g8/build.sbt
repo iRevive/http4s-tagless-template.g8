@@ -25,7 +25,8 @@ lazy val commonSettings = Seq(
   scalaVersion := Versions.scala,
   scalacOptions -= "-Xfatal-warnings",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
-  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9")
+  addCompilerPlugin("org.spire-math" %% "kind-projector"     % "0.9.10"),
+  addCompilerPlugin("com.olegpy"     %% "better-monadic-for" % "0.3.0")
 )
 
 lazy val scalazDerivingSettings = Seq(
@@ -51,14 +52,17 @@ lazy val itEnvironment = {
   import scala.sys.process._
 
   val startItEnv = TaskKey[Unit]("start-it-env", "Create instances of Postgres and MongoDB")
+  val network    = sys.env.getOrElse("DOCKER_NETWORK", "$name_normalized$-network")
 
   Seq(
     (startItEnv in IntegrationTest) := {
+      s"docker network create $network".!
+
       postgres.commands.remove.!
-      postgres.commands.start.!
+      postgres.commands.start(network).!
 
       mongodb.commands.remove.!
-      mongodb.commands.start.!
+      mongodb.commands.start(network).!
     },
 
     (test in IntegrationTest) := {
@@ -71,10 +75,10 @@ lazy val itEnvironment = {
     fork in IntegrationTest := true,
 
     javaOptions in IntegrationTest := Seq(
-      s"-DMONGODB_URI=mongodb://localhost:\${mongodb.container.port}/",
+      s"-DMONGODB_URI=\${mongodb.container.uri(network)}",
       "-Dorg.mongodb.async.type=netty",
 
-      s"-DPOSTGRESQL_URI=jdbc:postgresql://localhost:\${postgres.container.port}/\${postgres.container.db}",
+      s"-DPOSTGRESQL_URI=\${postgres.container.uri(network)}",
       s"-DPOSTGRESQL_USER=\${postgres.container.user}",
       s"-DPOSTGRESQL_PASSWORD=\${postgres.container.password}"
     )
@@ -107,7 +111,13 @@ lazy val wartRemoverSettings = Seq(
 
 lazy val dockerSettings = Seq(
   dockerBaseImage := "openjdk:8-alpine",
-  dockerUpdateLatest := true
+  dockerUpdateLatest := true,
+  dockerAlias := DockerAlias(
+    None,
+    None,
+    sys.env.getOrElse("DOCKER_REGISTRY_IMAGE", name.value),
+    Option((version in Docker).value)
+  )
 )
 
 lazy val releaseSettings = Seq(
@@ -127,7 +137,23 @@ lazy val releaseSettings = Seq(
   )
 )
 
-lazy val commandSettings = Seq(
-  addCommandAlias("scalafmtAll", ";scalafmt;test:scalafmt;it:scalafmt"),
-  addCommandAlias("testAll", ";clean;coverage;test;it:test;coverageReport")
-).flatten
+lazy val commandSettings = {
+  val ciSteps = List(
+    "clean",
+    "coverage",
+    "scalafmtCheck",
+    "test:scalafmtCheck",
+    "it:scalafmtCheck",
+    "test:compile",
+    "it:compile",
+    "test",
+    "it:test",
+    "coverageReport"
+  )
+
+  Seq(
+    addCommandAlias("scalafmtAll", ";scalafmt;test:scalafmt;it:scalafmt"),
+    addCommandAlias("testAll", ";clean;coverage;test;it:test;coverageReport"),
+    addCommandAlias("ci", ciSteps.mkString(";", ";", ""))
+  ).flatten
+}

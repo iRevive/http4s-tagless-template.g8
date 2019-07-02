@@ -17,6 +17,7 @@ with the project and is constantly a subject for changes.
 >   - [How to run integration tests](#how-to-run-integration-tests)  
 >   - [How to calculate test coverage](#how-to-calculate-test-coverage)  
 > - [Docker configuration](#docker-configuration)  
+>   - [Hot to create a CI image](#how-to-create-a-ci-image)
 >   - [How to create a latest docker image](#how-to-create-a-latest-docker-image)  
 >   - [How to run a dockerized application](#how-to-run-a-dockerized-application)  
 > - [Deploy](#deploy)  
@@ -26,11 +27,11 @@ with the project and is constantly a subject for changes.
 
 
 ## <a name="project-structure"></a> Project structure
-1) [src/main/scala/.../api](/src/main/scala/$organization$/api) - API endpoints;  
-2) [src/main/scala/.../persistence](/src/main/scala/$organization$/persistence) - persistence-specific logic (mongo client, AMQP client, etc);    
-3) [src/main/scala/.../processing](/src/main/scala/$organization$/processing) - processing-specific logic (services, etc);  
-5) [src/main/scala/.../util](/src/main/scala/$organization$/util) - utility classes;  
-6) [src/main/scala/.../Server.scala](/src/main/scala/$organization$/Server.scala) - application entry point; 
+1) [src/main/scala/.../api](/src/main/scala/$organization;format="packaged"$/api) - API endpoints;  
+2) [src/main/scala/.../persistence](/src/main/scala/$organization;format="packaged"$/persistence) - persistence-specific logic (mongo client, AMQP client, etc);    
+3) [src/main/scala/.../processing](/src/main/scala/$organization;format="packaged"$/processing) - processing-specific logic (services, etc);  
+5) [src/main/scala/.../util](/src/main/scala/$organization;format="packaged"$/util) - utility classes;  
+6) [src/main/scala/.../Server.scala](/src/main/scala/$organization;format="packaged"$/Server.scala) - application entry point; 
 7) [src/main/resources](/src/main/resources) - application and logback configs;    
 
 ## <a name="development-requirements"></a> Development requirements
@@ -89,6 +90,13 @@ Coverage reports will be in `target/scala-2.12/scoverage-report`. There are HTML
  
  
 ## <a name="docker-configuration"></a> Docker configuration 
+
+#### <a name="how-to-create-a-ci-image"></a> How to create a CI image
+SBT will publish an image locally using 'latest' tag.  
+Execute in a `<root>` project folder:  
+```
+docker build -f docker/dockerfiles/sbt/Dockerfile . -t $name_normalized$/ci-sbt:latest
+```
 
 #### <a name="how-to-create-a-latest-docker-image"></a> How to create a latest docker image
 SBT will publish an image locally using 'latest' tag.  

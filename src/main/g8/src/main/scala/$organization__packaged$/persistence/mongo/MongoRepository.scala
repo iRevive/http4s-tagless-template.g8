@@ -3,6 +3,7 @@ package mongo
 
 import cats.data.NonEmptyList
 import cats.effect.{Concurrent, ContextShift, IO}
+import cats.effect.syntax.bracket._
 import cats.instances.either._
 import cats.instances.list._
 import cats.instances.option._
@@ -94,7 +95,7 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
   private def deferFuture[R](action: => Future[R])(implicit p: Position): F[R] =
     IO.fromFuture(IO(action))
       .to[F]
-      .flatMap(a => ContextShift[F].shift.map(_ => a))
       .handleErrorWith(e => ErrorRaise[F].raise(RaisedError.mongo(MongoError.ExecutionError(e))))
+      .guarantee(ContextShift[F].shift)
 
 }

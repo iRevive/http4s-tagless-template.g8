@@ -4,7 +4,7 @@ import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
 import $organization$.test.BaseSpec
-import $organization$.util.RetryPolicy
+import $organization$.util.Retry
 import $organization$.util.error.ErrorHandle
 import doobie.hikari.HikariTransactor
 import eu.timepit.refined.auto._
@@ -31,7 +31,7 @@ class TransactorLoaderSpec extends BaseSpec {
           user = "root",
           password = "root",
           connectionAttemptTimeout = 5.millis,
-          retryPolicy = RetryPolicy(5, 30.millis, 5.second)
+          retryPolicy = Retry.Policy(5, 30.millis, 5.second)
         )
 
         for {
@@ -40,11 +40,8 @@ class TransactorLoaderSpec extends BaseSpec {
           result  <- ErrorHandle[Eff].attempt(loader.createAndVerify(config).use(_ => Eff.unit))
           retries <- counter.get
         } yield {
-          inside(result.leftValue.error.select[PostgresError].value) {
-            case PostgresError.ConnectionAttemptTimeout(cause) =>
-              cause shouldBe "Cannot acquire Postgres connection in [5 seconds]"
-              retries shouldBe 6
-          }
+          result.leftValue.error.select[PostgresError].value
+          retries shouldBe 5
         }
       }
 

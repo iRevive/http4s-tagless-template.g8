@@ -1,12 +1,14 @@
 package $organization$.persistence.postgres
 
 import cats.effect._
+import cats.effect.syntax.concurrent._
+import cats.mtl.syntax.local._
 import cats.syntax.applicativeError._
 import cats.syntax.functor._
-import $organization$.util.ExecutionOps
 import $organization$.util.error.{ErrorHandle, ErrorRaise, RaisedError}
-import $organization$.util.logging.{TraceProvider, TracedLogger}
+import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
 import $organization$.util.syntax.logging._
+import $organization$.util.syntax.retry._
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import eu.timepit.refined.auto._
@@ -31,12 +33,13 @@ class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Trace
     } yield xa
 
   private def verifyConnection(config: PostgresConfig, transactor: HikariTransactor[F]): F[Unit] =
-    ExecutionOps.retry(
-      name = "Verify Postgres connection",
-      fa = verifyConnectionOnce(transactor, config.connectionAttemptTimeout),
-      retryPolicy = config.retryPolicy,
-      onTimeout = timeoutError(log"Cannot acquire Postgres connection in [\${config.retryPolicy.timeout}]")
-    )
+    verifyConnectionOnce(transactor, config.connectionAttemptTimeout)
+      .retryDefault[RaisedError](config.retryPolicy, logger)
+      .timeoutTo(
+        config.retryPolicy.timeout,
+        timeoutError(log"Cannot acquire Postgres connection in [\${config.retryPolicy.timeout}]")
+      )
+      .local[TraceId](_.subId("verify-postgres-connection"))
 
   private[postgres] def verifyConnectionOnce(transactor: HikariTransactor[F], timeout: FiniteDuration): F[Unit] = {
     import doobie.implicits._

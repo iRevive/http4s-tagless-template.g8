@@ -19,6 +19,7 @@ object Versions {
   val netty             = "$netty_version$"
   val doobie            = "$doobie_version$"
   val scalazDeriving    = "$scalaz_deriving_version$"
+  val newtype           = "$newtype_version$"
   val refined           = "$refined_version$"
   val sourcecode        = "$sourcecode_version$"
   val magnolia          = "$magnorlia_version$"
@@ -45,6 +46,7 @@ object Dependencies {
     "io.circe"                   %% "circe-generic-extras" % Versions.circe,
     "io.circe"                   %% "circe-refined"        % Versions.circe,
     "io.circe"                   %% "circe-config"         % Versions.circeConfig,
+    "io.estatico"                %% "newtype"              % Versions.newtype,
     "eu.timepit"                 %% "refined"              % Versions.refined,
     "eu.timepit"                 %% "refined-cats"         % Versions.refined,
     "org.tpolecat"               %% "doobie-core"          % Versions.doobie,

@@ -1,0 +1,46 @@
+image: docker:17.10.0-ce
+services:
+  - docker:dind
+
+variables:
+  DOCKER_HOST: tcp://localhost:2375
+
+stages:
+  - build-ci-container
+  - execute-tests
+  - publish-coverage
+  - release
+
+build-ci-container:
+  stage: build-ci-container
+  script: "/bin/bash ci/build-ci-container.sh \${CI_REGISTRY_IMAGE}"
+
+coverage:
+  stage: execute-tests
+  script: "/bin/bash ci/execute-tests.sh \${CI_REGISTRY_IMAGE}"
+  artifacts:
+    paths:
+      - target/scala-2.12/scoverage-report/
+
+pages:
+  stage: publish-coverage
+  script:
+    - mv target/scala-2.12/scoverage-report/ public/
+    - echo "Coverage reports is available at \$CI_PAGES_DOMAIN"
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
+
+release:
+  stage: release
+  script: "/bin/bash ci/release.sh \${CI_REGISTRY_IMAGE}"
+  only:
+    - release
+
+before_script:
+  - apk update
+  - apk add bash
+  - docker login -u \$CI_REGISTRY_USER -p \$CI_REGISTRY_PASSWORD \$CI_REGISTRY

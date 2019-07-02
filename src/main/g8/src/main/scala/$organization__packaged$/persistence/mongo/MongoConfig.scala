@@ -1,6 +1,6 @@
 package $organization$.persistence.mongo
 
-import $organization$.util.RetryPolicy
+import $organization$.util.Retry
 import $organization$.util.logging.Loggable
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.string.Uri
@@ -13,7 +13,7 @@ final case class MongoConfig(
     uri: String Refined Uri,
     database: NonEmptyString,
     connectionAttemptTimeout: FiniteDuration,
-    retryPolicy: RetryPolicy
+    retryPolicy: Retry.Policy
 )
 
 object MongoConfig {

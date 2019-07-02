@@ -4,7 +4,7 @@ import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
 import $organization$.test.BaseSpec
-import $organization$.util.RetryPolicy
+import $organization$.util.Retry
 import $organization$.util.error.ErrorHandle
 import eu.timepit.refined.auto._
 import org.mongodb.scala.MongoDatabase
@@ -27,7 +27,7 @@ class MongoLoaderSpec extends BaseSpec {
           "mongodb://localhost:27017/?streamType=netty",
           "test-database",
           5.millis,
-          RetryPolicy(5, 30.millis, 1.second)
+          Retry.Policy(5, 30.millis, 1.second)
         )
 
         for {
@@ -36,11 +36,8 @@ class MongoLoaderSpec extends BaseSpec {
           result  <- ErrorHandle[Eff].attempt(loader.createAndVerify(config).use(_ => Eff.unit))
           retries <- counter.get
         } yield {
-          inside(result.leftValue.error.select[MongoError].value) {
-            case MongoError.ConnectionAttemptTimeout(cause) =>
-              cause shouldBe "Cannot acquire MongoDB connection in [1 second]"
-              retries shouldBe 6
-          }
+          result.leftValue.error.select[MongoError].value
+          retries shouldBe 5
         }
       }
 

@@ -10,7 +10,7 @@ import $organization$.util.syntax.config._
 import $organization$.util.logging.TraceProvider
 import org.mongodb.scala.MongoDatabase
 
-class PersistenceModuleLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider](
+class PersistenceModuleLoader[F[_]: Sync: ErrorHandle: TraceProvider](
     mongoLoader: MongoLoader[F],
     transactorLoader: TransactorLoader[F]
 ) {

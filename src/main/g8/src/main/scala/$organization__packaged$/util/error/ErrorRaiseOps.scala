@@ -11,6 +11,6 @@ trait ToErrorRaiseOps {
 final class ErrorRaiseOps[E, A](val fa: Either[E, A]) extends AnyVal {
 
   def pureOrRaise[F[_]](implicit E: ErrorRaise[F], A: Applicative[F], I: Inject[AppError, E], P: Position): F[A] =
-    fa.fold[F[A]](e => E.raise(RaisedError(I.apply(e), P)), A.pure)
+    fa.fold[F[A]](e => E.raise(RaisedError.withErrorId(I.apply(e), P)), A.pure)
 
 }

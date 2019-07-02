@@ -1,5 +1,6 @@
 package $organization$
 
+import cats.Monad
 import cats.effect._
 import $organization$.ApplicationLoader.Application
 import $organization$.api.{ApiModule, ApiModuleLoader}
@@ -9,7 +10,7 @@ import $organization$.util.error.ErrorHandle
 import $organization$.util.logging.TraceProvider
 import com.typesafe.config.Config
 
-class ApplicationLoader[F[_]: Concurrent: Timer: ContextShift: TraceProvider: ErrorHandle](
+class ApplicationLoader[F[_]: Monad](
     persistenceModuleLoader: PersistenceModuleLoader[F],
     processingModuleLoader: ProcessingModuleLoader[F],
     apiModuleLoader: ApiModuleLoader[F]
