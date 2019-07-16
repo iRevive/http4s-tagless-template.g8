@@ -1,12 +1,13 @@
 package $organization$.util.json
 
-import java.nio.charset.StandardCharsets
-
 import cats.data.NonEmptyList
 import $organization$.test.BaseSpec
-import $organization$.util.json.JsonParsingError._
-import io.circe.Json
+import $organization$.util.json.JsonOpsSpec.JsonModel
+import $organization$.util.logging.Loggable
+import $organization$.util.syntax.json._
+import io.circe.{DecodingFailure, Json}
 import io.circe.generic.auto._
+import io.circe.syntax._
 
 class JsonOpsSpec extends BaseSpec {
 
@@ -14,85 +15,35 @@ class JsonOpsSpec extends BaseSpec {
 
   "JsonOps" when {
 
-    "#parseJson" should {
-
-      "fail in case of incorrect json" in {
-        // missing closing bracket
-        val input =
-          """{"field": null"""
-
-        inside(JsonOps.parseJson(input).leftValue) {
-          case NonParsableJson(receivedInput, error) =>
-            receivedInput shouldBe input
-            error.message shouldBe "exhausted input"
-        }
-      }
-
-      "return a parsed json" in {
-        import io.circe.syntax._
-
-        val message = """{"field": 123}"""
-
-        val result = JsonOps.parseJson(message).value
-
-        result shouldBe Json.obj("field" := 123)
-      }
-
-    }
-
     "#decode" should {
 
-      "fail in case of incorrect json" in {
-        // missing closing bracket
-        val input =
-          """{"field": null"""
-
-        val bytes = input.getBytes(StandardCharsets.UTF_8)
-
-        inside(JsonOps.decode[JsonModel](bytes).leftValue) {
-          case NonParsableJson(receivedInput, error) =>
-            receivedInput shouldBe input
-            error.message shouldBe "exhausted input"
-        }
-      }
-
       "fail in case of missing or invalid fields" in {
-        val input =
-          """
-            |{
-            |  "field1": 123,
-            |  "field3": 4321
-            |}
-          """.stripMargin
+        val input = Json.obj(
+          "field1" := 123,
+          "field3" := 4321
+        )
 
-        val bytes = input.getBytes(StandardCharsets.UTF_8)
-
-        inside(JsonOps.decode[JsonModel](bytes).leftValue) {
+        inside(input.decode[JsonModel].leftValue) {
           case JsonDecodingError(json, className, errors) =>
-            val expectedJson = io.circe.parser.parse(input).value
-
             val expectedErrors = NonEmptyList.of(
-              "String: DownField(field1)",
-              "Attempt to decode value on failed cursor: DownField(field2)"
+              "DecodingFailure at .field1: String",
+              "DecodingFailure at .field2: Attempt to decode value on failed cursor"
             )
 
-            expectedJson shouldBe json
+            json shouldBe input
             className shouldBe "JsonModel"
-            errors.map(_.getMessage) shouldBe expectedErrors
+            errors.map(Loggable[DecodingFailure].show) shouldBe expectedErrors
         }
       }
 
       "return a parsed model" in {
-        val message =
-          """
-            |{
-            |  "field1": "test field",
-            |  "field2": 123,
-            |  "field3": 4321
-            |}
-          """.stripMargin
+        val input = Json.obj(
+          "field1" := "test field",
+          "field2" := 123,
+          "field3" := 4321
+        )
 
-        val result = JsonOps.decode[JsonModel](message.getBytes(StandardCharsets.UTF_8)).value
+        val result = input.decode[JsonModel].value
 
         val expected = JsonModel("test field", 123, 4321L)
 

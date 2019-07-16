@@ -56,7 +56,7 @@ lazy val itEnvironment = {
 
   Seq(
     (startItEnv in IntegrationTest) := {
-      s"docker network create $network".!
+      s"docker network create \$network".!
 
       postgres.commands.remove.!
       postgres.commands.start(network).!

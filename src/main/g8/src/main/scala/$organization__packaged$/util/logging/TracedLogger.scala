@@ -30,7 +30,7 @@ class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync
   }
 
   private def withError(message: String, error: RaisedError)(implicit traceId: TraceId): Unit =
-    error.error.fold(AppError.getException) match {
+    ThrowableExtractor[AppError].select(error.error) match {
       case Some(cause) =>
         logger.error(message, cause)
 

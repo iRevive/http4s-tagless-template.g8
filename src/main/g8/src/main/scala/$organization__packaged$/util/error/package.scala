@@ -4,14 +4,12 @@ import cats.mtl.{ApplicativeHandle, FunctorRaise}
 import $organization$.persistence.mongo.MongoError
 import $organization$.persistence.postgres.PostgresError
 import $organization$.util.config.ConfigParsingError
-import $organization$.util.json.JsonParsingError
+import $organization$.util.json.JsonDecodingError
 import shapeless._
 
 package object error {
 
-  type AppError = MongoError :+: PostgresError :+: JsonParsingError :+: ConfigParsingError :+: CNil
-
-  object AppError extends AppErrorOps
+  type AppError = MongoError :+: PostgresError :+: JsonDecodingError :+: ConfigParsingError :+: CNil
 
   type ErrorRaise[F[_]] = FunctorRaise[F, RaisedError]
 

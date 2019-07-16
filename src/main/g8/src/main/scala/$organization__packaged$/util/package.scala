@@ -13,6 +13,7 @@ package object util {
 
   type TracedResultT[A] = Traced[EitherT[Task, RaisedError, ?], A]
 
+  // \$COVERAGE-OFF\$
   def concurrentEffect(implicit F: ConcurrentEffect[Task]): ConcurrentEffect[TracedResultT] =
     new ConcurrentEffect[TracedResultT] {
 
@@ -68,5 +69,6 @@ package object util {
       override def tailRecM[A, B](a: A)(f: A => TracedResultT[Either[A, B]]): TracedResultT[B] =
         CE.tailRecM(a)(f)
     }
+  // \$COVERAGE-ON\$
 
 }

@@ -1,13 +1,15 @@
 package $organization$.util
 package logging
 
-import java.time.ZonedDateTime
 import java.util.UUID
 
+import cats.Show
 import cats.data.NonEmptyList
 import com.mongodb.DBObject
 import eu.timepit.refined.api.RefType
+import io.estatico.newtype.Coercible
 import magnolia._
+import org.http4s.{Status, Uri}
 import shapeless._
 
 import scala.annotation.implicitNotFound
@@ -30,6 +32,8 @@ object Loggable extends LoggableInstances {
   @SuppressWarnings(Array("org.wartremover.warts.ToString"))
   def fromToString[A]: Loggable[A] = _.toString
 
+  def fromShow[A: Show]: Loggable[A] = Show[A].show
+
   final case class Shown(override val toString: String) extends AnyVal
 
   object Shown {
@@ -51,25 +55,22 @@ object Loggable extends LoggableInstances {
 
 trait LoggableInstances {
 
-  implicit val stringLoggable: Loggable[String]   = Loggable.fromToString
-  implicit val intLoggable: Loggable[Int]         = Loggable.fromToString
-  implicit val shortLoggable: Loggable[Short]     = Loggable.fromToString
-  implicit val longLoggable: Loggable[Long]       = Loggable.fromToString
-  implicit val doubleLoggable: Loggable[Double]   = Loggable.fromToString
-  implicit val floatLoggable: Loggable[Float]     = Loggable.fromToString
-  implicit val booleanLoggable: Loggable[Boolean] = Loggable.fromToString
-  implicit val uuidLoggable: Loggable[UUID]       = Loggable.fromToString
-
-  implicit val dbObjectLoggable: Loggable[DBObject]                     = Loggable.fromToString
-  implicit def enumLoggable[E <: Enum[E]]: Loggable[E]                  = v => v.name()
-  implicit def enumerationLoggable[E <: Enumeration]: Loggable[E#Value] = Loggable.fromToString
-  implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime]           = Loggable.fromToString
-  implicit val finiteDurationLoggable: Loggable[FiniteDuration]         = Loggable.fromToString
-
+  implicit val stringLoggable: Loggable[String]                          = Loggable.fromToString
+  implicit val intLoggable: Loggable[Int]                                = Loggable.fromToString
+  implicit val shortLoggable: Loggable[Short]                            = Loggable.fromToString
+  implicit val longLoggable: Loggable[Long]                              = Loggable.fromToString
+  implicit val doubleLoggable: Loggable[Double]                          = Loggable.fromToString
+  implicit val floatLoggable: Loggable[Float]                            = Loggable.fromToString
+  implicit val booleanLoggable: Loggable[Boolean]                        = Loggable.fromToString
+  implicit val uuidLoggable: Loggable[UUID]                              = Loggable.fromToString
+  implicit val dbObjectLoggable: Loggable[DBObject]                      = Loggable.fromToString
+  implicit val finiteDurationLoggable: Loggable[FiniteDuration]          = Loggable.fromToString
   implicit val circeJsonLoggable: Loggable[io.circe.Json]                = v => v.noSpaces
-  implicit val circeErrorLoggable: Loggable[io.circe.Error]              = v => v.getMessage
-  implicit val circeParsingLoggable: Loggable[io.circe.ParsingFailure]   = v => v.getMessage
-  implicit val circeDecodingLoggable: Loggable[io.circe.DecodingFailure] = v => v.getMessage
+  implicit val circeErrorLoggable: Loggable[io.circe.Error]              = Loggable.fromShow
+  implicit val circeParsingLoggable: Loggable[io.circe.ParsingFailure]   = Loggable.fromShow
+  implicit val circeDecodingLoggable: Loggable[io.circe.DecodingFailure] = Loggable.fromShow
+  implicit val statusLoggable: Loggable[Status]                          = Loggable.fromToString
+  implicit val uriLoggable: Loggable[Uri]                                = Loggable.fromToString
 
   implicit val throwableLoggable: Loggable[Throwable] = throwable => {
     val className = ClassUtils.getClassSimpleName(throwable.getClass)
@@ -79,25 +80,12 @@ trait LoggableInstances {
   }
 
   implicit def listLoggable[A: Loggable]: Loggable[List[A]] = traversableLoggable
-  implicit def seqLoggable[A: Loggable]: Loggable[Seq[A]]   = traversableLoggable
-  implicit def setLoggable[A: Loggable]: Loggable[Set[A]]   = traversableLoggable
 
   implicit def nelLoggable[A: Loggable]: Loggable[NonEmptyList[A]] =
     value => traversableLoggable[A, List].show(value.toList)
 
-  implicit def mapLoggable[A: Loggable, B: Loggable]: Loggable[Map[A, B]] =
-    value => traversableLoggable[(A, B), List].show(value.toList)
-
   implicit def optionLoggable[A: Loggable]: Loggable[Option[A]] =
     value => value.fold("None")(Loggable[A].show)
-
-  implicit def tuple2[A, B](implicit a: Loggable[A], b: Loggable[B]): Loggable[(A, B)] = {
-    case (first, second) =>
-      s"(\${a.show(first)}, \${b.show(second)})"
-  }
-
-  implicit def eitherLoggable[A, B](implicit left: Loggable[A], right: Loggable[B]): Loggable[Either[A, B]] =
-    v => v.fold(l => s"Left(\${left.show(l)})", r => s"Right(\${right.show(r)})")
 
   implicit def refinedLoggable[T, P, F[_, _]](implicit underlying: Loggable[T], refType: RefType[F]): Loggable[F[T, P]] =
     value => underlying.show(refType.unwrap(value))
@@ -105,8 +93,13 @@ trait LoggableInstances {
   def traversableLoggable[A, M[X] <: TraversableOnce[X]](implicit ev: Loggable[A]): Loggable[M[A]] =
     value => value.map(ev.show).mkString("[", ", ", "]")
 
+  implicit def coercibleLoggable[R, N](implicit ev: Coercible[Loggable[R], Loggable[N]], R: Loggable[R]): Loggable[N] =
+    ev(R)
+
+  // \$COVERAGE-OFF\$
   implicit val cnilLoggable: Loggable[CNil] =
     cnil => sys.error(s"Unreachable \$cnil")
+  // \$COVERAGE-ON\$
 
   implicit def coproductLoggable[H, T <: Coproduct](implicit h: Lazy[Loggable[H]], t: Loggable[T]): Loggable[H :+: T] =
     value => value.eliminate(h.value.show, t.show)

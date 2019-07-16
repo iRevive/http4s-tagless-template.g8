@@ -4,11 +4,13 @@ import cats.effect._
 import cats.effect.syntax.concurrent._
 import cats.mtl.syntax.local._
 import cats.syntax.applicativeError._
+import cats.syntax.either._
 import cats.syntax.functor._
-import $organization$.util.error.{ErrorHandle, ErrorRaise, RaisedError}
+import $organization$.util.error.{ErrorHandle, RaisedError}
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
 import $organization$.util.syntax.logging._
 import $organization$.util.syntax.retry._
+import $organization$.util.syntax.mtl.raise._
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import eu.timepit.refined.auto._
@@ -48,7 +50,7 @@ class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Trace
 
     val attempt = query
       .transact(transactor)
-      .handleErrorWith(e => ErrorRaise[F].raise(RaisedError.postgres(PostgresError.UnavailableConnection(e))))
+      .handleErrorWith(e => PostgresError.unavailableConnection(e).asLeft.pureOrRaise)
       .void
 
     val timeoutTo = timeoutError[Unit](log"Failed attempt to acquire Postgres connection in [\$timeout]")
@@ -57,14 +59,12 @@ class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Trace
   }
 
   private def timeoutError[A](cause: String): F[A] =
-    ErrorRaise[F].raise[A](RaisedError.postgres(PostgresError.ConnectionAttemptTimeout(cause)))
+    PostgresError.connectionAttemptTimeout(cause).asLeft[A].pureOrRaise
 
   private val logger: TracedLogger[F] = TracedLogger.create(getClass)
 
 }
 
 object TransactorLoader {
-
   def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider] = new TransactorLoader[F]
-
 }

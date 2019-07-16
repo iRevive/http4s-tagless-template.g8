@@ -1,27 +1,48 @@
 package $organization$
 
-import cats.Monad
 import cats.effect._
-import $organization$.ApplicationLoader.Application
-import $organization$.api.{ApiModule, ApiModuleLoader}
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import $organization$.ApplicationLoader.{ApiModule, Application}
 import $organization$.persistence.{PersistenceModule, PersistenceModuleLoader}
 import $organization$.processing.{ProcessingModule, ProcessingModuleLoader}
+import $organization$.util.api.{ApiConfig, HealthApi}
 import $organization$.util.error.ErrorHandle
-import $organization$.util.logging.TraceProvider
+import $organization$.util.logging.{TraceProvider, TracedLogger}
+import $organization$.util.syntax.config._
+import $organization$.util.syntax.logging._
 import com.typesafe.config.Config
+import org.http4s.HttpApp
+import org.http4s.server.Router
+import org.http4s.syntax.kleisli._
 
-class ApplicationLoader[F[_]: Monad](
+class ApplicationLoader[F[_]: Sync: TraceProvider: ErrorHandle](
     persistenceModuleLoader: PersistenceModuleLoader[F],
-    processingModuleLoader: ProcessingModuleLoader[F],
-    apiModuleLoader: ApiModuleLoader[F]
+    processingModuleLoader: ProcessingModuleLoader[F]
 ) {
 
   def load(config: Config): Resource[F, Application[F]] =
     for {
       persistenceModule <- persistenceModuleLoader.load(config)
       processingModule  <- processingModuleLoader.load(config, persistenceModule)
-      apiModule         <- Resource.liftF(apiModuleLoader.load(config))
+      apiModule         <- Resource.liftF(loadApiModule(config, processingModule))
     } yield Application(persistenceModule, processingModule, apiModule)
+
+  private def loadApiModule(config: Config, processingModule: ProcessingModule[F]): F[ApiModule[F]] =
+    for {
+      apiConfig <- config.loadF[F, ApiConfig]("application.api")
+      _         <- logger.info(log"Loading API module with config \$apiConfig")
+    } yield ApiModule(mkRoutes(processingModule), apiConfig)
+
+  private def mkRoutes(processingModule: ProcessingModule[F]): HttpApp[F] = {
+    val healthApi = new HealthApi[F]
+
+    Router(
+      "/health" -> healthApi.routes
+    ).orNotFound
+  }
+
+  private val logger: TracedLogger[F] = TracedLogger.create[F](getClass)
 
 }
 
@@ -30,13 +51,14 @@ object ApplicationLoader {
   def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider]: ApplicationLoader[F] =
     new ApplicationLoader[F](
       PersistenceModuleLoader.default,
-      new ProcessingModuleLoader[F],
-      new ApiModuleLoader[F]
+      new ProcessingModuleLoader[F]
     )
+
+  final case class ApiModule[F[_]](httpApp: HttpApp[F], config: ApiConfig)
 
   final case class Application[F[_]](
       persistenceModule: PersistenceModule[F],
-      processingModule: ProcessingModule,
+      processingModule: ProcessingModule[F],
       apiModule: ApiModule[F]
   )
 

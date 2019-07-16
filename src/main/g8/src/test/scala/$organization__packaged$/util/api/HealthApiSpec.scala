@@ -1,15 +1,15 @@
-package $organization$.api
+package $organization$.util.api
 
 import $organization$.test.BaseSpec
 import org.http4s.syntax.kleisli._
 import org.http4s._
 
-class GeneralApiSpec extends BaseSpec {
+class HealthApiSpec extends BaseSpec {
 
-  "General API" should {
+  "Health API" should {
 
     "return 'I'm alive' from /health endpoint" in EffectAssertion() {
-      val request = Request[Eff](method = Method.GET, uri = uri"/health")
+      val request = Request[Eff](method = Method.GET, uri = uri"/")
 
       for {
         response <- routes.orNotFound.run(request)
@@ -22,6 +22,6 @@ class GeneralApiSpec extends BaseSpec {
 
   }
 
-  private lazy val routes: HttpRoutes[Eff] = new GeneralApi[Eff].routes
+  private lazy val routes: HttpRoutes[Eff] = new HealthApi[Eff].routes
 
 }

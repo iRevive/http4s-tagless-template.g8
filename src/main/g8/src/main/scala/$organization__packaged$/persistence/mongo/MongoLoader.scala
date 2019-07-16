@@ -5,11 +5,13 @@ import cats.effect.syntax.bracket._
 import cats.effect.syntax.concurrent._
 import cats.mtl.syntax.local._
 import cats.syntax.applicativeError._
+import cats.syntax.either._
 import cats.syntax.functor._
-import $organization$.util.error.{ErrorHandle, ErrorRaise, RaisedError}
+import $organization$.util.error.{ErrorHandle, RaisedError}
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
 import $organization$.util.syntax.logging._
 import $organization$.util.syntax.retry._
+import $organization$.util.syntax.mtl.raise._
 import eu.timepit.refined.auto._
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
@@ -49,22 +51,20 @@ class MongoLoader[F[_]: Timer: ContextShift: ErrorHandle: TraceProvider](implici
     val attempt = IO
       .fromFuture(IO.delay(db.runCommand(BsonDocument("connectionStatus" -> 1)).toFutureOption()))
       .to[F]
-      .handleErrorWith(e => ErrorRaise[F].raise(RaisedError.mongo(MongoError.UnavailableConnection(e))))
-      .guarantee(ContextShift[F].shift)
       .void
+      .handleErrorWith(e => MongoError.unavailableConnection(e).asLeft[Unit].pureOrRaise)
+      .guarantee(ContextShift[F].shift)
 
     Concurrent.timeoutTo(attempt, timeout, timeoutTo)
   }
 
   private def timeoutError[A](cause: String): F[A] =
-    ErrorRaise[F].raise[A](RaisedError.mongo(MongoError.ConnectionAttemptTimeout(cause)))
+    MongoError.connectionAttemptTimeout(cause).asLeft[A].pureOrRaise
 
   private val logger: TracedLogger[F] = TracedLogger.create(getClass)
 
 }
 
 object MongoLoader {
-
   def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider] = new MongoLoader[F]
-
 }

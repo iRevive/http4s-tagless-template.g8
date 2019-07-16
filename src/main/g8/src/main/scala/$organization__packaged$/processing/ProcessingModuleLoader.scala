@@ -6,9 +6,9 @@ import com.typesafe.config.Config
 
 class ProcessingModuleLoader[F[_]: Sync] {
 
-  def load(rootConfig: Config, persistenceModule: PersistenceModule[F]): Resource[F, ProcessingModule] = {
+  def load(rootConfig: Config, persistenceModule: PersistenceModule[F]): Resource[F, ProcessingModule[F]] = {
     val _ = (rootConfig, persistenceModule)
-    Resource.pure(ProcessingModule())
+    Resource.pure(ProcessingModule[F]())
   }
 
 }

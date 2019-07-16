@@ -4,7 +4,7 @@ package config
 import cats.effect.Sync
 import cats.syntax.either._
 import cats.syntax.flatMap._
-import $organization$.util.error.ErrorRaise
+import $organization$.util.error.{EmptyThrowableExtractor, ErrorRaise}
 import $organization$.util.logging.Loggable
 import $organization$.util.syntax.logging._
 import $organization$.util.syntax.mtl.raise._
@@ -41,5 +41,5 @@ final class ConfigOps(private val config: Config) extends AnyVal {
 
 }
 
-@scalaz.deriving(Loggable)
+@scalaz.deriving(Loggable, EmptyThrowableExtractor)
 final case class ConfigParsingError(path: String, expectedClass: String, error: Error)

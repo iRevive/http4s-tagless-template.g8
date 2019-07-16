@@ -4,16 +4,16 @@ package mongo
 import cats.data.NonEmptyList
 import cats.effect.{Concurrent, ContextShift, IO}
 import cats.effect.syntax.bracket._
-import cats.instances.either._
 import cats.instances.list._
 import cats.instances.option._
 import cats.syntax.applicativeError._
+import cats.syntax.either._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.traverse._
 import $organization$.util.Position
-import $organization$.util.error.{ErrorRaise, RaisedError}
-import $organization$.util.json.JsonOps
+import $organization$.util.error.ErrorRaise
+import $organization$.util.syntax.json._
 import $organization$.util.syntax.mtl.raise._
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.syntax._
@@ -33,7 +33,7 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
 
     IO.eval(collectionEval)
       .to[F]
-      .handleErrorWith(e => ErrorRaise[F].raise(RaisedError.mongo(MongoError.ExecutionError(e))))
+      .handleErrorWith(e => MongoError.executionError(e).asLeft.pureOrRaise)
   }
 
   final def findAndReplaceOne[A: Decoder: Encoder: ClassTag](
@@ -48,7 +48,7 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
     for {
       c      <- collection
       doc    <- deferFuture(c.findOneAndReplace(filter = criteria, replacement = replacement, options = options).headOption())
-      result <- doc.traverse(v => JsonOps.decode[A](v.toJson)).pureOrRaise
+      result <- doc.traverse(decode[A])
     } yield result
   }
 
@@ -56,14 +56,14 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
     for {
       c      <- collection
       docs   <- deferFuture(c.aggregate[BsonDocument](pipeline.toList).toFuture())
-      result <- docs.toList.traverse(v => JsonOps.decode[A](v.toJson)).pureOrRaise
+      result <- docs.toList.traverse(decode[A])
     } yield result
 
   final def findOne[A: Decoder: ClassTag](query: Bson): F[Option[A]] =
     for {
       c      <- collection
       doc    <- deferFuture(c.find[BsonDocument](query).headOption())
-      result <- doc.traverse(v => JsonOps.decode[A](v.toJson)).pureOrRaise
+      result <- doc.traverse(decode[A])
     } yield result
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
@@ -82,7 +82,7 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
     for {
       c      <- collection
       docs   <- deferFuture(search(c))
-      result <- docs.toList.traverse(v => JsonOps.decode[A](v.toJson)).pureOrRaise
+      result <- docs.toList.traverse(decode[A])
     } yield result
   }
 
@@ -92,10 +92,16 @@ class MongoRepository[F[_]: Concurrent: ContextShift: ErrorRaise](database: Mong
       _ <- deferFuture(c.insertOne(BsonDocument(value.asJson.noSpaces)).toFutureOption())
     } yield ()
 
+  private def decode[A: Decoder: ClassTag](doc: BsonDocument): F[A] =
+    for {
+      json     <- io.circe.parser.parse(doc.toJson).leftMap(e => MongoError.executionError(e)).pureOrRaise
+      response <- json.decodeF[F, A]
+    } yield response
+
   private def deferFuture[R](action: => Future[R])(implicit p: Position): F[R] =
     IO.fromFuture(IO(action))
       .to[F]
-      .handleErrorWith(e => ErrorRaise[F].raise(RaisedError.mongo(MongoError.ExecutionError(e))))
+      .handleErrorWith(e => MongoError.executionError(e).asLeft[R].pureOrRaise)
       .guarantee(ContextShift[F].shift)
 
 }
