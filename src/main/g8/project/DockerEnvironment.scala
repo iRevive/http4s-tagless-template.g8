@@ -39,7 +39,7 @@ object DockerEnvironment {
         "-Dorg.mongodb.async.type=netty",
         s"-DPOSTGRESQL_URI=\$postgreUri",
         s"-DPOSTGRESQL_USER=\$postgreUser",
-        s"-DPOSTGRESQL_PASSWORD=\$postgesPassword"
+        s"-DPOSTGRESQL_PASSWORD=\$postgrePassword"
       )
     }
 
