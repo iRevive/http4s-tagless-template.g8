@@ -1,4 +1,3 @@
-import sbt.Keys.javaOptions
 import sbtrelease.ReleaseStateTransformations._
 
 lazy val root = (project in file("."))
@@ -16,13 +15,13 @@ lazy val root = (project in file("."))
   .settings(releaseSettings)
   .settings(commandSettings)
   .settings(
-    name := Settings.name,
+    name                := Settings.name,
     libraryDependencies ++= Dependencies.root
   )
 
 lazy val commonSettings = Seq(
-  organization := Settings.organization,
-  scalaVersion := Versions.scala,
+  organization  := Settings.organization,
+  scalaVersion  := Versions.scala,
   scalacOptions -= "-Xfatal-warnings",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
   addCompilerPlugin("org.spire-math" %% "kind-projector"     % "0.9.10"),
@@ -31,74 +30,70 @@ lazy val commonSettings = Seq(
 
 lazy val scalazDerivingSettings = Seq(
   // WORKAROUND for scalaz.deriving: https://github.com/sbt/sbt/issues/1965
-  managedClasspath in Compile := {
-    val res = (resourceDirectory in Compile).value
-    val old = (managedClasspath in Compile).value
+  Compile / managedClasspath := {
+    val res = (Compile / resourceDirectory).value
+    val old = (Compile / managedClasspath).value
     Attributed.blank(res) +: old
   },
   addCompilerPlugin("org.scalaz" %% "deriving-plugin" % Versions.scalazDeriving)
 )
 
 lazy val testSettings = Seq(
-  fork in Test := true,
-  parallelExecution in Test := true,
-  javaOptions in Test := Seq(
-    "-Dorg.mongodb.async.type=netty"
-  )
+  Test / fork              := true,
+  Test / parallelExecution := true,
+  Test / javaOptions       := Seq("-Dorg.mongodb.async.type=netty")
 )
 
 lazy val itEnvironment = {
-  import DockerEnvironment.{postgres, mongodb}
-  import scala.sys.process._
-
-  val startItEnv = TaskKey[Unit]("start-it-env", "Create instances of Postgres and MongoDB")
-  val network    = sys.env.getOrElse("DOCKER_NETWORK", "$name_normalized$-network")
+  val startItEnv = TaskKey[Unit]("start-it-env", "Create integration environment")
+  val stopItEnv  = TaskKey[Unit]("stop-it-env", "Destroy integration environment")
+  val env        = DockerEnvironment.createEnv(sys.env.get("DOCKER_NETWORK"))
 
   Seq(
-    (startItEnv in IntegrationTest) := {
-      s"docker network create \$network".!
-
-      postgres.commands.remove.!
-      postgres.commands.start(network).!
-
-      mongodb.commands.remove.!
-      mongodb.commands.start(network).!
+    stopItEnv := {
+      env.destroy(sourceDirectory.value)
     },
+    startItEnv := {
+      env.destroy(sourceDirectory.value)
+      env.start(sourceDirectory.value)
+    },
+    IntegrationTest / testOptions ++= Def.task {
+      val log       = streams.value.log
+      val sourceDir = sourceDirectory.value
 
-    (test in IntegrationTest) := {
-      (test in IntegrationTest).dependsOn(startItEnv in IntegrationTest).andFinally {
-        postgres.commands.remove.!
-        mongodb.commands.remove.!
+      val setup = Tests.Setup { () =>
+        log.info("Re-creating integration environment")
+        env.destroy(sourceDir)
+        env.start(sourceDir)
       }
+
+      val cleanup = Tests.Setup { () =>
+        log.info("Destroying integration environment")
+        env.destroy(sourceDir)
+      }
+
+      Seq(setup, cleanup)
     }.value,
-
-    fork in IntegrationTest := true,
-
-    javaOptions in IntegrationTest := Seq(
-      s"-DMONGODB_URI=\${mongodb.container.uri(network)}",
-      "-Dorg.mongodb.async.type=netty",
-
-      s"-DPOSTGRESQL_URI=\${postgres.container.uri(network)}",
-      s"-DPOSTGRESQL_USER=\${postgres.container.user}",
-      s"-DPOSTGRESQL_PASSWORD=\${postgres.container.password}"
-    )
+    IntegrationTest / fork              := true,
+    IntegrationTest / parallelExecution := false,
+    IntegrationTest / javaOptions       := env.javaOpts
   )
 }
 
 lazy val buildSettings = Seq(
-  packageName in Universal := name.value,
-  mainClass in Compile := Some("$organization$.Server"),
-  sources in (Compile, doc) := Seq.empty,
-  publishArtifact in (Compile, packageDoc) := false,
-  bashScriptExtraDefines += """addJava "-Dconfig.file=\${app_home}/../conf/application.conf"""",
-  mappings in Universal += {
-    val conf = (resourceDirectory in Compile).value / "application.conf"
+  Universal / packageName                := name.value,
+  Compile / mainClass                    := Some("$organization$.Server"),
+  Compile / doc / sources                := Seq.empty,
+  Compile / packageDoc / publishArtifact := false,
+  bashScriptExtraDefines                 += """addJava "-Dconfig.file=${app_home}/../conf/application.conf"""",
+  Universal / mappings += {
+    val conf = (Compile / resourceDirectory).value / "application.conf"
     conf -> "conf/application.conf"
   }
 )
 
 lazy val wartRemoverSettings = Seq(
-  wartremoverErrors in (Compile, compile) ++= Warts.allBut(
+  Compile / compile / wartremoverErrors ++= Warts.allBut(
     Wart.Any,                 // false positives
     Wart.Nothing,             // false positives
     Wart.Product,             // false positives
@@ -110,13 +105,13 @@ lazy val wartRemoverSettings = Seq(
 )
 
 lazy val dockerSettings = Seq(
-  dockerBaseImage := "openjdk:8-alpine",
+  dockerBaseImage    := "openjdk:8-alpine",
   dockerUpdateLatest := true,
   dockerAlias := DockerAlias(
     None,
     None,
     sys.env.getOrElse("DOCKER_REGISTRY_IMAGE", name.value),
-    Option((version in Docker).value)
+    Option((Docker / version).value)
   )
 )
 

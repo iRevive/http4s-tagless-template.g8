@@ -1,0 +1,23 @@
+version: '3'
+services:
+
+  postgres:
+    restart: always
+    image: postgres:9.6
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: $name_normalized$
+    ports:
+      - 55432:5432
+
+  mongodb:
+    restart: always
+    image: mongo
+    ports:
+      - 57017:27017
+
+networks:
+  default:
+    external:
+      name: ${NETWORK}

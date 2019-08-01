@@ -1,56 +1,58 @@
+import sbt._
+import scala.sys.process._
+
 object DockerEnvironment {
 
-  object postgres {
+  val DefaultNetwork: String = "$name_normalized$-network"
 
-    object container {
-      val port          = 53124
-      val user          = "postgres"
-      val password      = "admin"
-      val db            = "$name_normalized$"
-      val containerName = "$name_normalized$-it-postgres"
-      val image         = "postgres:9.6"
+  def createEnv(network: Option[String]): DockerEnv = new DockerEnv(network.getOrElse(DefaultNetwork))
 
-      def uri(network: String): String = network match {
-        case "$name_normalized$-ci-network" => s"jdbc:postgresql://\$containerName:5432/\$db"
-        case _                              => s"jdbc:postgresql://localhost:\$port/\$db"
-      }
+  class DockerEnv(network: String) {
+
+    def start(sourceDirectory: File): Unit = {
+      val path = dockerComposePath(sourceDirectory)
+
+      createNetwork()
+      Process(s"docker-compose -f \$path up -d", None, dockerEnvVars: _*).!
     }
 
-    object commands {
-      val remove: String = s"docker rm -f \${container.containerName}"
-
-      def start(network: String): String =
-        s"""
-           |docker run --rm -d
-           |-p \${container.port}:5432
-           |--network=\$network
-           |-e POSTGRES_USER=\${container.user} -e POSTGRES_PASSWORD=\${container.password} -e POSTGRES_DB=\${container.db}
-           |--name \${container.containerName}
-           |\${container.image}
-         """.stripMargin.replace("\n", " ").trim
+    def destroy(sourceDirectory: File): Unit = {
+      val path = dockerComposePath(sourceDirectory)
+      Process(s"docker-compose -f \$path stop", None, dockerEnvVars: _*).!
     }
 
-  }
+    def javaOpts: Seq[String] = {
+      val postgreUri = foldNetwork(
+        "jdbc:postgresql://localhost:55432/$name_normalized$",
+        "jdbc:postgresql://postgres:5432/$name_normalized$"
+      )
 
-  object mongodb {
+      val (postgreUser, postgrePassword) = ("postgres", "admin")
 
-    object container {
-      val port          = 53123
-      val containerName = "$name_normalized$-it-mongo"
-      val image         = "mongo"
+      val mongoUri = foldNetwork(
+        "mongodb://localhost:57017/?streamType=netty",
+        "mongodb://mongo:27017/?streamType=netty"
+      )
 
-      def uri(network: String): String = network match {
-        case "$name_normalized$-ci-network" => s"mongodb://\$containerName:27017/?streamType=netty"
-        case _                              => s"mongodb://localhost:\$port/?streamType=netty"
-      }
+      Seq(
+        s"-DMONGODB_URI=\$mongoUri",
+        "-Dorg.mongodb.async.type=netty",
+        s"-DPOSTGRESQL_URI=\$postgreUri",
+        s"-DPOSTGRESQL_USER=\$postgreUser",
+        s"-DPOSTGRESQL_PASSWORD=\$postgesPassword"
+      )
     }
 
-    object commands {
-      val remove: String = s"docker rm -f \${container.containerName}"
+    private def createNetwork(): Unit =
+      s"docker network create $network".!
 
-      def start(network: String): String =
-        s"docker run --rm -d -p \${container.port}:27017 --network=\$network --name \${container.containerName} \${container.image}"
-    }
+    private def dockerComposePath(sourceDirectory: File): File =
+      sourceDirectory / "it" / "docker" / "docker-compose.yml"
+
+    private def dockerEnvVars: Seq[(String, String)] = Seq(("NETWORK", network))
+
+    private def foldNetwork[A](onDefault: => A, onExternal: => A): A =
+      if (network == DefaultNetwork) onDefault else onExternal
 
   }
 

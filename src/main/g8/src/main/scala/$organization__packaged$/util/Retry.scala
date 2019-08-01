@@ -93,7 +93,7 @@ object Retry {
       (result, retries, next) => {
         result match {
           case Result.Success(_) =>
-            logger.error(log"Retry policy. Success. Retires left [\$retries]. Next \$next")
+            logger.info(log"Retry policy. Success. Retires left [\$retries]. Next \$next")
 
           case Result.UnhandledError(cause) =>
             logger.error(log"Retry policy. Unhandled error \$cause. Retires left [\$retries]. Next \$next")
