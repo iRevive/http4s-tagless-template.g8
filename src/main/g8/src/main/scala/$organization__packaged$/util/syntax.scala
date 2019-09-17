@@ -2,6 +2,7 @@ package $organization$.util
 
 import $organization$.util.config.ToConfigOps
 import $organization$.util.error.ToErrorRaiseOps
+import $organization$.util.execution.ToRetryOps
 import $organization$.util.json.ToJsonOps
 import $organization$.util.logging.Loggable.InterpolatorOps
 import $organization$.util.syntax.mtl.ToAllMtlOps

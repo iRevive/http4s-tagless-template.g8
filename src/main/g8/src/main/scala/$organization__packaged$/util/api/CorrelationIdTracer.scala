@@ -15,10 +15,9 @@ object CorrelationIdTracer {
 
   def httpRoutes[F[_]: Monad: TraceProvider](routes: HttpRoutes[F]): HttpRoutes[F] =
     Kleisli { req: Request[F] =>
-      val route             = req.uri.path.substring(req.uri.path.lastIndexOf("/"))
+      val route             = req.uri.path.substring(0, req.uri.path.lastIndexOf("/"))
       val correlationHeader = req.headers.get(CorrelationIdHeader)
-
-      val traceId = TraceId.randomAlphanumeric(tracePrefix(correlationHeader, route))
+      val traceId           = TraceId.randomAlphanumeric(tracePrefix(correlationHeader, route))
 
       routes
         .run(req)
@@ -29,10 +28,10 @@ object CorrelationIdTracer {
   private def tracePrefix(correlationHeader: Option[Header], route: String): String =
     correlationHeader match {
       case Some(h) =>
-        log"api-\$route-\${h.value}"
+        log"\$route#\${h.value}"
 
       case None =>
-        log"api-\$route"
+        route + "#"
     }
 
 }

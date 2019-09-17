@@ -1,6 +1,6 @@
 package $organization$.persistence.mongo
 
-import $organization$.util.Retry
+import $organization$.util.execution.Retry
 import $organization$.util.logging.Loggable
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.string.Uri

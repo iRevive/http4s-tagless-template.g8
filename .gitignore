@@ -4,4 +4,7 @@
 logs/
 project/project/
 project/target/
+project/boot/
 target/
+lib_managed/
+src_managed/

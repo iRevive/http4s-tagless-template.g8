@@ -1,32 +1,31 @@
 import sbt._
 
 object Settings {
-  val organization          = "$organization$"
-  val name                  = "$name_normalized$"
+  val organization = "$organization$"
+  val name         = "$name_normalized$"
 }
 
 object Versions {
-  val scala             = "$scala_version$"
-
-  val http4s            = "$http4s_version$"
-  val circe             = "$circe_version$"
-  val circeConfig       = "$circe_config_version$"
-  val cats              = "$cats_version$"
-  val catsEffect        = "$cats_effect_version$"
-  val catsMTL           = "$cats_mtl_version$"
-  val monix             = "$monix_version$"
-  val mongoScalaDriver  = "$mongo_scala_driver_version$"
-  val netty             = "$netty_version$"
-  val doobie            = "$doobie_version$"
-  val scalazDeriving    = "$scalaz_deriving_version$"
-  val newtype           = "$newtype_version$"
-  val refined           = "$refined_version$"
-  val sourcecode        = "$sourcecode_version$"
-  val magnolia          = "$magnorlia_version$"
-  val logback           = "$logback_version$"
-  val scalaLogging      = "$scala_logging_version$"
-  val scalatest         = "$scalatest_version$"
-  val catsScalatest     = "$cats_scalatest_version$"
+  val scala            = "$scala_version$"
+  val http4s           = "$http4s_version$"
+  val circe            = "$circe_version$"
+  val circeConfig      = "$circe_config_version$"
+  val cats             = "$cats_version$"
+  val catsEffect       = "$cats_effect_version$"
+  val catsMTL          = "$cats_mtl_version$"
+  val monix            = "$monix_version$"
+  val mongoScalaDriver = "$mongo_scala_driver_version$"
+  val netty            = "$netty_version$"
+  val doobie           = "$doobie_version$"
+  val scalazDeriving   = "$scalaz_deriving_version$"
+  val newtype          = "$newtype_version$"
+  val refined          = "$refined_version$"
+  val sourcecode       = "$sourcecode_version$"
+  val magnolia         = "$magnorlia_version$"
+  val logback          = "$logback_version$"
+  val scalaLogging     = "$scala_logging_version$"
+  val scalatest        = "$scalatest_version$"
+  val catsScalatest    = "$cats_scalatest_version$"
 }
 
 object Dependencies {
@@ -54,13 +53,13 @@ object Dependencies {
     "org.tpolecat"               %% "doobie-refined"       % Versions.doobie,
     "org.tpolecat"               %% "doobie-postgres"      % Versions.doobie,
     "org.mongodb.scala"          %% "mongo-scala-driver"   % Versions.mongoScalaDriver,
-    "io.netty"                   %  "netty-all"            % Versions.netty,
+    "io.netty"                   % "netty-all"             % Versions.netty,
     "com.lihaoyi"                %% "sourcecode"           % Versions.sourcecode,
     "com.propensive"             %% "magnolia"             % Versions.magnolia,
     "com.typesafe.scala-logging" %% "scala-logging"        % Versions.scalaLogging,
-    "ch.qos.logback"             %  "logback-classic"      % Versions.logback,
-    "org.tpolecat"               %% "doobie-scalatest"     % Versions.doobie        % "it",
-    "org.scalatest"              %% "scalatest"            % Versions.scalatest     % "it,test",
+    "ch.qos.logback"             % "logback-classic"       % Versions.logback,
+    "org.tpolecat"               %% "doobie-scalatest"     % Versions.doobie % "it",
+    "org.scalatest"              %% "scalatest"            % Versions.scalatest % "it,test",
     "com.ironcorelabs"           %% "cats-scalatest"       % Versions.catsScalatest % "it,test"
   )
 

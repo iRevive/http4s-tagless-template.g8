@@ -4,8 +4,9 @@ import cats.data.EitherT
 import cats.effect.Concurrent
 import cats.scalatest.{EitherMatchers, EitherValues}
 import cats.syntax.functor._
+import $organization$.util.ClassUtils
+import $organization$.util.execution.Traced
 import $organization$.util.logging.TraceId
-import $organization$.util.{ClassUtils, Traced}
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalatest.{Inside, Matchers, OptionValues, WordSpecLike}
@@ -21,8 +22,9 @@ abstract class EffectSpec[E]
     with EitherValues {
 
   protected type Eff[A] = Traced[EitherT[Task, E, ?], A]
-  protected implicit lazy val Eff: Concurrent[Eff]        = Concurrent.catsKleisliConcurrent
-  protected implicit lazy val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
+
+  protected implicit val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
+  protected implicit val Eff: Concurrent[Eff]        = Concurrent.catsKleisliConcurrent
 
   protected final val DefaultTimeout: FiniteDuration = 20.seconds
 

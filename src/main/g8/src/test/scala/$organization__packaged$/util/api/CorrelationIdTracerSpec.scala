@@ -1,33 +1,48 @@
 package $organization$.util.api
 
+import cats.effect.concurrent.MVar
 import cats.mtl.implicits._
+import cats.syntax.functor._
 import $organization$.test.{BaseSpec, GenRandom}
-import $organization$.util.logging.TraceProvider
+import $organization$.util.logging.{TraceId, TraceProvider}
+import org.http4s.Method._
 import org.http4s._
 
 class CorrelationIdTracerSpec extends BaseSpec {
 
   "CorrelationIdTracer" should {
 
-    "add `X-Correlation-Id` header to trace prefix" in {
+    "add `X-Correlation-Id` header to trace prefix" in EffectAssertion() {
       val correlationId = GenRandom[String].gen
-      val header        = Header(CorrelationIdTracer.CorrelationIdHeader.value, GenRandom[String].gen)
-      val request       = Request[Eff](Method.GET, uri"/route", headers = Headers.of(header))
+      val header        = Header(CorrelationIdTracer.CorrelationIdHeader.value, correlationId)
+      val request       = Request[Eff](Method.GET, uri"/api/balance-state/123", headers = Headers.of(header))
 
       for {
-        _       <- CorrelationIdTracer.httpRoutes[Eff](HttpRoutes.empty).run(request).value
-        traceId <- TraceProvider[Eff].ask
-      } yield traceId.value shouldBe s"api-/route-\$correlationId"
+        m       <- MVar.empty[Eff, TraceId]
+        _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
+        traceId <- m.read
+      } yield traceId.value should startWith(s"/api/balance-state#\$correlationId")
     }
 
-    "use api route if `X-Correlation-Id` header is missing" in {
-      val request = Request[Eff](Method.GET, uri"/route")
+    "use api route if `X-Correlation-Id` header is missing" in EffectAssertion() {
+      val request = Request[Eff](Method.GET, uri"/api/balance-state/123")
+
       for {
-        _       <- CorrelationIdTracer.httpRoutes[Eff](HttpRoutes.empty).run(request).value
-        traceId <- TraceProvider[Eff].ask
-      } yield traceId.value shouldBe "api-/route"
+        m       <- MVar.empty[Eff, TraceId]
+        _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
+        traceId <- m.read
+      } yield traceId.value should startWith("/api/balance-state#")
     }
 
+  }
+
+  private def contextRecorder(m: MVar[Eff, TraceId]): HttpRoutes[Eff] = {
+    import org.http4s.dsl.impl.{->, /, Root}
+
+    HttpRoutes.of[Eff] {
+      case GET -> Root / "api" / "balance-state" / _ =>
+        TraceProvider[Eff].ask.flatMap(m.put).as(Response[Eff](Status.Ok))
+    }
   }
 
 }

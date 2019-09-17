@@ -1,4 +1,4 @@
-package $organization$.util
+package $organization$.util.execution
 
 import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
@@ -7,7 +7,7 @@ import cats.syntax.applicativeError._
 import cats.syntax.apply._
 import cats.syntax.functor._
 import $organization$.test.EffectSpec
-import $organization$.util.RetrySpec._
+import $organization$.util.execution.RetrySpec._
 import $organization$.util.logging.Loggable
 import $organization$.util.syntax.retry._
 import eu.timepit.refined.auto._

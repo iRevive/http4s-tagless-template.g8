@@ -35,6 +35,7 @@ class ApplicationLoader[F[_]: Sync: TraceProvider: ErrorHandle](
     } yield ApiModule(mkRoutes(processingModule), apiConfig)
 
   private def mkRoutes(processingModule: ProcessingModule[F]): HttpApp[F] = {
+    val _         = processingModule
     val healthApi = new HealthApi[F]
 
     Router(

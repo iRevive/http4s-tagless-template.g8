@@ -20,12 +20,11 @@ lazy val root = (project in file("."))
   )
 
 lazy val commonSettings = Seq(
-  organization  := Settings.organization,
-  scalaVersion  := Versions.scala,
-  scalacOptions -= "-Xfatal-warnings",
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
-  addCompilerPlugin("org.spire-math" %% "kind-projector"     % "0.9.10"),
-  addCompilerPlugin("com.olegpy"     %% "better-monadic-for" % "0.3.0")
+  organization := Settings.organization,
+  scalaVersion := Versions.scala,
+  addCompilerPlugin(("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full)),
+  addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
+  addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1")
 )
 
 lazy val scalazDerivingSettings = Seq(
@@ -67,7 +66,7 @@ lazy val itEnvironment = {
         env.start(sourceDir)
       }
 
-      val cleanup = Tests.Setup { () =>
+      val cleanup = Tests.Cleanup { () =>
         log.info("Destroying integration environment")
         env.destroy(sourceDir)
       }
@@ -85,7 +84,7 @@ lazy val buildSettings = Seq(
   Compile / mainClass                    := Some("$organization$.Server"),
   Compile / doc / sources                := Seq.empty,
   Compile / packageDoc / publishArtifact := false,
-  bashScriptExtraDefines                 += """addJava "-Dconfig.file=${app_home}/../conf/application.conf"""",
+  bashScriptExtraDefines                 += """addJava "-Dconfig.file=\${app_home}/../conf/application.conf"""",
   Universal / mappings += {
     val conf = (Compile / resourceDirectory).value / "application.conf"
     conf -> "conf/application.conf"
@@ -94,13 +93,13 @@ lazy val buildSettings = Seq(
 
 lazy val wartRemoverSettings = Seq(
   Compile / compile / wartremoverErrors ++= Warts.allBut(
-    Wart.Any,                 // false positives
-    Wart.Nothing,             // false positives
-    Wart.Product,             // false positives
-    Wart.Serializable,        // false positives
-    Wart.ImplicitParameter,   // only used for Pos, but evidently can't be suppressed
-    Wart.ImplicitConversion,  // it's fine here
-    Wart.PublicInference      // fails https://github.com/wartremover/wartremover/issues/398
+    Wart.Any,                // false positives
+    Wart.Nothing,            // false positives
+    Wart.Product,            // false positives
+    Wart.Serializable,       // false positives
+    Wart.ImplicitParameter,  // only used for Pos, but evidently can't be suppressed
+    Wart.ImplicitConversion, // it's fine here
+    Wart.PublicInference     // fails https://github.com/wartremover/wartremover/issues/398
   )
 )
 
@@ -133,22 +132,25 @@ lazy val releaseSettings = Seq(
 )
 
 lazy val commandSettings = {
-  val ciSteps = List(
-    "clean",
-    "coverage",
-    "scalafmtCheck",
-    "test:scalafmtCheck",
-    "it:scalafmtCheck",
-    "test:compile",
-    "it:compile",
-    "test",
-    "it:test",
-    "coverageReport"
-  )
+  val ci = Command.command("ci") { state =>
+    "set coverageOutputTeamCity := true" ::
+      "clean" ::
+      "coverage" ::
+      "scalafmtSbtCheck" ::
+      "scalafmtCheckAll" ::
+      "test:compile" ::
+      "it:compile" ::
+      "test" ::
+      "it:test" ::
+      "coverageReport" ::
+      state
+  }
+
+  val testAll = Command.command("testAll") { state =>
+    "clean" :: "coverage" :: "test" :: "it:test" :: "coverageReport" :: state
+  }
 
   Seq(
-    addCommandAlias("scalafmtAll", ";scalafmt;test:scalafmt;it:scalafmt"),
-    addCommandAlias("testAll", ";clean;coverage;test;it:test;coverageReport"),
-    addCommandAlias("ci", ciSteps.mkString(";", ";", ""))
-  ).flatten
+    commands ++= List(ci, testAll)
+  )
 }

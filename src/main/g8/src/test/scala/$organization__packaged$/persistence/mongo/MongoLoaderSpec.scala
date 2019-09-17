@@ -4,7 +4,7 @@ import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
 import $organization$.test.BaseSpec
-import $organization$.util.Retry
+import $organization$.util.execution.Retry
 import $organization$.util.error.ErrorHandle
 import eu.timepit.refined.auto._
 import org.mongodb.scala.MongoDatabase

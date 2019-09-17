@@ -1,7 +1,6 @@
 package $organization$.persistence.mongo
 
 import cats.effect._
-import cats.effect.syntax.bracket._
 import cats.effect.syntax.concurrent._
 import cats.mtl.syntax.local._
 import cats.syntax.applicativeError._
@@ -48,12 +47,10 @@ class MongoLoader[F[_]: Timer: ContextShift: ErrorHandle: TraceProvider](implici
   private[mongo] def verifyConnectionOnce(db: MongoDatabase, timeout: FiniteDuration): F[Unit] = {
     val timeoutTo = timeoutError[Unit](log"Failed attempt to acquire MongoDB connection in [\$timeout]")
 
-    val attempt = IO
-      .fromFuture(IO.delay(db.runCommand(BsonDocument("connectionStatus" -> 1)).toFutureOption()))
-      .to[F]
+    val attempt = Async
+      .fromFuture(F.delay(db.runCommand(BsonDocument("connectionStatus" -> 1)).toFutureOption()))
       .void
       .handleErrorWith(e => MongoError.unavailableConnection(e).asLeft[Unit].pureOrRaise)
-      .guarantee(ContextShift[F].shift)
 
     Concurrent.timeoutTo(attempt, timeout, timeoutTo)
   }

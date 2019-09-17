@@ -23,7 +23,7 @@ final class JsonOps(private val json: Json) extends AnyVal {
 
   def decode[A: ClassTag](implicit decoder: Decoder[A]): Either[JsonDecodingError, A] =
     decoder
-      .accumulating(json.hcursor)
+      .decodeAccumulating(json.hcursor)
       .toEither
       .leftMap(errors => JsonDecodingError(json, ClassUtils.classSimpleName[A], errors))
 

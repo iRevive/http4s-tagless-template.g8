@@ -6,8 +6,9 @@ import cats.scalatest.{EitherMatchers, EitherValues}
 import cats.syntax.functor._
 import $organization$.ApplicationLoader
 import $organization$.ApplicationLoader.Application
+import $organization$.util.ClassUtils
+import $organization$.util.execution.EffConcurrentEffect
 import $organization$.util.logging.TraceId
-import $organization$.util.{ClassUtils, TracedResultT}
 import com.typesafe.config.{Config, ConfigFactory}
 import eu.timepit.refined.types.string.NonEmptyString
 import monix.execution.Scheduler
@@ -18,9 +19,10 @@ import scala.util.Random
 
 trait ITSpec extends WordSpecLike with Matchers with EitherValues with OptionValues with EitherMatchers with Inside {
 
-  type Eff[A] = TracedResultT[A]
-  protected implicit lazy val Eff: ConcurrentEffect[Eff]  = $organization$.util.concurrentEffect
-  protected implicit lazy val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
+  protected type Eff[A] = $organization$.util.execution.Eff[A]
+
+  protected implicit val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
+  protected implicit val Eff: ConcurrentEffect[Eff]  = new EffConcurrentEffect
 
   protected val DefaultApplicationLoader = ApplicationLoader.default[Eff]
 

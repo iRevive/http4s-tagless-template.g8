@@ -6,8 +6,8 @@ import cats.effect.syntax.bracket._
 import cats.mtl.implicits._
 import cats.syntax.functor._
 import $organization$.ApplicationLoader.Application
-import $organization$.util.TracedResultT
 import $organization$.util.error.{ErrorHandle, RaisedError}
+import $organization$.util.execution.{Eff, EffConcurrentEffect}
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
 import $organization$.util.syntax.logging._
 import com.typesafe.config.ConfigFactory
@@ -47,18 +47,17 @@ object Runner {
 
   trait Default extends TaskApp {
 
-    type F[A] = TracedResultT[A]
-    implicit val F: ConcurrentEffect[F] = $organization$.util.concurrentEffect
+    implicit val Eff: ConcurrentEffect[Eff] = new EffConcurrentEffect
 
     override final def run(args: List[String]): Task[ExitCode] =
-      new Runner[F]
-        .run(ApplicationLoader.default[F], job)
+      new Runner[Eff]
+        .run(ApplicationLoader.default, job)
         .run(TraceId.randomAlphanumeric(name))
         .leftSemiflatMap(e => Task.raiseError(e.toException))
         .merge
 
     def name: String
-    def job: Kleisli[F, Application[F], ExitCode]
+    def job: Kleisli[Eff, Application[Eff], ExitCode]
 
   }
 

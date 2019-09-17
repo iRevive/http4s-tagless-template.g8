@@ -4,6 +4,7 @@ import scala.sys.process._
 object DockerEnvironment {
 
   val DefaultNetwork: String = "$name_normalized$-network"
+  val ComposeProject: String = "$name_normalized$".replace("-", "_")
 
   def createEnv(network: Option[String]): DockerEnv = new DockerEnv(network.getOrElse(DefaultNetwork))
 
@@ -13,12 +14,12 @@ object DockerEnvironment {
       val path = dockerComposePath(sourceDirectory)
 
       createNetwork()
-      Process(s"docker-compose -f \$path up -d", None, dockerEnvVars: _*).!
+      Process(s"docker-compose -f \$path -p \$ComposeProject up -d", None, dockerEnvVars: _*).!
     }
 
     def destroy(sourceDirectory: File): Unit = {
       val path = dockerComposePath(sourceDirectory)
-      Process(s"docker-compose -f \$path stop", None, dockerEnvVars: _*).!
+      Process(s"docker-compose -f \$path -p \$ComposeProject down", None, dockerEnvVars: _*).!
     }
 
     def javaOpts: Seq[String] = {
@@ -44,7 +45,7 @@ object DockerEnvironment {
     }
 
     private def createNetwork(): Unit =
-      s"docker network create $network".!
+      s"docker network create \$network".!
 
     private def dockerComposePath(sourceDirectory: File): File =
       sourceDirectory / "it" / "docker" / "docker-compose.yml"

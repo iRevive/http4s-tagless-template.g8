@@ -1,6 +1,6 @@
 package $organization$.persistence.postgres
 
-import $organization$.util.Retry
+import $organization$.util.execution.Retry
 import $organization$.util.logging.Loggable
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Decoder
@@ -24,6 +24,6 @@ final case class PostgresConfig(
 object PostgresConfig {
 
   implicit val configuration: Configuration     = Configuration.default.withKebabCaseMemberNames
-  implicit val decoder: Decoder[PostgresConfig] = deriveDecoder
+  implicit val decoder: Decoder[PostgresConfig] = deriveConfiguredDecoder
 
 }

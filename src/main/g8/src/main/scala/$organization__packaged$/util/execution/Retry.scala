@@ -1,10 +1,7 @@
-package $organization$.util
+package $organization$.util.execution
 
 import cats.effect.Timer
 import cats.mtl.ApplicativeHandle
-import cats.mtl.syntax.raise._
-import cats.syntax.applicative._
-import cats.syntax.applicativeError._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.{Applicative, MonadError}
@@ -28,34 +25,20 @@ object Retry {
 
     @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
     def loop(retries: Int): F[A] =
-      ApplicativeHandle[F, E]
-        .attempt(fa)
-        .attempt
-        .flatMap { input =>
-          val retriesLeft = retries - 1
+      Attempt.attempt[F, E, A](fa).flatMap { result =>
+        val retriesLeft = retries - 1
+        val operation   = decider.decide(result, retriesLeft)
 
-          val result: Result[E, A] = input match {
-            case Left(unhandledError) => Result.UnhandledError(unhandledError)
-            case Right(Left(error))   => Result.Error(error)
-            case Right(Right(value))  => Result.Success(value)
-          }
+        val next: F[A] = operation match {
+          case Operation.Retry =>
+            Timer[F].sleep(policy.delay) *> loop(retriesLeft)
 
-          val operation = decider.decide(result, retriesLeft)
-
-          val next: F[A] = operation match {
-            case Operation.Retry =>
-              Timer[F].sleep(policy.delay) *> loop(retriesLeft)
-
-            case Operation.Result | Operation.Rethrow =>
-              input match {
-                case Left(unhandledError) => unhandledError.raiseError
-                case Right(Left(error))   => error.raise
-                case Right(Right(value))  => value.pure[F]
-              }
-          }
-
-          logger.log(result, retriesLeft, operation) *> next
+          case Operation.Result | Operation.Rethrow =>
+            Attempt.toEffect(result)
         }
+
+        logger.log(result, retriesLeft, operation) *> next
+      }
 
     loop(policy.retries.value)
   }
@@ -64,26 +47,26 @@ object Retry {
   final case class Policy(retries: NonNegInt, delay: FiniteDuration, timeout: FiniteDuration)
 
   trait Decider[E, A] {
-    def decide(result: Result[E, A], retriesLeft: Int): Operation
+    def decide(result: Attempt.Result[E, A], retriesLeft: Int): Operation
   }
 
   object Decider {
     def default[E, A]: Retry.Decider[E, A] = { (result, retries) =>
       result match {
-        case Result.Success(_) =>
+        case Attempt.Result.Success(_) =>
           Retry.Operation.Result
 
-        case Result.Error(_) =>
+        case Attempt.Result.Error(_) =>
           if (retries > 0) Retry.Operation.Retry else Retry.Operation.Rethrow
 
-        case Result.UnhandledError(_) =>
+        case Attempt.Result.UnhandledError(_) =>
           if (retries > 0) Retry.Operation.Retry else Retry.Operation.Rethrow
       }
     }
   }
 
   trait Logger[F[_], E, A] {
-    def log(result: Result[E, A], retries: Int, next: Operation): F[Unit]
+    def log(result: Attempt.Result[E, A], retries: Int, next: Operation): F[Unit]
   }
 
   object Logger {
@@ -92,23 +75,16 @@ object Retry {
     def default[F[_]: Applicative, E: Loggable, A](logger: TracedLogger[F]): Logger[F, E, A] =
       (result, retries, next) => {
         result match {
-          case Result.Success(_) =>
+          case Attempt.Result.Success(_) =>
             logger.info(log"Retry policy. Success. Retires left [\$retries]. Next \$next")
 
-          case Result.UnhandledError(cause) =>
+          case Attempt.Result.UnhandledError(cause) =>
             logger.error(log"Retry policy. Unhandled error \$cause. Retires left [\$retries]. Next \$next")
 
-          case Result.Error(error) =>
+          case Attempt.Result.Error(error) =>
             logger.error(log"Retry policy. Error \$error. Retires left [\$retries]. Next \$next")
         }
       }
-  }
-
-  sealed trait Result[E, A]
-  object Result {
-    final case class Success[E, A](value: A)                extends Result[E, A]
-    final case class Error[E, A](cause: E)                  extends Result[E, A]
-    final case class UnhandledError[E, A](cause: Throwable) extends Result[E, A]
   }
 
   @scalaz.deriving(Loggable)

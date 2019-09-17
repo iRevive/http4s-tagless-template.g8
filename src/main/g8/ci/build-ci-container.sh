@@ -1,23 +1,21 @@
 #!/usr/bin/env bash
 
-if [ "\$#" -ne 1 ]; then
-  echo "Docker image name is missing"
+if [ -z "\$1" ]; then
+  echo "CI SBT docker image name is missing"
   exit 1
 fi
 
-docker_image=\$1
-sbt_image="\$docker_image/ci-sbt:latest"
+sbt_image=\$1
 
 set -euf pipefail
 
 echo "Pulling CI SBT image \$sbt_image"
 docker pull \$sbt_image || true
 
-if test ! -z "\$(docker images -q \$sbt_image)"; then
+if [ -n "$(docker images -q \$sbt_image)" ] && [ -z "\$REBUILD_CI_CONTAINER" ]; then
   echo "SBT container already exists"
   exit
 fi
-
 
 echo "Creating SBT container"
 
