@@ -19,19 +19,18 @@ import scala.concurrent.duration._
 
 class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider] {
 
-  def createAndVerify(config: PostgresConfig): Resource[F, HikariTransactor[F]] =
+  def createAndVerify(config: PostgresConfig, blocker: Blocker): Resource[F, HikariTransactor[F]] =
     for {
       _  <- Resource.liftF(logger.info(log"Loading Postgres module with config \$config"))
-      xa <- createFromConfig(config)
+      xa <- createFromConfig(config, blocker)
       _  <- Resource.liftF(logger.info("Verifying Postgres connection"))
       _  <- Resource.liftF(verifyConnection(config, xa))
     } yield xa
 
-  private def createFromConfig(config: PostgresConfig): Resource[F, HikariTransactor[F]] =
+  private def createFromConfig(config: PostgresConfig, blocker: Blocker): Resource[F, HikariTransactor[F]] =
     for {
       ce <- ExecutionContexts.fixedThreadPool[F](32)
-      te <- ExecutionContexts.cachedThreadPool[F]
-      xa <- HikariTransactor.newHikariTransactor[F](config.driver, config.uri, config.user, config.password, ce, te)
+      xa <- HikariTransactor.newHikariTransactor[F](config.driver, config.uri, config.user, config.password, ce, blocker)
     } yield xa
 
   private def verifyConnection(config: PostgresConfig, transactor: HikariTransactor[F]): F[Unit] =

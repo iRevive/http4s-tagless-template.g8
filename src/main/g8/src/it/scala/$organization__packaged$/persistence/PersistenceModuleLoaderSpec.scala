@@ -1,5 +1,6 @@
 package $organization$.persistence
 
+import cats.effect.Blocker
 import cats.mtl.implicits._
 import $organization$.it.ITSpec
 import $organization$.util.config.ConfigParsingError
@@ -100,8 +101,13 @@ class PersistenceModuleLoaderSpec extends ITSpec {
             """.stripMargin
           )
 
+          val fa = for {
+            blocker    <- Blocker[Eff]
+            transactor <- loader.loadTransactor(config, blocker)
+          } yield transactor
+
           for {
-            result <- ErrorHandle[Eff].attempt(loader.loadTransactor(config).use(_ => Eff.unit))
+            result <- ErrorHandle[Eff].attempt(fa.use(_ => Eff.unit))
           } yield {
             inside(result.leftValue.error.select[ConfigParsingError].value) {
               case ConfigParsingError(path, expectedClass, err) =>
@@ -129,8 +135,13 @@ class PersistenceModuleLoaderSpec extends ITSpec {
             """.stripMargin
           )
 
+          val fa = for {
+            blocker    <- Blocker[Eff]
+            transactor <- loader.loadTransactor(config, blocker)
+          } yield transactor
+
           for {
-            result <- ErrorHandle[Eff].attempt(loader.loadTransactor(config).use(_ => Eff.unit))
+            result <- ErrorHandle[Eff].attempt(fa.use(_ => Eff.unit))
           } yield {
             inside(result.leftValue.error.select[ConfigParsingError].value) {
               case ConfigParsingError(path, expectedClass, err) =>
@@ -144,8 +155,13 @@ class PersistenceModuleLoaderSpec extends ITSpec {
       }
 
       "load transactor" in EffectAssertion() {
+        val fa = for {
+          blocker    <- Blocker[Eff]
+          transactor <- loader.loadTransactor(DefaultConfig, blocker)
+        } yield transactor
+
         for {
-          result <- ErrorHandle[Eff].attempt(loader.loadTransactor(DefaultConfig).use(_ => Eff.unit))
+          result <- ErrorHandle[Eff].attempt(fa.use(_ => Eff.unit))
         } yield {
           result should beRight(())
         }

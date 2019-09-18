@@ -1,5 +1,6 @@
 package $organization$.persistence.postgres
 
+import cats.effect.{Blocker, Resource}
 import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
@@ -34,10 +35,15 @@ class TransactorLoaderSpec extends BaseSpec {
           retryPolicy = Retry.Policy(5, 30.millis, 5.second)
         )
 
+        def fa(counter: Ref[Eff, Int]): Resource[Eff, HikariTransactor[Eff]] =
+          for {
+            blocker    <- Blocker[Eff]
+            transactor <- mkLoader(counter).createAndVerify(config, blocker)
+          } yield transactor
+
         for {
           counter <- Ref.of[Eff, Int](0)
-          loader = mkLoader(counter)
-          result  <- ErrorHandle[Eff].attempt(loader.createAndVerify(config).use(_ => Eff.unit))
+          result  <- ErrorHandle[Eff].attempt(fa(counter).use(_ => Eff.unit))
           retries <- counter.get
         } yield {
           result.leftValue.error.select[PostgresError].value

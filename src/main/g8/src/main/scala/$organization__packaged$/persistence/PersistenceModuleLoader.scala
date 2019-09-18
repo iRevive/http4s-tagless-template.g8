@@ -15,10 +15,10 @@ class PersistenceModuleLoader[F[_]: Sync: ErrorHandle: TraceProvider](
     transactorLoader: TransactorLoader[F]
 ) {
 
-  def load(rootConfig: Config): Resource[F, PersistenceModule[F]] =
+  def load(rootConfig: Config, blocker: Blocker): Resource[F, PersistenceModule[F]] =
     for {
       mongoDatabase <- loadMongoDatabase(rootConfig)
-      transactor    <- loadTransactor(rootConfig)
+      transactor    <- loadTransactor(rootConfig, blocker)
     } yield PersistenceModule(mongoDatabase, transactor)
 
   private[persistence] def loadMongoDatabase(rootConfig: Config): Resource[F, MongoDatabase] =
@@ -27,10 +27,10 @@ class PersistenceModuleLoader[F[_]: Sync: ErrorHandle: TraceProvider](
       db          <- mongoLoader.createAndVerify(mongoConfig)
     } yield db
 
-  private[persistence] def loadTransactor(rootConfig: Config): Resource[F, HikariTransactor[F]] =
+  private[persistence] def loadTransactor(rootConfig: Config, blocker: Blocker): Resource[F, HikariTransactor[F]] =
     for {
       config <- Resource.liftF(rootConfig.loadF[F, PostgresConfig]("application.persistence.postgres"))
-      db     <- transactorLoader.createAndVerify(config)
+      db     <- transactorLoader.createAndVerify(config, blocker)
     } yield db
 
 }

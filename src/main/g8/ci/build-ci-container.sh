@@ -12,7 +12,7 @@ set -euf pipefail
 echo "Pulling CI SBT image \$sbt_image"
 docker pull \$sbt_image || true
 
-if [ -n "$(docker images -q \$sbt_image)" ] && [ -z "\$REBUILD_CI_CONTAINER" ]; then
+if [ -n "\$(docker images -q \$sbt_image)" ] && [ -z "\$REBUILD_CI_CONTAINER" ]; then
   echo "SBT container already exists"
   exit
 fi

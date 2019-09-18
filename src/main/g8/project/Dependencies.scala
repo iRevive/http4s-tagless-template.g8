@@ -9,6 +9,7 @@ object Versions {
   val scala            = "$scala_version$"
   val http4s           = "$http4s_version$"
   val circe            = "$circe_version$"
+  val circeExtras      = "$circe_extras_version$"
   val circeConfig      = "$circe_config_version$"
   val cats             = "$cats_version$"
   val catsEffect       = "$cats_effect_version$"
@@ -39,16 +40,13 @@ object Dependencies {
     "org.typelevel"              %% "cats-effect"          % Versions.catsEffect,
     "org.typelevel"              %% "cats-mtl-core"        % Versions.catsMTL,
     "org.scalaz"                 %% "deriving-macro"       % Versions.scalazDeriving,
-    "io.circe"                   %% "circe-core"           % Versions.circe,
-    "io.circe"                   %% "circe-jawn"           % Versions.circe,
     "io.circe"                   %% "circe-generic"        % Versions.circe,
-    "io.circe"                   %% "circe-generic-extras" % Versions.circe,
     "io.circe"                   %% "circe-refined"        % Versions.circe,
+    "io.circe"                   %% "circe-generic-extras" % Versions.circeExtras,
     "io.circe"                   %% "circe-config"         % Versions.circeConfig,
     "io.estatico"                %% "newtype"              % Versions.newtype,
     "eu.timepit"                 %% "refined"              % Versions.refined,
     "eu.timepit"                 %% "refined-cats"         % Versions.refined,
-    "org.tpolecat"               %% "doobie-core"          % Versions.doobie,
     "org.tpolecat"               %% "doobie-hikari"        % Versions.doobie,
     "org.tpolecat"               %% "doobie-refined"       % Versions.doobie,
     "org.tpolecat"               %% "doobie-postgres"      % Versions.doobie,

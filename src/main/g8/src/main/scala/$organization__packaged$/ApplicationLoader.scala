@@ -12,6 +12,7 @@ import $organization$.util.logging.{TraceProvider, TracedLogger}
 import $organization$.util.syntax.config._
 import $organization$.util.syntax.logging._
 import com.typesafe.config.Config
+import monix.execution.Scheduler
 import org.http4s.HttpApp
 import org.http4s.server.Router
 import org.http4s.syntax.kleisli._
@@ -23,7 +24,8 @@ class ApplicationLoader[F[_]: Sync: TraceProvider: ErrorHandle](
 
   def load(config: Config): Resource[F, Application[F]] =
     for {
-      persistenceModule <- persistenceModuleLoader.load(config)
+      blocker           <- makeBlocker
+      persistenceModule <- persistenceModuleLoader.load(config, blocker)
       processingModule  <- processingModuleLoader.load(config, persistenceModule)
       apiModule         <- Resource.liftF(loadApiModule(config, processingModule))
     } yield Application(persistenceModule, processingModule, apiModule)
@@ -42,6 +44,11 @@ class ApplicationLoader[F[_]: Sync: TraceProvider: ErrorHandle](
       "/health" -> healthApi.routes
     ).orNotFound
   }
+
+  private def makeBlocker: Resource[F, Blocker] =
+    Resource
+      .make(Sync[F].delay(Scheduler.io()))(s => Sync[F].delay(s.shutdown()))
+      .map(Blocker.liftExecutionContext)
 
   private val logger: TracedLogger[F] = TracedLogger.create[F](getClass)
 
