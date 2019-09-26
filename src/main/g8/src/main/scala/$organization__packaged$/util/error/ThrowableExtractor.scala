@@ -10,8 +10,7 @@ object ThrowableExtractor {
   def apply[E](implicit ev: ThrowableExtractor[E]): ThrowableExtractor[E] = ev
 
   // \$COVERAGE-OFF\$
-  implicit val cnilThrowableExtractor: ThrowableExtractor[CNil] =
-    cnil => sys.error(s"Unreachable \$cnil")
+  implicit val cnilThrowableExtractor: ThrowableExtractor[CNil] = _.impossible
   // \$COVERAGE-ON\$
 
   implicit def coproductThrowableExtractor[H, T <: Coproduct](

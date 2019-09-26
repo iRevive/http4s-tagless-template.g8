@@ -97,8 +97,7 @@ trait LoggableInstances {
     ev(R)
 
   // \$COVERAGE-OFF\$
-  implicit val cnilLoggable: Loggable[CNil] =
-    cnil => sys.error(s"Unreachable \$cnil")
+  implicit val cnilLoggable: Loggable[CNil] = _.impossible
   // \$COVERAGE-ON\$
 
   implicit def coproductLoggable[H, T <: Coproduct](implicit h: Lazy[Loggable[H]], t: Loggable[T]): Loggable[H :+: T] =

@@ -20,7 +20,7 @@ object ErrorResponseSelector {
     Response[F](status).withEntity(ApiResponse.Error(message, errorId).asJson)
 
   implicit def cnilErrorResponseSelector[F[_]]: ErrorResponseSelector[F, CNil] =
-    (value: CNil, errorId: String) => sys.error(s"Unreachable \$value. Error id \$errorId")
+    (value: CNil, _: String) => value.impossible
 
   implicit def coproductErrorSelector[F[_], H, T <: Coproduct](
       implicit h: Lazy[ErrorResponseSelector[F, H]],
