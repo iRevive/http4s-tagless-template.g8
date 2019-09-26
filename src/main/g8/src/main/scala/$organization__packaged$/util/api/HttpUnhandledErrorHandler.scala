@@ -1,8 +1,10 @@
 package $organization$.util.api
 
-import cats.ApplicativeError
 import cats.data.{Kleisli, OptionT}
+import cats.effect.Sync
+import cats.syntax.applicative._
 import cats.syntax.applicativeError._
+import cats.syntax.flatMap._
 import cats.syntax.functor._
 import $organization$.util.error.RaisedError
 import $organization$.util.logging.TracedLogger
@@ -13,18 +15,19 @@ import org.http4s.{HttpRoutes, Request, Response, Status}
 
 object HttpUnhandledErrorHandler {
 
-  def httpRoutes[F[_]: ApplicativeError[?[_], Throwable]](logger: TracedLogger[F])(routes: HttpRoutes[F]): HttpRoutes[F] =
+  def httpRoutes[F[_]: Sync](logger: TracedLogger[F])(routes: HttpRoutes[F]): HttpRoutes[F] =
     Kleisli { req: Request[F] =>
       OptionT {
         routes
           .run(req)
           .value
           .handleErrorWith { error =>
-            val errorId  = RaisedError.generateErrorId
-            val body     = ApiResponse.Error("Unhandled internal error", errorId).asJson
-            val response = Response[F](Status.InternalServerError).withEntity(body)
-
-            logger.error(log"Execution completed with an unhandled error \$error", error).as(Option(response))
+            for {
+              errorId  <- RaisedError.generateErrorId
+              body     <- ApiResponse.Error("Unhandled internal error", errorId).asJson.pure[F]
+              response <- Response[F](Status.InternalServerError).withEntity(body).pure[F]
+              _        <- logger.error(log"Execution completed with an unhandled error \$error", error)
+            } yield Option(response)
           }
       }
     }

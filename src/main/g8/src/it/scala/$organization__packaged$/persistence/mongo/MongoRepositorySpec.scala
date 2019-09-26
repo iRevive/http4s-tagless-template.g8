@@ -2,8 +2,11 @@ package $organization$.persistence.mongo
 
 import cats.mtl.implicits._
 import $organization$.it.ITSpec
+import eu.timepit.refined.scalacheck.string._
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.auto._
 import org.mongodb.scala.model.Filters.{equal => eQual}
+import org.scalacheck.{Arbitrary, Gen}
 
 import scala.util.Random
 
@@ -14,19 +17,18 @@ class MongoRepositorySpec extends ITSpec {
   "MongoRepository" should {
 
     "persist and retrieve a value" in withApplication() { app =>
-      val collectionName = randomNonEmptyString()
-      val repository     = new MongoRepository[Eff](app.persistenceModule.mongoDatabase, collectionName)
+      implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.asciiPrintableStr)
 
-      val name   = randomString()
-      val number = Random.nextInt()
+      forAll { (collectionName: NonEmptyString, name: String, number: Int) =>
+        val repository = new MongoRepository[Eff](app.persistenceModule.mongoDatabase, collectionName)
+        val document   = Entity(name, number)
 
-      val document = Entity(name, number)
-
-      for {
-        _      <- repository.insertOne(document)
-        result <- repository.findOne[Entity](eQual("name", name))
-      } yield {
-        result shouldBe Some(document)
+        for {
+          _      <- repository.insertOne(document)
+          result <- repository.findOne[Entity](eQual("name", name))
+        } yield {
+          result shouldBe Some(document)
+        }
       }
     }
 

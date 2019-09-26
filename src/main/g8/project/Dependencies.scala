@@ -27,6 +27,7 @@ object Versions {
   val scalaLogging     = "$scala_logging_version$"
   val scalatest        = "$scalatest_version$"
   val catsScalatest    = "$cats_scalatest_version$"
+  val scalacheck       = "$scalacheck_version$"
 }
 
 object Dependencies {
@@ -58,7 +59,9 @@ object Dependencies {
     "ch.qos.logback"             % "logback-classic"       % Versions.logback,
     "org.tpolecat"               %% "doobie-scalatest"     % Versions.doobie % "it",
     "org.scalatest"              %% "scalatest"            % Versions.scalatest % "it,test",
-    "com.ironcorelabs"           %% "cats-scalatest"       % Versions.catsScalatest % "it,test"
+    "com.ironcorelabs"           %% "cats-scalatest"       % Versions.catsScalatest % "it,test",
+    "org.scalacheck"             %% "scalacheck"           % Versions.scalacheck % "it,test",
+    "eu.timepit"                 %% "refined-scalacheck"   % Versions.refined % "it,test"
   )
 
 }

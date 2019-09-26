@@ -133,7 +133,6 @@ lazy val releaseSettings = Seq(
 
 lazy val commandSettings = {
   val ci = Command.command("ci") { state =>
-    "set coverageOutputTeamCity := true" ::
       "clean" ::
       "coverage" ::
       "scalafmtSbtCheck" ::

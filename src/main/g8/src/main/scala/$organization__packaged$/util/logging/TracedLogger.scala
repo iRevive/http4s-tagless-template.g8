@@ -9,27 +9,27 @@ import com.typesafe.scalalogging.{Logger, LoggerTakingImplicit}
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync[F], traceProvider: TraceProvider[F]) {
 
-  def info(value: String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+  def info(value: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
     F.delay(logger.info(value))
   }
 
-  def error(value: String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+  def error(value: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
     F.delay(logger.error(value))
   }
 
-  def error(value: String, cause: Throwable): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+  def error(value: => String, cause: Throwable): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
     F.delay(logger.error(value, cause))
   }
 
-  def error(value: String, error: RaisedError): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+  def error(value: => String, error: RaisedError): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
     F.delay(withError(value, error))
   }
 
-  def warn(value: String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+  def warn(value: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
     F.delay(logger.warn(value))
   }
 
-  private def withError(message: String, error: RaisedError)(implicit traceId: TraceId): Unit =
+  private def withError(message: => String, error: RaisedError)(implicit traceId: TraceId): Unit =
     ThrowableExtractor[AppError].select(error.error) match {
       case Some(cause) =>
         logger.error(message, cause)

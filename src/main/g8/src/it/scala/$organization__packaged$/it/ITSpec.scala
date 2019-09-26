@@ -11,13 +11,21 @@ import $organization$.util.execution.EffConcurrentEffect
 import $organization$.util.logging.TraceId
 import com.typesafe.config.{Config, ConfigFactory}
 import eu.timepit.refined.types.string.NonEmptyString
+import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalatest._
+import org.scalatestplus.scalacheck.{CheckerAsserting, ScalaCheckPropertyChecks}
 
 import scala.concurrent.duration._
-import scala.util.Random
 
-trait ITSpec extends WordSpecLike with Matchers with EitherValues with OptionValues with EitherMatchers with Inside {
+trait ITSpec
+    extends WordSpecLike
+    with Matchers
+    with EitherValues
+    with OptionValues
+    with EitherMatchers
+    with Inside
+    with ScalaCheckPropertyChecks {
 
   protected type Eff[A] = $organization$.util.execution.Eff[A]
 
@@ -26,28 +34,27 @@ trait ITSpec extends WordSpecLike with Matchers with EitherValues with OptionVal
 
   protected val DefaultApplicationLoader = ApplicationLoader.default[Eff]
 
-  protected def DefaultTimeout: FiniteDuration         = 20.seconds
-  protected def randomNonEmptyString(): NonEmptyString = NonEmptyString.unsafeFrom(randomString())
-  protected def randomString(): String                 = Random.alphanumeric.take(10).map(_.toLower).mkString
+  protected def DefaultTimeout: FiniteDuration = 20.seconds
 
   @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   protected def withApplication[A](timeout: Duration = DefaultTimeout)(program: Application[Eff] => Eff[A]): Unit =
     EffectAssertion(timeout) {
-      DefaultApplicationLoader.load(DefaultConfig).use(program)
+      ApplicationLoader.default[Eff].load(DefaultConfig).use(program)
     }
 
   object EffectAssertion {
 
     @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
     def apply[A](timeout: Duration = DefaultTimeout)(program: Eff[A]): Unit =
-      program
-        .run(TraceId.randomAlphanumeric(className))
-        .void
-        .value
-        .runSyncUnsafe(timeout)
-        .value
+      (for {
+        traceId <- TraceId.randomAlphanumeric[Task](className)
+        result  <- program.run(traceId).void.value
+      } yield result).runSyncUnsafe(timeout).value
 
   }
+
+  protected implicit def checkingAsserting[A]: CheckerAsserting[A] { type Result = Eff[Unit] } =
+    new EffectCheckerAsserting[Eff, A]
 
   protected lazy val DefaultConfig: Config = ConfigFactory.load()
 

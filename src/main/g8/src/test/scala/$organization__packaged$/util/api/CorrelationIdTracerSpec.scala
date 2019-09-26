@@ -3,7 +3,7 @@ package $organization$.util.api
 import cats.effect.concurrent.MVar
 import cats.mtl.implicits._
 import cats.syntax.functor._
-import $organization$.test.{BaseSpec, GenRandom}
+import $organization$.test.BaseSpec
 import $organization$.util.logging.{TraceId, TraceProvider}
 import org.http4s.Method._
 import org.http4s._
@@ -13,15 +13,16 @@ class CorrelationIdTracerSpec extends BaseSpec {
   "CorrelationIdTracer" should {
 
     "add `X-Correlation-Id` header to trace prefix" in EffectAssertion() {
-      val correlationId = GenRandom[String].gen
-      val header        = Header(CorrelationIdTracer.CorrelationIdHeader.value, correlationId)
-      val request       = Request[Eff](Method.GET, uri"/api/balance-state/123", headers = Headers.of(header))
+      forAll { correlationId: String =>
+        val header  = Header(CorrelationIdTracer.CorrelationIdHeader.value, correlationId)
+        val request = Request[Eff](Method.GET, uri"/api/balance-state/123", headers = Headers.of(header))
 
-      for {
-        m       <- MVar.empty[Eff, TraceId]
-        _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
-        traceId <- m.read
-      } yield traceId.value should startWith(s"/api/balance-state#\$correlationId")
+        for {
+          m       <- MVar.empty[Eff, TraceId]
+          _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
+          traceId <- m.read
+        } yield traceId.value should startWith(s"/api/balance-state#\$correlationId")
+      }
     }
 
     "use api route if `X-Correlation-Id` header is missing" in EffectAssertion() {

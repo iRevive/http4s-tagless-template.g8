@@ -30,9 +30,9 @@ with the project and is constantly a subject for changes.
 1) [src/main/scala/.../api](/src/main/scala/$organization;format="packaged"$/api) - API endpoints;  
 2) [src/main/scala/.../persistence](/src/main/scala/$organization;format="packaged"$/persistence) - persistence-specific logic (mongo client, AMQP client, etc);    
 3) [src/main/scala/.../processing](/src/main/scala/$organization;format="packaged"$/processing) - processing-specific logic (services, etc);  
-5) [src/main/scala/.../util](/src/main/scala/$organization;format="packaged"$/util) - utility classes;  
-6) [src/main/scala/.../Server.scala](/src/main/scala/$organization;format="packaged"$/Server.scala) - application entry point; 
-7) [src/main/resources](/src/main/resources) - application and logback configs;    
+4) [src/main/scala/.../util](/src/main/scala/$organization;format="packaged"$/util) - utility classes;  
+5) [src/main/scala/.../Server.scala](/src/main/scala/$organization;format="packaged"$/Server.scala) - application entry point; 
+6) [src/main/resources](/src/main/resources) - application and logback configs;    
 
 ## <a name="development-requirements"></a> Development requirements
 1) Scala $scala_version$;  

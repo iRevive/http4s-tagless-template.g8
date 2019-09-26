@@ -1,6 +1,6 @@
 package $organization$
 
-import cats.data.Kleisli
+import cats.data.{EitherT, Kleisli}
 import cats.effect._
 import cats.effect.syntax.bracket._
 import cats.mtl.implicits._
@@ -50,11 +50,10 @@ object Runner {
     implicit val Eff: ConcurrentEffect[Eff] = new EffConcurrentEffect
 
     override final def run(args: List[String]): Task[ExitCode] =
-      new Runner[Eff]
-        .run(ApplicationLoader.default, job)
-        .run(TraceId.randomAlphanumeric(name))
-        .leftSemiflatMap(e => Task.raiseError(e.toException))
-        .merge
+      (for {
+        traceId <- TraceId.randomAlphanumeric[EitherT[Task, RaisedError, ?]](name)
+        result  <- new Runner[Eff].run(ApplicationLoader.default, job).run(traceId)
+      } yield result).leftSemiflatMap(e => Task.raiseError(e.toException)).merge
 
     def name: String
     def job: Kleisli[Eff, Application[Eff], ExitCode]

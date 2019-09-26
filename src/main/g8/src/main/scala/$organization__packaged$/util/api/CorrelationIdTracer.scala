@@ -1,7 +1,7 @@
 package $organization$.util.api
 
-import cats.Monad
-import cats.data.Kleisli
+import cats.data.{Kleisli, OptionT}
+import cats.effect.Sync
 import cats.mtl.implicits._
 import $organization$.util.logging.{TraceId, TraceProvider}
 import $organization$.util.syntax.logging._
@@ -13,16 +13,15 @@ object CorrelationIdTracer {
 
   val CorrelationIdHeader: CaseInsensitiveString = "X-Correlation-Id".ci
 
-  def httpRoutes[F[_]: Monad: TraceProvider](routes: HttpRoutes[F]): HttpRoutes[F] =
+  def httpRoutes[F[_]: Sync: TraceProvider](routes: HttpRoutes[F]): HttpRoutes[F] =
     Kleisli { req: Request[F] =>
       val route             = req.uri.path.substring(0, req.uri.path.lastIndexOf("/"))
       val correlationHeader = req.headers.get(CorrelationIdHeader)
-      val traceId           = TraceId.randomAlphanumeric(tracePrefix(correlationHeader, route))
 
-      routes
-        .run(req)
-        .map(_.putHeaders(correlationHeader.toList: _*))
-        .scope(traceId)
+      for {
+        traceId <- OptionT.liftF(TraceId.randomAlphanumeric[F] (tracePrefix(correlationHeader, route)))
+        result  <- routes.run(req).map(_.putHeaders(correlationHeader.toList: _*)).scope(traceId)
+      } yield result
     }
 
   private def tracePrefix(correlationHeader: Option[Header], route: String): String =

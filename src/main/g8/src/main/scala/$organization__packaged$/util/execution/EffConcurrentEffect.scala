@@ -4,6 +4,7 @@ package execution
 import cats.data.{EitherT, Kleisli}
 import cats.effect._
 import cats.syntax.either._
+import $organization$.util.error.RaisedError
 import $organization$.util.logging.TraceId
 import monix.eval.Task
 
@@ -12,14 +13,26 @@ final class EffConcurrentEffect(implicit F: ConcurrentEffect[Task]) extends Conc
 
   private val CE: Concurrent[Eff] = Concurrent.catsKleisliConcurrent
 
-  private def genTraceId(method: String): TraceId = TraceId.randomAlphanumeric(s"concurrent-effect-\$method")
+  private def asCallback[A](e: Either[Throwable, Either[RaisedError, A]]): Either[Throwable, A] =
+    e.flatMap(x => x.leftMap(_.toException))
 
-  override def runCancelable[A](fa: Eff[A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[CancelToken[Eff]] =
-    F.runCancelable(fa.run(genTraceId("runCancelable")).value)(cb.compose(_.flatMap(x => x.leftMap(_.toException))))
-      .map(v => Kleisli.liftF(EitherT.liftF(v)(F)))
+  override def runCancelable[A](fa: Eff[A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[CancelToken[Eff]] = {
+    val f = for {
+      traceId <- TraceId.randomAlphanumeric[Task]("concurrent-effect-runCancelable")
+      result       <- fa.run(traceId).value
+    } yield result
 
-  override def runAsync[A](fa: Eff[A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] =
-    F.runAsync(fa.run(genTraceId("runAsync")).value)(cb.compose(_.flatMap(x => x.leftMap(_.toException))))
+    F.runCancelable(f)(cb.compose(asCallback)).map(v => Kleisli.liftF(EitherT.liftF(v)(F)))
+  }
+
+  override def runAsync[A](fa: Eff[A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] = {
+    val f = for {
+      traceId <- TraceId.randomAlphanumeric[Task]("concurrent-effect-runAsync")
+      result  <- fa.run(traceId).value
+    } yield result
+
+    F.runAsync(f)(cb.compose(asCallback))
+  }
 
   override def start[A](fa: Eff[A]): Eff[Fiber[Eff, A]] =
     CE.start(fa)
