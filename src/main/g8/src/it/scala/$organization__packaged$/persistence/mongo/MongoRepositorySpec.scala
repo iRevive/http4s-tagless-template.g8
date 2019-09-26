@@ -8,8 +8,6 @@ import io.circe.generic.auto._
 import org.mongodb.scala.model.Filters.{equal => eQual}
 import org.scalacheck.{Arbitrary, Gen}
 
-import scala.util.Random
-
 class MongoRepositorySpec extends ITSpec {
 
   import MongoRepositorySpec.Entity

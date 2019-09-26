@@ -10,7 +10,6 @@ import $organization$.util.ClassUtils
 import $organization$.util.execution.EffConcurrentEffect
 import $organization$.util.logging.TraceId
 import com.typesafe.config.{Config, ConfigFactory}
-import eu.timepit.refined.types.string.NonEmptyString
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalatest._
