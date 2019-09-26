@@ -19,7 +19,7 @@ object CorrelationIdTracer {
       val correlationHeader = req.headers.get(CorrelationIdHeader)
 
       for {
-        traceId <- OptionT.liftF(TraceId.randomAlphanumeric[F] (tracePrefix(correlationHeader, route)))
+        traceId <- OptionT.liftF(TraceId.randomAlphanumeric[F](tracePrefix(correlationHeader, route)))
         result  <- routes.run(req).map(_.putHeaders(correlationHeader.toList: _*)).scope(traceId)
       } yield result
     }

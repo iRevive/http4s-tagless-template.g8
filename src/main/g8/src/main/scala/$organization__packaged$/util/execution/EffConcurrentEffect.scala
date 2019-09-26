@@ -19,7 +19,7 @@ final class EffConcurrentEffect(implicit F: ConcurrentEffect[Task]) extends Conc
   override def runCancelable[A](fa: Eff[A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[CancelToken[Eff]] = {
     val f = for {
       traceId <- TraceId.randomAlphanumeric[Task]("concurrent-effect-runCancelable")
-      result       <- fa.run(traceId).value
+      result  <- fa.run(traceId).value
     } yield result
 
     F.runCancelable(f)(cb.compose(asCallback)).map(v => Kleisli.liftF(EitherT.liftF(v)(F)))
