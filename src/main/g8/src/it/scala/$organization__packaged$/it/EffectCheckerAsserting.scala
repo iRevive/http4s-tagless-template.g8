@@ -1,4 +1,4 @@
-package $organization$.test
+package $organization$.it
 
 import cats.MonadError
 import org.scalactic.source
