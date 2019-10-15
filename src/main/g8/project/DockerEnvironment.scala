@@ -32,7 +32,7 @@ object DockerEnvironment {
 
       val mongoUri = foldNetwork(
         "mongodb://localhost:57017/?streamType=netty",
-        "mongodb://mongo:27017/?streamType=netty"
+        "mongodb://mongodb:27017/?streamType=netty"
       )
 
       Seq(

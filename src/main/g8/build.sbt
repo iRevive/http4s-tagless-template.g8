@@ -22,9 +22,10 @@ lazy val root = (project in file("."))
 lazy val commonSettings = Seq(
   organization := Settings.organization,
   scalaVersion := Versions.scala,
-  addCompilerPlugin(("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full)),
-  addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
-  addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1")
+  javacOptions ++= Seq("-source", "11"),
+  addCompilerPlugin("org.scalamacros" % "paradise"            % "2.1.1" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel"   %% "kind-projector"     % Versions.kindProjector cross CrossVersion.full),
+  addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % Versions.betterMonadicFor)
 )
 
 lazy val scalazDerivingSettings = Seq(
@@ -104,7 +105,7 @@ lazy val wartRemoverSettings = Seq(
 )
 
 lazy val dockerSettings = Seq(
-  dockerBaseImage    := "openjdk:8-alpine",
+  dockerBaseImage    := "adoptopenjdk/openjdk11:alpine",
   dockerUpdateLatest := true,
   dockerAlias := DockerAlias(
     None,

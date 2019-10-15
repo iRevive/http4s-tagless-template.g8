@@ -18,7 +18,6 @@ object Versions {
   val mongoScalaDriver = "$mongo_scala_driver_version$"
   val netty            = "$netty_version$"
   val doobie           = "$doobie_version$"
-  val scalazDeriving   = "$scalaz_deriving_version$"
   val newtype          = "$newtype_version$"
   val refined          = "$refined_version$"
   val sourcecode       = "$sourcecode_version$"
@@ -28,6 +27,9 @@ object Versions {
   val scalatest        = "$scalatest_version$"
   val catsScalatest    = "$cats_scalatest_version$"
   val scalacheck       = "$scalacheck_version$"
+  val scalazDeriving   = "$scalaz_deriving_version$"
+  val kindProjector    = "$kind_projector_version$"
+  val betterMonadicFor = "$better_monadic_for_version$"
 }
 
 object Dependencies {

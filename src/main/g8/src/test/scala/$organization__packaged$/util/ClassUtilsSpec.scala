@@ -9,9 +9,6 @@ class ClassUtilsSpec extends WordSpec with Matchers {
     "correctly extract a name of nested class" in {
       val clazz = new ClassUtilsSpec.services.TestClass
 
-      val error = intercept[java.lang.InternalError](clazz.getClass.getSimpleName)
-      error.getMessage shouldBe "Malformed class name"
-
       ClassUtils.getClassSimpleName(clazz.getClass) shouldBe "TestClass"
     }
 

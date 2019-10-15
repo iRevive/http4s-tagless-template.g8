@@ -7,7 +7,7 @@ fi
 
 sbt_image=\$1
 
-set -euf pipefail
+set -ef pipefail
 
 echo "Pulling CI SBT image \$sbt_image"
 docker pull \$sbt_image || true
@@ -19,5 +19,11 @@ fi
 
 echo "Creating SBT container"
 
-docker build -f ./docker/dockerfiles/sbt/Dockerfile . -t \$sbt_image
+docker build \
+    --pull \
+    --file ./docker/dockerfiles/sbt/Dockerfile \
+    --cache-from \$sbt_image:latest \
+    --tag \$sbt_image \
+    .
+
 docker push \$sbt_image

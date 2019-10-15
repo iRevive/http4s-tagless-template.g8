@@ -22,5 +22,6 @@ docker run --rm \
     --mount src="\$(pwd)",target=/opt/workspace,type=bind \
     --network=$name_normalized$-ci-network \
     -e DOCKER_NETWORK=$name_normalized$-ci-network \
+    -e DOCKER_REGISTRY_IMAGE=\$CI_REGISTRY_IMAGE \
     \$sbt_image \
     sbt ci
