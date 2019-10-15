@@ -5,7 +5,7 @@
 You can use [Giter8](https://github.com/foundweekends/giter8) to create your own project from the template.
 
 Prerequisites:
-- JDK 8
+- JDK 11
 - Giter8 0.11.0
 
 Open a console and run the following command to apply this template:

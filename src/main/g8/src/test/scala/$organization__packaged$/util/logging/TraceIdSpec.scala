@@ -14,8 +14,8 @@ class TraceIdSpec extends BaseSpec {
       } yield noException shouldBe thrownBy(UUID.fromString(traceId.value))
     }
 
-    "generate a correct sub id" in EffectAssertion() {
-      forAll { (string: String, int: Int) =>
+    "generate a correct sub id" in forAll { (string: String, int: Int) =>
+      EffectAssertion() {
         for {
           traceId <- TraceId.randomUuid
         } yield {

@@ -9,8 +9,8 @@ class RaisedErrorSpec extends BaseSpec {
 
   "RaisedError" should {
 
-    "use correct loggable instance" in EffectAssertion() {
-      forAll { (message: String, errorId: String) =>
+    "use correct loggable instance" in forAll { (message: String, errorId: String) =>
+      EffectAssertion() {
         val expectedMessage =
           "RaisedError(" +
             s"error = ConnectionAttemptTimeout(message = \$message), " +
@@ -22,8 +22,8 @@ class RaisedErrorSpec extends BaseSpec {
       }
     }
 
-    "create a runtime exception" in EffectAssertion() {
-      forAll { (message: String, errorId: String) =>
+    "create a runtime exception" in forAll { (message: String, errorId: String) =>
+      EffectAssertion() {
         val expectedMessage =
           "RaisedError(" +
             s"error = ConnectionAttemptTimeout(message = \$message), " +

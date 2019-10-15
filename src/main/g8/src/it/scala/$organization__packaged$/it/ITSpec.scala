@@ -13,7 +13,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalatest._
-import org.scalatestplus.scalacheck.{CheckerAsserting, ScalaCheckPropertyChecks}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.concurrent.duration._
 
@@ -51,9 +51,6 @@ trait ITSpec
       } yield result).runSyncUnsafe(timeout).value
 
   }
-
-  protected implicit def checkingAsserting[A]: CheckerAsserting[A] { type Result = Eff[Unit] } =
-    new EffectCheckerAsserting[Eff, A]
 
   protected lazy val DefaultConfig: Config = ConfigFactory.load()
 

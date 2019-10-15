@@ -12,8 +12,8 @@ class CorrelationIdTracerSpec extends BaseSpec {
 
   "CorrelationIdTracer" should {
 
-    "add `X-Correlation-Id` header to trace prefix" in EffectAssertion() {
-      forAll { correlationId: String =>
+    "add `X-Correlation-Id` header to trace prefix" in forAll { correlationId: String =>
+      EffectAssertion() {
         val header  = Header(CorrelationIdTracer.CorrelationIdHeader.value, correlationId)
         val request = Request[Eff](Method.GET, uri"/api/balance-state/123", headers = Headers.of(header))
 

@@ -10,7 +10,7 @@ import $organization$.util.logging.TraceId
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalatest.{Inside, Matchers, OptionValues, WordSpecLike}
-import org.scalatestplus.scalacheck.{CheckerAsserting, ScalaCheckPropertyChecks}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.concurrent.duration._
 
@@ -40,9 +40,6 @@ abstract class EffectSpec[E]
       } yield result).runSyncUnsafe(timeout).value
 
   }
-
-  protected implicit def checkingAsserting[A]: CheckerAsserting[A] { type Result = Eff[Unit] } =
-    new EffectCheckerAsserting[Eff, A]
 
   private lazy val className: String = ClassUtils.getClassSimpleName(getClass)
 
