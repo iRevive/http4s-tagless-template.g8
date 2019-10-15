@@ -3,7 +3,7 @@ package $organization$.persistence.postgres
 import $organization$.util.logging.Loggable
 import $organization$.util.error.ThrowableExtractor
 
-@scalaz.deriving(Loggable)
+@scalaz.annotation.deriving(Loggable)
 sealed trait PostgresError
 
 object PostgresError {

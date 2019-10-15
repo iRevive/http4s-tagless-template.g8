@@ -4,7 +4,7 @@ import $organization$.util.logging.Loggable
 import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric.{NonNegInt, PosInt}
 
-@scalaz.deriving(Loggable)
+@scalaz.annotation.deriving(Loggable)
 sealed trait Pagination
 
 object Pagination {

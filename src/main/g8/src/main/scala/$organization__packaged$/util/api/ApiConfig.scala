@@ -6,5 +6,5 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Decoder
 import io.circe.refined._
 
-@scalaz.deriving(Decoder, Loggable)
+@scalaz.annotation.deriving(Decoder, Loggable)
 final case class ApiConfig(host: NonEmptyString, port: PosInt, auth: BasicAuthConfig)

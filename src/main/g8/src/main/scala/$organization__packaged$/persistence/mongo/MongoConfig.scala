@@ -8,7 +8,7 @@ import eu.timepit.refined.types.string.NonEmptyString
 
 import scala.concurrent.duration.FiniteDuration
 
-@scalaz.deriving(Loggable)
+@scalaz.annotation.deriving(Loggable)
 final case class MongoConfig(
     uri: String Refined Uri,
     database: NonEmptyString,

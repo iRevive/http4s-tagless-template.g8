@@ -5,7 +5,7 @@ import cats.syntax.functor._
 import $organization$.util.Position
 import $organization$.util.logging.Loggable
 
-@scalaz.deriving(Loggable)
+@scalaz.annotation.deriving(Loggable)
 final case class RaisedError(error: AppError, pos: Position, errorId: String) {
 
   def toException: RuntimeException =

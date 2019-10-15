@@ -1,8 +1,9 @@
 package $organization$.util.api
 
 import $organization$.test.BaseSpec
-import org.http4s.syntax.kleisli._
 import org.http4s._
+import org.http4s.syntax.kleisli._
+import org.http4s.syntax.literals._
 
 class HealthApiSpec extends BaseSpec {
 

@@ -5,8 +5,9 @@ import cats.mtl.implicits._
 import cats.syntax.functor._
 import $organization$.test.BaseSpec
 import $organization$.util.logging.{TraceId, TraceProvider}
-import org.http4s.Method._
 import org.http4s._
+import org.http4s.Method._
+import org.http4s.syntax.literals._
 
 class CorrelationIdTracerSpec extends BaseSpec {
 

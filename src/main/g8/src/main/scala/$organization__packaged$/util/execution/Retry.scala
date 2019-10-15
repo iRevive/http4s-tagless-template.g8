@@ -43,7 +43,7 @@ object Retry {
     loop(policy.retries.value)
   }
 
-  @scalaz.deriving(Decoder, Loggable)
+  @scalaz.annotation.deriving(Decoder, Loggable)
   final case class Policy(retries: NonNegInt, delay: FiniteDuration, timeout: FiniteDuration)
 
   trait Decider[E, A] {
@@ -87,7 +87,7 @@ object Retry {
       }
   }
 
-  @scalaz.deriving(Loggable)
+  @scalaz.annotation.deriving(Loggable)
   sealed trait Operation
   object Operation {
     final case object Result  extends Operation

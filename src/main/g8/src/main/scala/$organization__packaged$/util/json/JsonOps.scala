@@ -29,7 +29,7 @@ final class JsonOps(private val json: Json) extends AnyVal {
 
 }
 
-@scalaz.deriving(Loggable, EmptyThrowableExtractor)
+@scalaz.annotation.deriving(Loggable, EmptyThrowableExtractor)
 final case class JsonDecodingError(
     json: Json,
     targetClass: String,
