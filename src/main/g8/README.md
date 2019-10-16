@@ -29,12 +29,11 @@ with the project and is constantly a subject for changes.
 
 
 ## <a name="project-structure"></a> Project structure
-1) [src/main/scala/.../api](/src/main/scala/$organization;format="packaged"$/api) - API endpoints;  
-2) [src/main/scala/.../persistence](/src/main/scala/$organization;format="packaged"$/persistence) - persistence-specific logic (mongo client, AMQP client, etc);    
-3) [src/main/scala/.../processing](/src/main/scala/$organization;format="packaged"$/processing) - processing-specific logic (services, etc);  
-4) [src/main/scala/.../util](/src/main/scala/$organization;format="packaged"$/util) - utility classes;  
-5) [src/main/scala/.../Server.scala](/src/main/scala/$organization;format="packaged"$/Server.scala) - application entry point; 
-6) [src/main/resources](/src/main/resources) - application and logback configs;    
+1) [src/main/scala/.../persistence](/src/main/scala/$organization;format="packaged"$/persistence) - persistence-specific logic (PostgreSQL, AMQP client, etc);    
+2) [src/main/scala/.../service](/src/main/scala/$organization;format="packaged"$/service) - processing-specific logic (services, etc);  
+3) [src/main/scala/.../util](/src/main/scala/$organization;format="packaged"$/util) - utility classes;  
+4) [src/main/scala/.../Server.scala](/src/main/scala/$organization;format="packaged"$/Server.scala) - application entry point; 
+5) [src/main/resources](/src/main/resources) - application and logback configs;    
 
 ## <a name="development-requirements"></a> Development requirements
 1) Java 11;

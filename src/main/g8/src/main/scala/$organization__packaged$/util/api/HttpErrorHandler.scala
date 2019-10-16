@@ -3,9 +3,7 @@ package $organization$.util.api
 import cats.data.{Kleisli, OptionT}
 import cats.mtl.syntax.handle._
 import cats.syntax.applicative._
-import cats.syntax.functor._
 import cats.{Applicative, Monad}
-import $organization$.persistence.mongo.MongoError
 import $organization$.persistence.postgres.PostgresError
 import $organization$.util.config.ConfigParsingError
 import $organization$.util.error.{AppError, ErrorHandle, RaisedError}
@@ -21,7 +19,7 @@ object HttpErrorHandler {
         routes
           .run(req)
           .value
-          .handleWith[RaisedError](e => ErrorResponseSelector[F, AppError].toResponse(e.error, e.errorId).pure[F].map(Option(_)))
+          .handleWith[RaisedError](e => Option(ErrorResponseSelector[F, AppError].toResponse(e.error, e.errorId)).pure[F])
       }
     }
 
@@ -35,13 +33,6 @@ object HttpErrorHandler {
     ErrorResponseSelector.badRequestResponse {
       case PostgresError.UnavailableConnection(_)    => "Postgres connection is not available"
       case PostgresError.ConnectionAttemptTimeout(_) => "Postgres connection timeout"
-    }
-
-  implicit def mongoErrorResponse[F[_]: Applicative]: ErrorResponseSelector[F, MongoError] =
-    ErrorResponseSelector.badRequestResponse {
-      case MongoError.UnavailableConnection(_)    => "Mongo connection is not available"
-      case MongoError.ConnectionAttemptTimeout(_) => "Mongo connection timeout"
-      case MongoError.ExecutionError(_)           => "Cannot execute mongo query"
     }
 
 }

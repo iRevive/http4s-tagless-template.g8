@@ -40,8 +40,7 @@ lazy val scalazDerivingSettings = Seq(
 
 lazy val testSettings = Seq(
   Test / fork              := true,
-  Test / parallelExecution := true,
-  Test / javaOptions       := Seq("-Dorg.mongodb.async.type=netty")
+  Test / parallelExecution := true
 )
 
 lazy val itEnvironment = {

@@ -24,7 +24,6 @@ sbt new https://github.com/iRevive/http4s-tagless-template.g8
 - [Cats Effect](https://github.com/typelevel/cats-effect)
 - [Cats MTL](https://github.com/typelevel/cats-mtl)
 - [Doobie](https://github.com/tpolecat/doobie)
-- [Mongo Scala Driver](https://github.com/mongodb/mongo-scala-driver)
 
 ## Template configuration
 This template will prompt for the following parameters. Press `Enter` if the default values suit you:
@@ -34,13 +33,13 @@ This template will prompt for the following parameters. Press `Enter` if the def
 
 The template comes with the following sources:
 
-* `GeneralApi.scala` -- the class which handles requests.
-* `PersistenceModuleLoader.scala` -- the class which has an initialization logic of MongoDB and PostgreSQL connectors.
-* `Server.scala` -- the main class which starts up the HTTP server.
-* `GeneralApiSpec.scala` -- the class which tests routes.
-* `PersistenceModuleLoaderSpec.scala` -- the class which has an integration test for a persistence module.
-* `docker-compose.yml` -- docker compose configuration. 
-* `README.md` -- the documentation with explanation of all project functions.
+* `GeneralApi.scala` - the class which handles requests.
+* `PersistenceModuleLoader.scala` - the class which has an initialization logic of PostgreSQL connector.
+* `Server.scala` - the main class which starts up the HTTP server.
+* `GeneralApiSpec.scala` - the class which tests routes.
+* `PersistenceModuleLoaderSpec.scala` - the class which has an integration test for a persistence module.
+* `docker-compose.yml` - docker compose configuration. 
+* `README.md` - the documentation with explanation of all project functions.
 
 Once inside the project folder use the following command to run the code:
 ```
@@ -50,7 +49,7 @@ sbt clean test it:test run
 ## SBT plugins
 
 #### [sbt-release](https://github.com/sbt/sbt-release)
-The plugin configured without `publishArtifact` step. By default, it will publish a docker image locally.  
+The plugin configured without `publishArtifact` step. By default, it will publish a docker image.  
 
 #### [sbt-native-packager](https://github.com/sbt/sbt-native-packager)
 Almost default configuration.
@@ -67,4 +66,4 @@ Default configuration without changes.
 ## Integration tests
 
 This template will generate a docker-based environment for integration tests.  
-On the start of integration tests sbt will start MongoDB as a docker container, after tests it will be destroyed.
+On the start of integration tests sbt will start PostgreSQL as a docker container, after tests it will be destroyed.

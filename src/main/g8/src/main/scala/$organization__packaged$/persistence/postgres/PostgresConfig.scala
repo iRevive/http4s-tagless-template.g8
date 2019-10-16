@@ -1,6 +1,7 @@
 package $organization$.persistence.postgres
 
 import $organization$.util.execution.Retry
+import $organization$.util.config.ConfigBoolean
 import $organization$.util.logging.Loggable
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Decoder
@@ -18,6 +19,7 @@ final case class PostgresConfig(
     user: NonEmptyString,
     password: String,
     connectionAttemptTimeout: FiniteDuration,
+    runMigration: ConfigBoolean,
     retryPolicy: Retry.Policy
 )
 

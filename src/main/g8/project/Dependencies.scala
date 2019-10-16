@@ -15,9 +15,8 @@ object Versions {
   val catsEffect       = "$cats_effect_version$"
   val catsMTL          = "$cats_mtl_version$"
   val monix            = "$monix_version$"
-  val mongoScalaDriver = "$mongo_scala_driver_version$"
-  val netty            = "$netty_version$"
   val doobie           = "$doobie_version$"
+  val flyway           = "$flyway_version$"
   val newtype          = "$newtype_version$"
   val refined          = "$refined_version$"
   val sourcecode       = "$sourcecode_version$"
@@ -53,8 +52,7 @@ object Dependencies {
     "org.tpolecat"               %% "doobie-hikari"        % Versions.doobie,
     "org.tpolecat"               %% "doobie-refined"       % Versions.doobie,
     "org.tpolecat"               %% "doobie-postgres"      % Versions.doobie,
-    "org.mongodb.scala"          %% "mongo-scala-driver"   % Versions.mongoScalaDriver,
-    "io.netty"                   % "netty-all"             % Versions.netty,
+    "org.flywaydb"               % "flyway-core"           % Versions.flyway,
     "com.lihaoyi"                %% "sourcecode"           % Versions.sourcecode,
     "com.propensive"             %% "magnolia"             % Versions.magnolia,
     "com.typesafe.scala-logging" %% "scala-logging"        % Versions.scalaLogging,

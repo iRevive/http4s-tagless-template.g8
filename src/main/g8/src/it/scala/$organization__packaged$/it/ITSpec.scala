@@ -12,8 +12,10 @@ import $organization$.util.logging.TraceId
 import com.typesafe.config.{Config, ConfigFactory}
 import monix.eval.Task
 import monix.execution.Scheduler
+import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import io.estatico.newtype.Coercible
 
 import scala.concurrent.duration._
 
@@ -30,8 +32,6 @@ trait ITSpec
 
   protected implicit val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
   protected implicit val Eff: ConcurrentEffect[Eff]  = new EffConcurrentEffect
-
-  protected val DefaultApplicationLoader = ApplicationLoader.default[Eff]
 
   protected def DefaultTimeout: FiniteDuration = 20.seconds
 
@@ -51,6 +51,12 @@ trait ITSpec
       } yield result).runSyncUnsafe(timeout).value
 
   }
+
+  protected implicit def coercibleArbitrary[R, N](
+      implicit ev: Coercible[Arbitrary[R], Arbitrary[N]],
+      R: Arbitrary[R]
+  ): Arbitrary[N] =
+    ev(R)
 
   protected lazy val DefaultConfig: Config = ConfigFactory.load()
 

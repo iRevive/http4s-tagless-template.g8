@@ -1,11 +1,11 @@
 package $organization$.util
 package logging
 
+import java.time.Instant
 import java.util.UUID
 
 import cats.Show
 import cats.data.NonEmptyList
-import com.mongodb.DBObject
 import eu.timepit.refined.api.RefType
 import io.estatico.newtype.Coercible
 import magnolia._
@@ -63,8 +63,8 @@ trait LoggableInstances {
   implicit val floatLoggable: Loggable[Float]                            = Loggable.fromToString
   implicit val booleanLoggable: Loggable[Boolean]                        = Loggable.fromToString
   implicit val uuidLoggable: Loggable[UUID]                              = Loggable.fromToString
-  implicit val dbObjectLoggable: Loggable[DBObject]                      = Loggable.fromToString
   implicit val finiteDurationLoggable: Loggable[FiniteDuration]          = Loggable.fromToString
+  implicit val instantLoggable: Loggable[Instant]                        = Loggable.fromToString
   implicit val circeJsonLoggable: Loggable[io.circe.Json]                = v => v.noSpaces
   implicit val circeErrorLoggable: Loggable[io.circe.Error]              = Loggable.fromShow
   implicit val circeParsingLoggable: Loggable[io.circe.ParsingFailure]   = Loggable.fromShow

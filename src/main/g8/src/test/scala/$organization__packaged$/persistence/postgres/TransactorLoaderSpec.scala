@@ -32,6 +32,7 @@ class TransactorLoaderSpec extends BaseSpec {
           user = "root",
           password = "root",
           connectionAttemptTimeout = 5.millis,
+          runMigration = false,
           retryPolicy = Retry.Policy(5, 30.millis, 5.second)
         )
 

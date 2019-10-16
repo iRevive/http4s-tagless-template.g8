@@ -11,12 +11,6 @@ services:
     ports:
       - 55432:5432
 
-  mongodb:
-    restart: always
-    image: mongo
-    ports:
-      - 57017:27017
-
 networks:
   default:
     external:

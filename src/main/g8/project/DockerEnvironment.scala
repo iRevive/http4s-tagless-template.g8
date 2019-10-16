@@ -30,14 +30,7 @@ object DockerEnvironment {
 
       val (postgreUser, postgrePassword) = ("postgres", "admin")
 
-      val mongoUri = foldNetwork(
-        "mongodb://localhost:57017/?streamType=netty",
-        "mongodb://mongodb:27017/?streamType=netty"
-      )
-
       Seq(
-        s"-DMONGODB_URI=\$mongoUri",
-        "-Dorg.mongodb.async.type=netty",
         s"-DPOSTGRESQL_URI=\$postgreUri",
         s"-DPOSTGRESQL_USER=\$postgreUser",
         s"-DPOSTGRESQL_PASSWORD=\$postgrePassword"

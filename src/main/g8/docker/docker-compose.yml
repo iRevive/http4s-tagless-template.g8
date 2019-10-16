@@ -8,20 +8,22 @@ services:
       APPLICATION_HTTP_HOST: "0.0.0.0"
       APPLICATION_HTTP_PORT: 9000
       LOG_LEVEL: "INFO"
-      MONGODB_URI: "mongodb://mongodb:27017/"
+      POSTGRESQL_URI: "jdbc:postgresql://postgres:5432/$name_normalized$"
+      POSTGRESQL_USER: "postgres"
+      POSTGRESQL_PASSWORD: "admin"
     ports:
       - 9000:9000
     links:
-      - mongodb
+      - postgres
     depends_on:
-      - mongodb
+      - postgres
 
-  mongodb:
+  postgres:
     restart: always
-    image: mongo:latest
-    ports:
-      - 27017:27017
+    image: postgres:9.6
     environment:
-      - MONGO_DATA_DIR=/data/db
-    volumes:
-      - ./mongo/data:/data/db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: $name_normalized$
+    ports:
+      - 55432:5432
