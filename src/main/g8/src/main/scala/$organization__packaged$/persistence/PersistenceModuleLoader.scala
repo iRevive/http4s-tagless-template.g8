@@ -5,13 +5,13 @@ import cats.syntax.functor._
 import com.typesafe.config.Config
 import doobie.hikari.HikariTransactor
 import $organization$.persistence.postgres.{PostgresConfig, TransactorLoader}
-import $organization$.util.error.ErrorHandle
+import $organization$.util.error.{ErrorHandle, ErrorIdGen}
 import $organization$.util.syntax.config._
 import $organization$.util.syntax.logging._
 import $organization$.util.logging.{TraceProvider, TracedLogger}
 import org.flywaydb.core.Flyway
 
-class PersistenceModuleLoader[F[_]: Sync: ErrorHandle: TraceProvider](transactorLoader: TransactorLoader[F]) {
+class PersistenceModuleLoader[F[_]: Sync: ErrorHandle: TraceProvider: ErrorIdGen](transactorLoader: TransactorLoader[F]) {
 
   def load(rootConfig: Config, blocker: Blocker): Resource[F, PersistenceModule[F]] =
     for {
@@ -37,7 +37,7 @@ class PersistenceModuleLoader[F[_]: Sync: ErrorHandle: TraceProvider](transactor
 
 object PersistenceModuleLoader {
 
-  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider] =
+  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen] =
     new PersistenceModuleLoader[F](TransactorLoader.default)
 
 }

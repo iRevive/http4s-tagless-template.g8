@@ -5,7 +5,7 @@ import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.syntax.either._
 import cats.syntax.flatMap._
-import $organization$.util.error.{EmptyThrowableExtractor, ErrorRaise}
+import $organization$.util.error.{EmptyThrowableExtractor, ErrorIdGen, ErrorRaise}
 import $organization$.util.logging.Loggable
 import $organization$.util.syntax.mtl.raise._
 import io.circe._
@@ -18,7 +18,7 @@ trait ToJsonOps {
 
 final class JsonOps(private val json: Json) extends AnyVal {
 
-  def decodeF[F[_]: Sync: ErrorRaise, A: ClassTag: Decoder]: F[A] =
+  def decodeF[F[_]: Sync: ErrorRaise: ErrorIdGen, A: ClassTag: Decoder]: F[A] =
     Sync[F].delay(decode[A]).flatMap(_.pureOrRaise)
 
   def decode[A: ClassTag](implicit decoder: Decoder[A]): Either[JsonDecodingError, A] =

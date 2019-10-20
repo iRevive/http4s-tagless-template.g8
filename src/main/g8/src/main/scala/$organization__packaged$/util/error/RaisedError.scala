@@ -1,6 +1,6 @@
 package $organization$.util.error
 
-import cats.effect.Sync
+import cats.Functor
 import cats.syntax.functor._
 import $organization$.util.Position
 import $organization$.util.logging.Loggable
@@ -18,11 +18,9 @@ final case class RaisedError(error: AppError, pos: Position, errorId: String) {
 
 object RaisedError {
 
-  def withErrorId[F[_]: Sync](error: AppError)(implicit pos: Position): F[RaisedError] =
+  def withErrorId[F[_]: Functor: ErrorIdGen](error: AppError)(implicit pos: Position): F[RaisedError] =
     for {
-      id <- generateErrorId[F]
+      id <- ErrorIdGen[F].gen
     } yield RaisedError(error, pos, id)
-
-  def generateErrorId[F[_]: Sync]: F[String] = Sync[F].delay(scala.util.Random.alphanumeric.take(6).mkString)
 
 }

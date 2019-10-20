@@ -7,6 +7,7 @@ import cats.syntax.functor._
 import $organization$.ApplicationLoader
 import $organization$.ApplicationLoader.Application
 import $organization$.util.ClassUtils
+import $organization$.util.error.ErrorIdGen
 import $organization$.util.execution.EffConcurrentEffect
 import $organization$.util.logging.TraceId
 import com.typesafe.config.{Config, ConfigFactory}
@@ -32,6 +33,7 @@ trait ITSpec
 
   protected implicit val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
   protected implicit val Eff: ConcurrentEffect[Eff]  = new EffConcurrentEffect
+  protected implicit val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const("test")
 
   protected def DefaultTimeout: FiniteDuration = 20.seconds
 

@@ -4,7 +4,7 @@ package config
 import cats.effect.Sync
 import cats.syntax.either._
 import cats.syntax.flatMap._
-import $organization$.util.error.{EmptyThrowableExtractor, ErrorRaise}
+import $organization$.util.error.{EmptyThrowableExtractor, ErrorIdGen, ErrorRaise}
 import $organization$.util.logging.Loggable
 import $organization$.util.syntax.logging._
 import $organization$.util.syntax.mtl.raise._
@@ -20,10 +20,10 @@ trait ToConfigOps {
 final class ConfigOps(private val config: Config) extends AnyVal {
   import io.circe.config.syntax._
 
-  def loadF[F[_]: Sync: ErrorRaise, A: Decoder: ClassTag](path: String): F[A] =
+  def loadF[F[_]: Sync: ErrorRaise: ErrorIdGen, A: Decoder: ClassTag](path: String): F[A] =
     Sync[F].delay(load[A](path)).flatMap(_.pureOrRaise)
 
-  def loadMetaF[F[_]: Sync: ErrorRaise, A: Decoder: ClassTag](path: String): F[A] =
+  def loadMetaF[F[_]: Sync: ErrorRaise: ErrorIdGen, A: Decoder: ClassTag](path: String): F[A] =
     Sync[F].delay(loadMeta[A](path)).flatMap(_.pureOrRaise)
 
   def load[A: Decoder: ClassTag](path: String): Either[ConfigParsingError, A] =

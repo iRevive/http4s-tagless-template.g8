@@ -6,7 +6,7 @@ import cats.effect.syntax.bracket._
 import cats.mtl.implicits._
 import cats.syntax.functor._
 import $organization$.ApplicationLoader.Application
-import $organization$.util.error.{ErrorHandle, RaisedError}
+import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
 import $organization$.util.execution.{Eff, EffConcurrentEffect}
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
 import $organization$.util.syntax.logging._
@@ -47,7 +47,8 @@ object Runner {
 
   trait Default extends TaskApp {
 
-    implicit val Eff: ConcurrentEffect[Eff] = new EffConcurrentEffect
+    implicit val Eff: ConcurrentEffect[Eff]  = new EffConcurrentEffect
+    implicit val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.alphanumeric(6)
 
     override final def run(args: List[String]): Task[ExitCode] =
       (for {

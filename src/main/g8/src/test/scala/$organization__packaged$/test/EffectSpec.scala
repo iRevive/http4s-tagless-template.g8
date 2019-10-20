@@ -5,6 +5,7 @@ import cats.effect.Concurrent
 import cats.scalatest.{EitherMatchers, EitherValues}
 import cats.syntax.functor._
 import $organization$.util.ClassUtils
+import $organization$.util.error.ErrorIdGen
 import $organization$.util.execution.Traced
 import $organization$.util.logging.TraceId
 import monix.eval.Task
@@ -27,6 +28,7 @@ abstract class EffectSpec[E]
 
   protected implicit val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
   protected implicit val Eff: Concurrent[Eff]        = Concurrent.catsKleisliConcurrent
+  protected implicit val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const("test")
 
   protected final val DefaultTimeout: FiniteDuration = 20.seconds
 

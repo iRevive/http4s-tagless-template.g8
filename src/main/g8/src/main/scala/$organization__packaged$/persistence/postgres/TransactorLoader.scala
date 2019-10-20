@@ -6,7 +6,7 @@ import cats.mtl.syntax.local._
 import cats.syntax.applicativeError._
 import cats.syntax.either._
 import cats.syntax.functor._
-import $organization$.util.error.{ErrorHandle, RaisedError}
+import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
 import $organization$.util.syntax.logging._
 import $organization$.util.syntax.retry._
@@ -17,7 +17,7 @@ import eu.timepit.refined.auto._
 
 import scala.concurrent.duration._
 
-class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider] {
+class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen] {
 
   def createAndVerify(config: PostgresConfig, blocker: Blocker): Resource[F, HikariTransactor[F]] =
     for {
@@ -65,5 +65,5 @@ class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Trace
 }
 
 object TransactorLoader {
-  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider] = new TransactorLoader[F]
+  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen] = new TransactorLoader[F]
 }

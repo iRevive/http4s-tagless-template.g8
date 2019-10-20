@@ -11,6 +11,8 @@ class RaisedErrorSpec extends BaseSpec {
 
     "use correct loggable instance" in forAll { (message: String, errorId: String) =>
       EffectAssertion() {
+        implicit val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const(errorId)
+
         val expectedMessage =
           "RaisedError(" +
             s"error = ConnectionAttemptTimeout(message = \$message), " +
@@ -24,6 +26,8 @@ class RaisedErrorSpec extends BaseSpec {
 
     "create a runtime exception" in forAll { (message: String, errorId: String) =>
       EffectAssertion() {
+        implicit val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const(errorId)
+
         val expectedMessage =
           "RaisedError(" +
             s"error = ConnectionAttemptTimeout(message = \$message), " +

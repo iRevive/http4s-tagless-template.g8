@@ -7,7 +7,7 @@ import $organization$.ApplicationLoader.{ApiModule, Application}
 import $organization$.persistence.{PersistenceModule, PersistenceModuleLoader}
 import $organization$.service.{ServiceModule, ServiceModuleLoader}
 import $organization$.util.api.{ApiConfig, HealthApi}
-import $organization$.util.error.ErrorHandle
+import $organization$.util.error.{ErrorHandle, ErrorIdGen}
 import $organization$.util.logging.{TraceProvider, TracedLogger}
 import $organization$.util.syntax.config._
 import $organization$.util.syntax.logging._
@@ -16,7 +16,7 @@ import org.http4s.HttpApp
 import org.http4s.server.Router
 import org.http4s.syntax.kleisli._
 
-class ApplicationLoader[F[_]: Sync: TraceProvider: ErrorHandle](
+class ApplicationLoader[F[_]: Sync: TraceProvider: ErrorHandle: ErrorIdGen](
     persistenceModuleLoader: PersistenceModuleLoader[F],
     serviceModuleLoader: ServiceModuleLoader[F]
 ) {
@@ -50,7 +50,7 @@ class ApplicationLoader[F[_]: Sync: TraceProvider: ErrorHandle](
 
 object ApplicationLoader {
 
-  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider]: ApplicationLoader[F] =
+  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen]: ApplicationLoader[F] =
     new ApplicationLoader[F](
       PersistenceModuleLoader.default,
       new ServiceModuleLoader[F]
