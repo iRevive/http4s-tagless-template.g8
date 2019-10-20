@@ -7,11 +7,11 @@ import $organization$.util.config.ConfigParsingError
 import $organization$.util.error.ErrorHandle
 import com.typesafe.config.ConfigFactory
 
-class PersistenceModuleLoaderSpec extends ITSpec {
+class PersistenceModuleResourceSpec extends ITSpec {
 
-  "PersistenceModuleLoader" when {
+  "PersistenceModuleResource" when {
 
-    "loading Transactor" should {
+    "creating Transactor" should {
 
       "return an error" when {
 
@@ -26,7 +26,7 @@ class PersistenceModuleLoaderSpec extends ITSpec {
 
           val fa = for {
             blocker    <- Blocker[Eff]
-            transactor <- loader.loadTransactor(config, blocker)
+            transactor <- moduleResource.createTransactor(config, blocker)
           } yield transactor
 
           for {
@@ -61,7 +61,7 @@ class PersistenceModuleLoaderSpec extends ITSpec {
 
           val fa = for {
             blocker    <- Blocker[Eff]
-            transactor <- loader.loadTransactor(config, blocker)
+            transactor <- moduleResource.createTransactor(config, blocker)
           } yield transactor
 
           for {
@@ -78,10 +78,10 @@ class PersistenceModuleLoaderSpec extends ITSpec {
 
       }
 
-      "load transactor" in EffectAssertion() {
+      "create transactor" in EffectAssertion() {
         val fa = for {
           blocker    <- Blocker[Eff]
-          transactor <- loader.loadTransactor(DefaultConfig, blocker)
+          transactor <- moduleResource.createTransactor(DefaultConfig, blocker)
         } yield transactor
 
         for {
@@ -95,6 +95,6 @@ class PersistenceModuleLoaderSpec extends ITSpec {
 
   }
 
-  private val loader = PersistenceModuleLoader.default[Eff]
+  private val moduleResource = PersistenceModuleResource.default[Eff]
 
 }

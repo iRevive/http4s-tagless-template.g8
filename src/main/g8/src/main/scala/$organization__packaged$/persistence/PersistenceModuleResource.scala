@@ -4,24 +4,26 @@ import cats.effect._
 import cats.syntax.functor._
 import com.typesafe.config.Config
 import doobie.hikari.HikariTransactor
-import $organization$.persistence.postgres.{PostgresConfig, TransactorLoader}
+import $organization$.persistence.postgres.{PostgresConfig, TransactorResource}
 import $organization$.util.error.{ErrorHandle, ErrorIdGen}
 import $organization$.util.syntax.config._
 import $organization$.util.syntax.logging._
 import $organization$.util.logging.{TraceProvider, TracedLogger}
 import org.flywaydb.core.Flyway
 
-class PersistenceModuleLoader[F[_]: Sync: ErrorHandle: TraceProvider: ErrorIdGen](transactorLoader: TransactorLoader[F]) {
+class PersistenceModuleResource[F[_]: Sync: ErrorHandle: TraceProvider: ErrorIdGen](
+    transactorResource: TransactorResource[F]
+) {
 
-  def load(rootConfig: Config, blocker: Blocker): Resource[F, PersistenceModule[F]] =
+  def create(rootConfig: Config, blocker: Blocker): Resource[F, PersistenceModule[F]] =
     for {
-      transactor <- loadTransactor(rootConfig, blocker)
+      transactor <- createTransactor(rootConfig, blocker)
     } yield PersistenceModule(transactor)
 
-  private[persistence] def loadTransactor(rootConfig: Config, blocker: Blocker): Resource[F, HikariTransactor[F]] =
+  private[persistence] def createTransactor(rootConfig: Config, blocker: Blocker): Resource[F, HikariTransactor[F]] =
     for {
       config <- Resource.liftF(rootConfig.loadF[F, PostgresConfig]("application.persistence.postgres"))
-      db     <- transactorLoader.createAndVerify(config, blocker)
+      db     <- transactorResource.createAndVerify(config, blocker)
       _      <- Resource.liftF(logger.info(log"Run migration [\${config.runMigration}]"))
       _      <- Resource.liftF(Sync[F].whenA(config.runMigration)(runFlywayMigration(db)))
     } yield db
@@ -35,9 +37,9 @@ class PersistenceModuleLoader[F[_]: Sync: ErrorHandle: TraceProvider: ErrorIdGen
 
 }
 
-object PersistenceModuleLoader {
+object PersistenceModuleResource {
 
   def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen] =
-    new PersistenceModuleLoader[F](TransactorLoader.default)
+    new PersistenceModuleResource[F](TransactorResource.default)
 
 }

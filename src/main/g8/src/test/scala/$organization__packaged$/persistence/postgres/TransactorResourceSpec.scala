@@ -12,14 +12,14 @@ import eu.timepit.refined.auto._
 
 import scala.concurrent.duration._
 
-class TransactorLoaderSpec extends BaseSpec {
+class TransactorResourceSpec extends BaseSpec {
 
-  "TransactorLoader" should {
+  "TransactorResource" should {
 
     "return an error" when {
 
       "connection in unreachable" in EffectAssertion() {
-        def mkLoader(counter: Ref[Eff, Int]): TransactorLoader[Eff] = new TransactorLoader[Eff] {
+        def mkResource(counter: Ref[Eff, Int]): TransactorResource[Eff] = new TransactorResource[Eff] {
           override private[postgres] def verifyConnectionOnce(
               transactor: HikariTransactor[Eff],
               timeout: FiniteDuration
@@ -39,7 +39,7 @@ class TransactorLoaderSpec extends BaseSpec {
         def fa(counter: Ref[Eff, Int]): Resource[Eff, HikariTransactor[Eff]] =
           for {
             blocker    <- Blocker[Eff]
-            transactor <- mkLoader(counter).createAndVerify(config, blocker)
+            transactor <- mkResource(counter).createAndVerify(config, blocker)
           } yield transactor
 
         for {

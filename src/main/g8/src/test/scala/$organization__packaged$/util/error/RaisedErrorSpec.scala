@@ -16,11 +16,11 @@ class RaisedErrorSpec extends BaseSpec {
         val expectedMessage =
           "RaisedError(" +
             s"error = ConnectionAttemptTimeout(message = \$message), " +
-            s"pos = com.example.util.error.RaisedErrorSpec#:20, errorId = \$errorId)"
+            s"pos = com.example.util.error.RaisedErrorSpec#:22, errorId = \$errorId)"
 
         for {
           error <- RaisedError.withErrorId[Eff](PostgresError.connectionAttemptTimeout(message).inject[AppError])
-        } yield Loggable[RaisedError].show(error.copy(errorId = errorId)) shouldBe expectedMessage
+        } yield Loggable[RaisedError].show(error) shouldBe expectedMessage
       }
     }
 
@@ -31,12 +31,12 @@ class RaisedErrorSpec extends BaseSpec {
         val expectedMessage =
           "RaisedError(" +
             s"error = ConnectionAttemptTimeout(message = \$message), " +
-            s"pos = com.example.util.error.RaisedErrorSpec#:33, errorId = \$errorId)"
+            s"pos = com.example.util.error.RaisedErrorSpec#:37, errorId = \$errorId)"
 
         for {
           error <- RaisedError.withErrorId[Eff](PostgresError.connectionAttemptTimeout(message).inject[AppError])
         } yield {
-          val asException = error.copy(errorId = errorId).toException
+          val asException = error.toException
 
           asException shouldBe a[RuntimeException]
           asException.getMessage shouldBe expectedMessage

@@ -5,7 +5,7 @@ import cats.effect._
 import cats.effect.syntax.bracket._
 import cats.mtl.implicits._
 import cats.syntax.functor._
-import $organization$.ApplicationLoader.Application
+import $organization$.ApplicationResource.Application
 import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
 import $organization$.util.execution.{Eff, EffConcurrentEffect}
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
@@ -15,17 +15,17 @@ import monix.eval.{Task, TaskApp}
 
 class Runner[F[_]: Sync: TraceProvider: ErrorHandle] {
 
-  final def run(loader: ApplicationLoader[F], job: Kleisli[F, Application[F], ExitCode]): F[ExitCode] =
-    loadApp(loader)
+  final def run(appResource: ApplicationResource[F], job: Kleisli[F, Application[F], ExitCode]): F[ExitCode] =
+    loadApp(appResource)
       .use(job.run)
       .handleWith[RaisedError](e => logger.error(log"Job completed with an error. \$e", e).as(ExitCode.Error))
       .guaranteeCase(finalizer)
 
-  private final def loadApp(loader: ApplicationLoader[F]): Resource[F, Application[F]] =
+  private final def loadApp(appResource: ApplicationResource[F]): Resource[F, Application[F]] =
     for {
       _      <- Resource.liftF(logger.info("Running the job"))
       config <- Resource.liftF(Sync[F].delay(ConfigFactory.load()))
-      app    <- loader.load(config)
+      app    <- appResource.create(config)
     } yield app
 
   private final def finalizer: ExitCase[Throwable] => F[Unit] = {
@@ -53,7 +53,7 @@ object Runner {
     override final def run(args: List[String]): Task[ExitCode] =
       (for {
         traceId <- TraceId.randomAlphanumeric[EitherT[Task, RaisedError, ?]](name)
-        result  <- new Runner[Eff].run(ApplicationLoader.default, job).run(traceId)
+        result  <- new Runner[Eff].run(ApplicationResource.default, job).run(traceId)
       } yield result).leftSemiflatMap(e => Task.raiseError(e.toException)).merge
 
     def name: String

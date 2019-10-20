@@ -6,7 +6,7 @@ import cats.data.Kleisli
 import cats.effect._
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
-import $organization$.ApplicationLoader.Application
+import $organization$.ApplicationResource.Application
 import $organization$.util.api.ApiConfig
 import $organization$.util.execution.Eff
 import $organization$.util.logging.TracedLogger

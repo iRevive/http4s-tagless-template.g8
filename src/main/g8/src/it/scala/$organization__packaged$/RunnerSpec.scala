@@ -15,7 +15,7 @@ class RunnerSpec extends ITSpec {
       val runner = new Runner[Eff]
 
       for {
-        result <- runner.run(ApplicationLoader.default[Eff], Kleisli.pure(ExitCode.Success))
+        result <- runner.run(ApplicationResource.default[Eff], Kleisli.pure(ExitCode.Success))
       } yield result shouldBe ExitCode.Success
     }
 

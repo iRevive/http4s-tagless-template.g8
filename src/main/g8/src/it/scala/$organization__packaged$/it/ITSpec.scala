@@ -4,8 +4,8 @@ import cats.effect.ConcurrentEffect
 import cats.mtl.implicits._
 import cats.scalatest.{EitherMatchers, EitherValues}
 import cats.syntax.functor._
-import $organization$.ApplicationLoader
-import $organization$.ApplicationLoader.Application
+import $organization$.ApplicationResource
+import $organization$.ApplicationResource.Application
 import $organization$.util.ClassUtils
 import $organization$.util.error.ErrorIdGen
 import $organization$.util.execution.EffConcurrentEffect
@@ -40,7 +40,7 @@ trait ITSpec
   @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   protected def withApplication[A](timeout: Duration = DefaultTimeout)(program: Application[Eff] => Eff[A]): Unit =
     EffectAssertion(timeout) {
-      ApplicationLoader.default[Eff].load(DefaultConfig).use(program)
+      ApplicationResource.default[Eff].create(DefaultConfig).use(program)
     }
 
   object EffectAssertion {

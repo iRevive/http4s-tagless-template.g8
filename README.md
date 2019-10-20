@@ -34,10 +34,10 @@ This template will prompt for the following parameters. Press `Enter` if the def
 The template comes with the following sources:
 
 * `GeneralApi.scala` - the class which handles requests.
-* `PersistenceModuleLoader.scala` - the class which has an initialization logic of PostgreSQL connector.
+* `PersistenceModuleResource.scala` - the class which has an initialization logic of PostgreSQL connector.
 * `Server.scala` - the main class which starts up the HTTP server.
 * `GeneralApiSpec.scala` - the class which tests routes.
-* `PersistenceModuleLoaderSpec.scala` - the class which has an integration test for a persistence module.
+* `PersistenceModuleResourceSpec.scala` - the class which has an integration test for a persistence module.
 * `docker-compose.yml` - docker compose configuration. 
 * `README.md` - the documentation with explanation of all project functions.
 

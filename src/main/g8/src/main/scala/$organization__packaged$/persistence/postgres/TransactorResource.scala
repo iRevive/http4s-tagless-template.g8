@@ -17,11 +17,11 @@ import eu.timepit.refined.auto._
 
 import scala.concurrent.duration._
 
-class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen] {
+class TransactorResource[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen] {
 
   def createAndVerify(config: PostgresConfig, blocker: Blocker): Resource[F, HikariTransactor[F]] =
     for {
-      _  <- Resource.liftF(logger.info(log"Loading Postgres module with config \$config"))
+      _  <- Resource.liftF(logger.info(log"Creating Postgres module with config \$config"))
       xa <- createFromConfig(config, blocker)
       _  <- Resource.liftF(logger.info("Verifying Postgres connection"))
       _  <- Resource.liftF(verifyConnection(config, xa))
@@ -64,6 +64,6 @@ class TransactorLoader[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Trace
 
 }
 
-object TransactorLoader {
-  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen] = new TransactorLoader[F]
+object TransactorResource {
+  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen] = new TransactorResource[F]
 }
