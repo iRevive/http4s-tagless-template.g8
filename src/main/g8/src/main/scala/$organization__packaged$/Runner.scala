@@ -52,7 +52,7 @@ object Runner {
 
     override final def run(args: List[String]): Task[ExitCode] =
       (for {
-        traceId <- TraceId.randomAlphanumeric[EitherT[Task, RaisedError, ?]](name)
+        traceId <- TraceId.randomAlphanumeric[EitherT[Task, RaisedError, *]](name)
         result  <- new Runner[Eff].run(ApplicationResource.default, job).run(traceId)
       } yield result).leftSemiflatMap(e => Task.raiseError(e.toException)).merge
 

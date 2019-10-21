@@ -24,7 +24,7 @@ abstract class EffectSpec[E]
     with EitherValues
     with ScalaCheckPropertyChecks {
 
-  protected type Eff[A] = Traced[EitherT[Task, E, ?], A]
+  protected type Eff[A] = Traced[EitherT[Task, E, *], A]
 
   protected implicit val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
   protected implicit val Eff: Concurrent[Eff]        = Concurrent.catsKleisliConcurrent

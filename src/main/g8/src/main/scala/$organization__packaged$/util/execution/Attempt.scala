@@ -9,7 +9,7 @@ import cats.syntax.functor._
 
 object Attempt {
 
-  def attempt[F[_]: MonadError[?[_], Throwable], E: ApplicativeHandle[F, ?], A](fa: F[A]): F[Result[E, A]] =
+  def attempt[F[_]: MonadError[*[_], Throwable], E: ApplicativeHandle[F, *], A](fa: F[A]): F[Result[E, A]] =
     ApplicativeHandle[F, E]
       .attempt(fa)
       .attempt
@@ -19,7 +19,7 @@ object Attempt {
         case Right(Right(value))  => Result.Success(value)
       }
 
-  def toEffect[F[_]: MonadError[?[_], Throwable], E: ApplicativeHandle[F, ?], A](result: Result[E, A]): F[A] =
+  def toEffect[F[_]: MonadError[*[_], Throwable], E: ApplicativeHandle[F, *], A](result: Result[E, A]): F[A] =
     result match {
       case Attempt.Result.UnhandledError(unhandledError) => unhandledError.raiseError
       case Attempt.Result.Error(error)                   => error.raise

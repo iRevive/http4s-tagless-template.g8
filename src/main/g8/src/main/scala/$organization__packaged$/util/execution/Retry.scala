@@ -16,7 +16,7 @@ import scala.concurrent.duration.FiniteDuration
 
 object Retry {
 
-  def retry[F[_]: MonadError[?[_], Throwable]: Timer, E: ApplicativeHandle[F, ?], A](
+  def retry[F[_]: MonadError[*[_], Throwable]: Timer, E: ApplicativeHandle[F, *], A](
       fa: F[A],
       policy: Policy,
       decider: Decider[E, A],
