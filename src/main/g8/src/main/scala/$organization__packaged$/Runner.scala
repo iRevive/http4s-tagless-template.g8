@@ -4,7 +4,7 @@ import cats.data.{EitherT, Kleisli}
 import cats.effect._
 import cats.effect.syntax.bracket._
 import cats.mtl.implicits._
-import cats.syntax.functor._
+import cats.syntax.flatMap._
 import $organization$.ApplicationResource.Application
 import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
 import $organization$.util.execution.{Eff, EffConcurrentEffect}
@@ -18,7 +18,7 @@ class Runner[F[_]: Sync: TraceProvider: ErrorHandle] {
   final def run(appResource: ApplicationResource[F], job: Kleisli[F, Application[F], ExitCode]): F[ExitCode] =
     loadApp(appResource)
       .use(job.run)
-      .handleWith[RaisedError](e => logger.error(log"Job completed with an error. \$e", e).as(ExitCode.Error))
+      .handleWith[RaisedError](e => logger.error(log"Job completed with an error. \$e", e) >> e.raise[F, ExitCode])
       .guaranteeCase(finalizer)
 
   private final def loadApp(appResource: ApplicationResource[F]): Resource[F, Application[F]] =
