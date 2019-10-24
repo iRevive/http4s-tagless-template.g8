@@ -73,7 +73,7 @@ trait LoggableInstances {
   implicit val uriLoggable: Loggable[Uri]                                = Loggable.fromToString
 
   implicit val throwableLoggable: Loggable[Throwable] = throwable => {
-    val className = ClassUtils.getClassSimpleName(throwable.getClass)
+    val className = throwable.getClass.getSimpleName
     val message   = Option(throwable.getMessage).getOrElse("<empty message>")
 
     s"\$className(\$message)"

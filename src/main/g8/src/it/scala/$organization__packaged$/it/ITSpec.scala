@@ -6,7 +6,6 @@ import cats.scalatest.{EitherMatchers, EitherValues}
 import cats.syntax.functor._
 import $organization$.ApplicationResource
 import $organization$.ApplicationResource.Application
-import $organization$.util.ClassUtils
 import $organization$.util.error.ErrorIdGen
 import $organization$.util.execution.EffConcurrentEffect
 import $organization$.util.logging.TraceId
@@ -27,7 +26,7 @@ trait ITSpec
     with OptionValues
     with EitherMatchers
     with Inside
-    with ScalaCheckPropertyChecks {
+    with ScalaCheckPropertyChecks { self =>
 
   protected type Eff[A] = $organization$.util.execution.Eff[A]
 
@@ -48,7 +47,7 @@ trait ITSpec
     @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
     def apply[A](timeout: Duration = DefaultTimeout)(program: Eff[A]): Unit =
       (for {
-        traceId <- TraceId.randomAlphanumeric[Task](className)
+        traceId <- TraceId.randomAlphanumeric[Task](self.getClass.getSimpleName)
         result  <- program.run(traceId).void.value
       } yield result).runSyncUnsafe(timeout).value
 
@@ -61,7 +60,5 @@ trait ITSpec
     ev(R)
 
   protected lazy val DefaultConfig: Config = ConfigFactory.load()
-
-  private lazy val className: String = ClassUtils.getClassSimpleName(getClass)
 
 }

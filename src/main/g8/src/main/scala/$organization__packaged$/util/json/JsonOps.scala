@@ -21,11 +21,11 @@ final class JsonOps(private val json: Json) extends AnyVal {
   def decodeF[F[_]: Sync: ErrorRaise: ErrorIdGen, A: ClassTag: Decoder]: F[A] =
     Sync[F].delay(decode[A]).flatMap(_.pureOrRaise)
 
-  def decode[A: ClassTag](implicit decoder: Decoder[A]): Either[JsonDecodingError, A] =
+  def decode[A](implicit decoder: Decoder[A], ct: ClassTag[A]): Either[JsonDecodingError, A] =
     decoder
       .decodeAccumulating(json.hcursor)
       .toEither
-      .leftMap(errors => JsonDecodingError(json, ClassUtils.classSimpleName[A], errors))
+      .leftMap(errors => JsonDecodingError(json, ct.runtimeClass.getSimpleName, errors))
 
 }
 

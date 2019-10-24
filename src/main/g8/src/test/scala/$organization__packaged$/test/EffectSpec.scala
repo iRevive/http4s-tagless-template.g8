@@ -4,7 +4,6 @@ import cats.data.EitherT
 import cats.effect.Concurrent
 import cats.scalatest.{EitherMatchers, EitherValues}
 import cats.syntax.functor._
-import $organization$.util.ClassUtils
 import $organization$.util.error.ErrorIdGen
 import $organization$.util.execution.Traced
 import $organization$.util.logging.TraceId
@@ -22,7 +21,7 @@ abstract class EffectSpec[E]
     with OptionValues
     with Inside
     with EitherValues
-    with ScalaCheckPropertyChecks {
+    with ScalaCheckPropertyChecks { self =>
 
   protected type Eff[A] = Traced[EitherT[Task, E, *], A]
 
@@ -37,12 +36,10 @@ abstract class EffectSpec[E]
     @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
     def apply[A](timeout: Duration = DefaultTimeout)(program: Eff[A]): Unit =
       (for {
-        traceId <- TraceId.randomAlphanumeric[Task](className)
+        traceId <- TraceId.randomAlphanumeric[Task](self.getClass.getSimpleName)
         result  <- program.run(traceId).void.value
       } yield result).runSyncUnsafe(timeout).value
 
   }
-
-  private lazy val className: String = ClassUtils.getClassSimpleName(getClass)
 
 }

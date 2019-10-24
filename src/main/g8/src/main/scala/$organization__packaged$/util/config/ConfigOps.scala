@@ -26,13 +26,13 @@ final class ConfigOps(private val config: Config) extends AnyVal {
   def loadMetaF[F[_]: Sync: ErrorRaise: ErrorIdGen, A: Decoder: ClassTag](path: String): F[A] =
     Sync[F].delay(loadMeta[A](path)).flatMap(_.pureOrRaise)
 
-  def load[A: Decoder: ClassTag](path: String): Either[ConfigParsingError, A] =
-    config.as[A](path).leftMap(error => ConfigParsingError(path, ClassUtils.classSimpleName, error))
+  def load[A: Decoder](path: String)(implicit ct: ClassTag[A]): Either[ConfigParsingError, A] =
+    config.as[A](path).leftMap(error => ConfigParsingError(path, ct.runtimeClass.getSimpleName, error))
 
-  def loadMeta[A: Decoder: ClassTag](path: String): Either[ConfigParsingError, A] =
+  def loadMeta[A: Decoder](path: String)(implicit ct: ClassTag[A]): Either[ConfigParsingError, A] =
     parseStringAsConfig(config.getString(path))
       .flatMap(_.as[A])
-      .leftMap(error => ConfigParsingError(path, ClassUtils.classSimpleName, error))
+      .leftMap(error => ConfigParsingError(path, ct.runtimeClass.getSimpleName, error))
 
   private def parseStringAsConfig(input: => String): Either[Error, Config] =
     Either
