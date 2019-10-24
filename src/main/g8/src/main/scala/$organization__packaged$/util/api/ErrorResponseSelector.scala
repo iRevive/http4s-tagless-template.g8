@@ -24,8 +24,10 @@ object ErrorResponseSelector extends ErrorResponseSelectorInstances {
   def apiResponse[F[_]: Applicative](status: Status, message: String, errorId: String): Response[F] =
     Response[F](status).withEntity(ApiResponse.Error(message, errorId).asJson)
 
+  // \$COVERAGE-OFF\$
   implicit def cnilErrorResponseSelector[F[_]]: ErrorResponseSelector[F, CNil] =
     (value: CNil, _: String) => value.impossible
+  // \$COVERAGE-ON\$
 
   implicit def coproductErrorSelector[F[_], H, T <: Coproduct](
       implicit h: Lazy[ErrorResponseSelector[F, H]],
