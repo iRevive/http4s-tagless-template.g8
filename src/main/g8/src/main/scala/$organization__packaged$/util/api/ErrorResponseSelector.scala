@@ -1,6 +1,10 @@
 package $organization$.util.api
 
 import cats.Applicative
+import $organization$.persistence.postgres.PostgresError
+import $organization$.util.config.ConfigParsingError
+import $organization$.util.json.JsonDecodingError
+import $organization$.util.syntax.logging._
 import io.circe.syntax._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.{Response, Status}
@@ -10,7 +14,8 @@ trait ErrorResponseSelector[F[_], E] {
   def toResponse(value: E, errorId: String): Response[F]
 }
 
-object ErrorResponseSelector {
+object ErrorResponseSelector extends ErrorResponseSelectorInstances {
+
   def apply[F[_], E](implicit ev: ErrorResponseSelector[F, E]): ErrorResponseSelector[F, E] = ev
 
   def badRequestResponse[F[_]: Applicative, E](toErrorMessage: E => String): ErrorResponseSelector[F, E] =
@@ -27,5 +32,21 @@ object ErrorResponseSelector {
       t: ErrorResponseSelector[F, T]
   ): ErrorResponseSelector[F, H :+: T] =
     (value, errorId) => value.eliminate(h.value.toResponse(_, errorId), t.toResponse(_, errorId))
+
+}
+
+trait ErrorResponseSelectorInstances {
+
+  implicit def configParsingErrorResponse[F[_]: Applicative]: ErrorResponseSelector[F, ConfigParsingError] =
+    ErrorResponseSelector.badRequestResponse(e => log"Cannot load config [\${e.expectedClass}] at [\${e.path}]")
+
+  implicit def jsonDecodingErrorResponse[F[_]: Applicative]: ErrorResponseSelector[F, JsonDecodingError] =
+    ErrorResponseSelector.badRequestResponse(e => log"Json decoding error. \${e.errors}")
+
+  implicit def postgresErrorResponse[F[_]: Applicative]: ErrorResponseSelector[F, PostgresError] =
+    ErrorResponseSelector.badRequestResponse {
+      case PostgresError.UnavailableConnection(_)    => "Postgres connection is not available"
+      case PostgresError.ConnectionAttemptTimeout(_) => "Postgres connection timeout"
+    }
 
 }
