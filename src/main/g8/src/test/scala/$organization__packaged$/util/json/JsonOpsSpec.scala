@@ -1,8 +1,8 @@
 package $organization$.util.json
 
+import cats.mtl.implicits._
 import cats.data.NonEmptyList
 import $organization$.test.BaseSpec
-import $organization$.util.json.JsonOpsSpec.JsonModel
 import $organization$.util.logging.Loggable
 import $organization$.util.syntax.json._
 import io.circe.{DecodingFailure, Json}
@@ -17,37 +17,40 @@ class JsonOpsSpec extends BaseSpec {
 
     "#decode" should {
 
-      "fail in case of missing or invalid fields" in {
+      "fail in case of missing or invalid fields" in EffectAssertion() {
         val input = Json.obj(
           "field1" := 123,
           "field3" := 4321
         )
 
-        inside(input.decode[JsonModel].leftValue) {
-          case JsonDecodingError(json, className, errors) =>
-            val expectedErrors = NonEmptyList.of(
-              "DecodingFailure at .field1: String",
-              "DecodingFailure at .field2: Attempt to decode value on failed cursor"
-            )
+        for {
+          resultT <- input.decodeF[Eff, JsonModel].attemptHandle
+        } yield {
+          val result = resultT.leftValue.error.select[JsonDecodingError].value
 
-            json shouldBe input
-            className shouldBe "JsonModel"
-            errors.map(Loggable[DecodingFailure].show) shouldBe expectedErrors
+          val expectedErrors = NonEmptyList.of(
+            "DecodingFailure at .field1: String",
+            "DecodingFailure at .field2: Attempt to decode value on failed cursor"
+          )
+
+          result.json shouldBe input
+          result.targetClass shouldBe "JsonModel"
+          result.errors.map(Loggable[DecodingFailure].show) shouldBe expectedErrors
         }
       }
 
-      "return a parsed model" in {
+      "return a parsed model" in EffectAssertion() {
         val input = Json.obj(
           "field1" := "test field",
           "field2" := 123,
           "field3" := 4321
         )
 
-        val result = input.decode[JsonModel].value
-
         val expected = JsonModel("test field", 123, 4321L)
 
-        result shouldBe expected
+        for {
+          result <- input.decodeF[Eff, JsonModel]
+        } yield result shouldBe expected
       }
 
     }
