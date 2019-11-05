@@ -14,8 +14,10 @@ docker pull \$sbt_image || true
 
 echo "Releasing application"
 
-docker network rm scala-gitlab-ci-network || true
-docker network create -d bridge scala-gitlab-ci-network
+CI_NETWORK=$name_normalized$-ci-network
+
+docker network rm \$CI_NETWORK || true
+docker network create -d bridge \$CI_NETWORK
 
 # Prepare git
 git config user.email "ci@gitlab.com"
@@ -36,8 +38,8 @@ docker run --rm \
     --user \$(id -u):\$(id -g) \
     -v /var/run/docker.sock:/var/run/docker.sock \
     --mount src="\$(pwd)",target=/opt/workspace,type=bind \
-    --network=scala-gitlab-ci-network \
-    -e DOCKER_NETWORK=scala-gitlab-ci-network \
+    --network=\$CI_NETWORK \
+    -e DOCKER_NETWORK=\$CI_NETWORK \
     -e DOCKER_REGISTRY_IMAGE=\$CI_REGISTRY_IMAGE \
     \$sbt_image \
     bash ./ci/release_entrypoint.sh
