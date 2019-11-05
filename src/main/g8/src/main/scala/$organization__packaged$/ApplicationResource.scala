@@ -26,7 +26,7 @@ class ApplicationResource[F[_]: Sync: TraceProvider: ErrorHandle: ErrorIdGen](
       blocker           <- Blocker[F]
       persistenceModule <- persistenceModuleResource.create(config, blocker)
       serviceModule     <- serviceModuleResource.create(config, persistenceModule)
-      apiModule         <- Resource.liftF(createApiModule(config, serviceModule))
+      apiModule         <- Resource.liftF(createApiModule(config, persistenceModule, serviceModule))
     } yield Application(persistenceModule, serviceModule, apiModule)
 
   private def createApiModule(

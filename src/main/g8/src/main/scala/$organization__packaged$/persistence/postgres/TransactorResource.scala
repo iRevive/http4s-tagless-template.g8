@@ -40,7 +40,7 @@ class TransactorResource[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Tra
         config.retryPolicy.timeout,
         timeoutError(log"Cannot acquire Postgres connection in [\${config.retryPolicy.timeout}]")
       )
-      .local[TraceId](_.subId("verify-postgres-connection"))
+      .local[TraceId](_.childText("verify-postgres-connection"))
 
   private[postgres] def verifyConnectionOnce(transactor: HikariTransactor[F], timeout: FiniteDuration): F[Unit] = {
     import doobie.implicits._

@@ -3,6 +3,7 @@ package $organization$.util.logging
 import java.util.UUID
 
 import $organization$.test.BaseSpec
+import $organization$.util.logging.TraceId./
 
 class TraceIdSpec extends BaseSpec {
 
@@ -11,16 +12,18 @@ class TraceIdSpec extends BaseSpec {
     "generate a value from random uuid" in EffectAssertion() {
       for {
         traceId <- TraceId.randomUuid
-      } yield noException shouldBe thrownBy(UUID.fromString(traceId.value))
+      } yield traceId.value shouldBe a[UUID]
     }
 
-    "generate a correct sub id" in forAll { (string: String, int: Int) =>
+    "generate a correct sub id" in forAll { string: String =>
       EffectAssertion() {
         for {
           traceId <- TraceId.randomUuid
         } yield {
-          traceId.subId(string).value shouldBe traceId.value + "#" + string
-          traceId.subId(int).value shouldBe traceId.value + "#" + int
+          inside(traceId.child(TraceId.Text(string))) {
+            case TraceId.Uuid(_) / TraceId.Text(value) =>
+              value shouldBe string
+          }
         }
       }
     }

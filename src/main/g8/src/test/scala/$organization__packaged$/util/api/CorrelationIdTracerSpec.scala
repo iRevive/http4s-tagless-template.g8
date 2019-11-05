@@ -4,6 +4,7 @@ import cats.effect.concurrent.MVar
 import cats.mtl.implicits._
 import cats.syntax.functor._
 import $organization$.test.BaseSpec
+import $organization$.util.logging.TraceId./
 import $organization$.util.logging.{TraceId, TraceProvider}
 import org.http4s.Method._
 import org.http4s._
@@ -21,7 +22,13 @@ class CorrelationIdTracerSpec extends BaseSpec {
           m       <- MVar.empty[Eff, TraceId]
           _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
           traceId <- m.read
-        } yield traceId.value should startWith(s"/api/balance-state#\$correlationId")
+        } yield {
+          inside(traceId) {
+            case TraceId.ApiRoute(route) / TraceId.Text(value) / TraceId.Text(_) =>
+              route shouldBe "/api/balance-state"
+              value shouldBe correlationId
+          }
+        }
       }
     }
 
@@ -32,7 +39,12 @@ class CorrelationIdTracerSpec extends BaseSpec {
         m       <- MVar.empty[Eff, TraceId]
         _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
         traceId <- m.read
-      } yield traceId.value should startWith("/api/balance-state#")
+      } yield {
+        inside(traceId) {
+          case TraceId.ApiRoute(route) / TraceId.Text(_) =>
+            route shouldBe "/api/balance-state"
+        }
+      }
     }
 
   }

@@ -1,8 +1,7 @@
 package $organization$.util.api
 
 import $organization$.it.ITSpec
-import org.http4s.syntax.literals._
-import org.http4s.{Method, Request, Status}
+import org.http4s._
 
 class HealthApiSpec extends ITSpec {
 
