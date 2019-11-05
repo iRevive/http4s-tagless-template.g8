@@ -29,18 +29,22 @@ class ApplicationResource[F[_]: Sync: TraceProvider: ErrorHandle: ErrorIdGen](
       apiModule         <- Resource.liftF(createApiModule(config, serviceModule))
     } yield Application(persistenceModule, serviceModule, apiModule)
 
-  private def createApiModule(config: Config, serviceModule: ServiceModule[F]): F[ApiModule[F]] =
+  private def createApiModule(
+      config: Config,
+      persistenceModule: PersistenceModule[F],
+      serviceModule: ServiceModule[F]
+  ): F[ApiModule[F]] =
     for {
       apiConfig <- config.loadF[F, ApiConfig]("application.api")
       _         <- logger.info(log"Loading API module with config \$apiConfig")
-    } yield ApiModule(mkRoutes(serviceModule), apiConfig)
+    } yield ApiModule(mkRoutes(persistenceModule, serviceModule), apiConfig)
 
-  private def mkRoutes(serviceModule: ServiceModule[F]): HttpApp[F] = {
+  private def mkRoutes(persistenceModule: PersistenceModule[F], serviceModule: ServiceModule[F]): HttpApp[F] = {
     val _         = serviceModule
-    val healthApi = new HealthApi[F]
+    val healthApi = new HealthApi[F](persistenceModule.transactor)
 
     Router(
-      "/health" -> healthApi.routes
+      "/" -> healthApi.routes
     ).orNotFound
   }
 

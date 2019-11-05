@@ -15,6 +15,7 @@ object Versions {
   val catsEffect       = "$cats_effect_version$"
   val catsMTL          = "$cats_mtl_version$"
   val monix            = "$monix_version$"
+  val sup              = "$sup_version$"
   val doobie           = "$doobie_version$"
   val flyway           = "$flyway_version$"
   val newtype          = "$newtype_version$"
@@ -49,6 +50,9 @@ object Dependencies {
     "io.estatico"                %% "newtype"              % Versions.newtype,
     "eu.timepit"                 %% "refined"              % Versions.refined,
     "eu.timepit"                 %% "refined-cats"         % Versions.refined,
+    "com.kubukoz"                %% "sup-doobie"           % Versions.sup,
+    "com.kubukoz"                %% "sup-http4s"           % Versions.sup,
+    "com.kubukoz"                %% "sup-circe"            % Versions.sup,
     "org.tpolecat"               %% "doobie-hikari"        % Versions.doobie,
     "org.tpolecat"               %% "doobie-refined"       % Versions.doobie,
     "org.tpolecat"               %% "doobie-postgres"      % Versions.doobie,
