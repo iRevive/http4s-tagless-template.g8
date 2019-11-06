@@ -24,7 +24,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
           traceId <- m.read
         } yield {
           inside(traceId) {
-            case TraceId.ApiRoute(route) / TraceId.Text(value) / TraceId.Text(_) =>
+            case TraceId.ApiRoute(route) / TraceId.Const(value) / TraceId.Alphanumeric(_) =>
               route shouldBe "/api/balance-state"
               value shouldBe correlationId
           }
@@ -41,7 +41,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
         traceId <- m.read
       } yield {
         inside(traceId) {
-          case TraceId.ApiRoute(route) / TraceId.Text(_) =>
+          case TraceId.ApiRoute(route) / TraceId.Alphanumeric(_) =>
             route shouldBe "/api/balance-state"
         }
       }

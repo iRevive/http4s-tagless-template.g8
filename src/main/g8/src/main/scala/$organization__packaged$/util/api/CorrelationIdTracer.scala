@@ -20,7 +20,7 @@ object CorrelationIdTracer {
 
       for {
         alphanumeric <- OptionT.liftF(TraceId.randomAlphanumeric[F](6))
-        traceId = correlationHeader.fold(root)(v => root.childText(v)).child(alphanumeric)
+        traceId = correlationHeader.fold(root)(v => root.child(TraceId.Const(v))).child(alphanumeric)
         header  = Header(CorrelationIdHeader.value, correlationHeader.getOrElse(alphanumeric.value))
         result <- routes.run(req).map(_.putHeaders(header)).scope(traceId)
       } yield result

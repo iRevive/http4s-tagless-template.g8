@@ -20,8 +20,8 @@ class TraceIdSpec extends BaseSpec {
         for {
           traceId <- TraceId.randomUuid
         } yield {
-          inside(traceId.child(TraceId.Text(string))) {
-            case TraceId.Uuid(_) / TraceId.Text(value) =>
+          inside(traceId.child(TraceId.Const(string))) {
+            case TraceId.Uuid(_) / TraceId.Const(value) =>
               value shouldBe string
           }
         }
