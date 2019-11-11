@@ -5,7 +5,7 @@ import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.syntax.either._
 import cats.syntax.flatMap._
-import $organization$.util.error.{EmptyThrowableExtractor, ErrorIdGen, ErrorRaise}
+import $organization$.util.error.{ErrorIdGen, ErrorRaise, ThrowableSelect}
 import $organization$.util.logging.Loggable
 import $organization$.util.syntax.mtl.raise._
 import io.circe._
@@ -29,7 +29,7 @@ final class JsonOps(private val json: Json) extends AnyVal {
 
 }
 
-@scalaz.deriving(Loggable, EmptyThrowableExtractor)
+@scalaz.deriving(Loggable, ThrowableSelect.Empty)
 final case class JsonDecodingError(
     json: Json,
     targetClass: String,

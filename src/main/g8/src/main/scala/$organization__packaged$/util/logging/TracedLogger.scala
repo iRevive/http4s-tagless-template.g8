@@ -9,34 +9,26 @@ import com.typesafe.scalalogging.{Logger, LoggerTakingImplicit}
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync[F], traceProvider: TraceProvider[F]) {
 
-  def info(value: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
-    F.delay(logger.info(value))
+  def info(message: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+    F.delay(logger.info(message))
   }
 
-  def error(value: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
-    F.delay(logger.error(value))
+  def warn(message: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+    F.delay(logger.warn(message))
   }
 
-  def error(value: => String, cause: Throwable): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
-    F.delay(logger.error(value, cause))
+  def error(message: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+    F.delay(logger.error(message))
   }
 
-  def error(value: => String, error: RaisedError): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
-    F.delay(withError(value, error))
-  }
-
-  def warn(value: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
-    F.delay(logger.warn(value))
-  }
-
-  private def withError(message: => String, error: RaisedError)(implicit traceId: TraceId): Unit =
-    ThrowableExtractor[AppError].select(error.error) match {
-      case Some(cause) =>
-        logger.error(message, cause)
-
-      case None =>
-        logger.error(message)
+  def error[E: ThrowableSelect](message: => String, error: E): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+    F.delay {
+      ThrowableSelect[E].select(error) match {
+        case Some(cause) => logger.error(message, cause)
+        case None        => logger.error(message)
+      }
     }
+  }
 
 }
 

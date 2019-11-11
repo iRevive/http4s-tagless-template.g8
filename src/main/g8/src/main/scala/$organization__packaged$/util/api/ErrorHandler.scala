@@ -39,7 +39,6 @@ object ErrorHandler {
               response <- Response[F](Status.InternalServerError).withEntity(body).pure[F]
               _        <- logger.error(log"Execution completed with an unhandled error \$error", error)
             } yield Option(response)
-
         }
       }
     }

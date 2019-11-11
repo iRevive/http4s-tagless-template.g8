@@ -9,7 +9,7 @@ import $organization$.util.logging.Loggable
 final case class RaisedError(error: AppError, pos: Position, errorId: String) {
 
   def toException: RuntimeException =
-    ThrowableExtractor[AppError].select(error) match {
+    ThrowableSelect[AppError].select(error) match {
       case Some(cause) => new RuntimeException(Loggable[RaisedError].show(this), cause)
       case None        => new RuntimeException(Loggable[RaisedError].show(this))
     }

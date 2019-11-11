@@ -1,7 +1,7 @@
 package $organization$.persistence.postgres
 
 import $organization$.util.logging.Loggable
-import $organization$.util.error.ThrowableExtractor
+import $organization$.util.error.ThrowableSelect
 
 @scalaz.deriving(Loggable)
 sealed trait PostgresError
@@ -15,7 +15,7 @@ object PostgresError {
   def unavailableConnection(cause: Throwable): PostgresError   = UnavailableConnection(cause)
   def connectionAttemptTimeout(message: String): PostgresError = ConnectionAttemptTimeout(message)
 
-  implicit val postgresErrorThrowableExtractor: ThrowableExtractor[PostgresError] = {
+  implicit val postgresErrorThrowableSelect: ThrowableSelect[PostgresError] = {
     case _: ConnectionAttemptTimeout  => None
     case UnavailableConnection(cause) => Option(cause)
   }
