@@ -1,7 +1,7 @@
 lazy val root = (project in file("."))
   .enablePlugins(ScriptedPlugin)
   .settings(
-    name := "giter8.g8",
+    name := "http4s-tagless.g8",
     Test / test := {
       val _ = (g8Test in Test).toTask("").value
     },
