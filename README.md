@@ -1,6 +1,7 @@
 ## Http4s tagless template
 
 [![Build Status](https://travis-ci.org/iRevive/http4s-tagless-template.g8.svg?branch=master)](https://travis-ci.org/iRevive/http4s-tagless-template.g8.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/iRevive/http4s-tagless-template.g8/badge.svg?branch=master)](https://coveralls.io/github/iRevive/http4s-tagless-template.g8?branch=master)
 
 You can use [Giter8](https://github.com/foundweekends/giter8) to create your own project from the template.
 
