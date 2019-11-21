@@ -15,7 +15,7 @@ g8 https://github.com/iRevive/http4s-tagless-template.g8
  ```
 or
 ```
-sbt new https://github.com/iRevive/http4s-tagless-template.g8
+sbt new iRevive/http4s-tagless-template.g8
 ```
 
 ## Template libraries
