@@ -13,7 +13,6 @@ jdk:
   - openjdk11
 
 script:
-  ## This runs the template with the default parameters, and runs test within the templated app.
   - sbt -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M g8
   - cp -R .git target/g8/.git/
   - cd target/g8
@@ -24,4 +23,4 @@ script:
   - find $HOME/.sbt -name "*.lock" | xargs rm
 
 after_success:
-  - sbt coveralls
+  - bash <(curl -s https://codecov.io/bash)
