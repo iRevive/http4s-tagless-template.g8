@@ -15,13 +15,15 @@ class TraceIdSpec extends BaseSpec {
       } yield traceId.value shouldBe a[UUID]
     }
 
-    "generate a correct sub id" in forAll { string: String =>
-      for {
-        traceId <- TraceId.randomUuid
-      } yield {
-        inside(traceId.child(TraceId.Const(string))) {
-          case TraceId.Uuid(_) / TraceId.Const(value) =>
-            value shouldBe string
+    "generate a correct sub id" in EffectAssertion() {
+      forAll { string: String =>
+        for {
+          traceId <- TraceId.randomUuid
+        } yield {
+          inside(traceId.child(TraceId.Const(string))) {
+            case TraceId.Uuid(_) / TraceId.Const(value) =>
+              value shouldBe string
+          }
         }
       }
     }

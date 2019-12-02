@@ -36,7 +36,7 @@ class EffectCheckerAsserting[F[_], A](implicit F: Effect[F]) extends CheckerAsse
       scalaCheckLabels
     )
 
-    throw error
+    F.raiseError(error)
   }
 
 }
