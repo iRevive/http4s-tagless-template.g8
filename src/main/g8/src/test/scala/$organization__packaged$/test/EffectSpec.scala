@@ -9,13 +9,15 @@ import $organization$.util.execution.Traced
 import $organization$.util.logging.TraceId
 import monix.eval.Task
 import monix.execution.Scheduler
-import org.scalatest.{Inside, Matchers, OptionValues, WordSpecLike}
+import org.scalatest.{Inside, OptionValues}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.concurrent.duration._
 
 abstract class EffectSpec[E]
-    extends WordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with EitherMatchers
     with OptionValues
@@ -25,9 +27,9 @@ abstract class EffectSpec[E]
 
   protected type Eff[A] = Traced[EitherT[Task, E, *], A]
 
-  protected implicit val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
-  protected implicit val Eff: Concurrent[Eff]        = Concurrent.catsKleisliConcurrent
-  protected implicit val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const("test")
+  protected implicit final val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
+  protected implicit lazy val Eff: Concurrent[Eff]         = Concurrent.catsKleisliConcurrent
+  protected implicit final val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const("test")
 
   protected final val DefaultTimeout: FiniteDuration = 20.seconds
 

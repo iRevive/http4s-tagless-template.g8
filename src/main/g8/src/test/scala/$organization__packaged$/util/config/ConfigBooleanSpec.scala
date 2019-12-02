@@ -4,9 +4,10 @@ import $organization$.util.logging.Loggable
 import com.typesafe.config.ConfigFactory
 import io.circe.config.syntax._
 import io.circe.generic.auto._
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ConfigBooleanSpec extends WordSpec with Matchers {
+class ConfigBooleanSpec extends AnyWordSpec with Matchers {
 
   import ConfigBooleanSpec._
 

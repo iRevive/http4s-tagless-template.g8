@@ -14,20 +14,18 @@ class CorrelationIdTracerSpec extends BaseSpec {
   "CorrelationIdTracer" should {
 
     "add `X-Correlation-Id` header to trace prefix" in forAll { correlationId: String =>
-      EffectAssertion() {
-        val header  = Header(CorrelationIdTracer.CorrelationIdHeader.value, correlationId)
-        val request = Request[Eff](Method.GET, uri"/api/balance-state/123", headers = Headers.of(header))
+      val header  = Header(CorrelationIdTracer.CorrelationIdHeader.value, correlationId)
+      val request = Request[Eff](Method.GET, uri"/api/balance-state/123", headers = Headers.of(header))
 
-        for {
-          m       <- MVar.empty[Eff, TraceId]
-          _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
-          traceId <- m.read
-        } yield {
-          inside(traceId) {
-            case TraceId.ApiRoute(route) / TraceId.Const(value) / TraceId.Alphanumeric(_) =>
-              route shouldBe "/api/balance-state"
-              value shouldBe correlationId
-          }
+      for {
+        m       <- MVar.empty[Eff, TraceId]
+        _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
+        traceId <- m.read
+      } yield {
+        inside(traceId) {
+          case TraceId.ApiRoute(route) / TraceId.Const(value) / TraceId.Alphanumeric(_) =>
+            route shouldBe "/api/balance-state"
+            value shouldBe correlationId
         }
       }
     }

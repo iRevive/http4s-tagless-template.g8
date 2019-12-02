@@ -10,17 +10,19 @@ import $organization$.util.error.ErrorIdGen
 import $organization$.util.execution.EffConcurrentEffect
 import $organization$.util.logging.TraceId
 import com.typesafe.config.{Config, ConfigFactory}
+import io.estatico.newtype.Coercible
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalacheck.Arbitrary
-import org.scalatest._
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import io.estatico.newtype.Coercible
+import org.scalatest.{Inside, OptionValues}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatestplus.scalacheck.{CheckerAsserting, ScalaCheckPropertyChecks}
 
 import scala.concurrent.duration._
 
 trait ITSpec
-    extends WordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with EitherValues
     with OptionValues
@@ -30,11 +32,11 @@ trait ITSpec
 
   protected type Eff[A] = $organization$.util.execution.Eff[A]
 
-  protected implicit val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
-  protected implicit val Eff: ConcurrentEffect[Eff]  = new EffConcurrentEffect
-  protected implicit val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const("test")
+  protected implicit final val DefaultScheduler: Scheduler = monix.execution.Scheduler.Implicits.global
+  protected implicit final val Eff: ConcurrentEffect[Eff]  = new EffConcurrentEffect
+  protected implicit final val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const("test")
 
-  protected def DefaultTimeout: FiniteDuration = 20.seconds
+  protected final val DefaultTimeout: FiniteDuration = 20.seconds
 
   @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   protected def withApplication[A](timeout: Duration = DefaultTimeout)(program: Application[Eff] => Eff[A]): Unit =
@@ -59,6 +61,9 @@ trait ITSpec
   ): Arbitrary[N] =
     ev(R)
 
-  protected lazy val DefaultConfig: Config = ConfigFactory.load()
+  protected lazy final val DefaultConfig: Config = ConfigFactory.load()
+
+  protected implicit final def effCheckingAsserting[A]: CheckerAsserting[Eff[A]] { type Result = Eff[Unit] } =
+    new EffectCheckerAsserting
 
 }
