@@ -4,7 +4,7 @@ import $organization$.util.logging.Loggable
 import sourcecode.Enclosing
 
 final case class Position(enclosing: sourcecode.Enclosing, line: sourcecode.Line) {
-  def fullPosition: String = s"\${enclosing.value}:\${line.value}"
+  def fullPosition: String = s"\${enclosing.value}:\${line.value.toString}"
 }
 
 object Position {

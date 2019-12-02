@@ -11,6 +11,7 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.headers.`Content-Type`
 import org.http4s.syntax.kleisli._
+import org.http4s.syntax.literals._
 import shapeless.syntax.inject._
 
 class ErrorHandlerSpec extends BaseSpec {

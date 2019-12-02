@@ -80,7 +80,7 @@ class RetrySpec extends EffectSpec[ExecutionError] {
 
 object RetrySpec {
 
-  @scalaz.deriving(Loggable)
+  @scalaz.annotation.deriving(Loggable)
   final case class ExecutionError(cause: String)
 
 }

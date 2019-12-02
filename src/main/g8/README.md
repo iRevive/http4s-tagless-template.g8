@@ -88,7 +88,7 @@ or
 ```
 sbt testAll
 ```
-Coverage reports will be in `target/scala-2.12/scoverage-report`. There are HTML and XML reports. The XML is useful if you need to programatically use the results, or if you're writing a tool.  
+Coverage reports will be in `target/scala-2.13/scoverage-report`. There are HTML and XML reports. The XML is useful if you need to programatically use the results, or if you're writing a tool.  
  
  
  

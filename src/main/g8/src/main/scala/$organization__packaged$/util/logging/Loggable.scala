@@ -90,8 +90,8 @@ trait LoggableInstances {
   implicit def refinedLoggable[T, P, F[_, _]](implicit underlying: Loggable[T], refType: RefType[F]): Loggable[F[T, P]] =
     value => underlying.show(refType.unwrap(value))
 
-  def traversableLoggable[A, M[X] <: TraversableOnce[X]](implicit ev: Loggable[A]): Loggable[M[A]] =
-    value => value.map(ev.show).mkString("[", ", ", "]")
+  def traversableLoggable[A, M[X] <: IterableOnce[X]](implicit ev: Loggable[A]): Loggable[M[A]] =
+    value => value.iterator.map(ev.show).mkString("[", ", ", "]")
 
   implicit def coercibleLoggable[R, N](implicit ev: Coercible[Loggable[R], Loggable[N]], R: Loggable[R]): Loggable[N] =
     ev(R)

@@ -5,6 +5,7 @@ import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Authorization
 import org.http4s.syntax.kleisli._
+import org.http4s.syntax.literals._
 
 class AuthUtilsSpec extends BaseSpec {
 

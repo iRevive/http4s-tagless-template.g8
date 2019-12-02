@@ -6,8 +6,8 @@ import cats.syntax.functor._
 import $organization$.test.BaseSpec
 import $organization$.util.logging.TraceId./
 import $organization$.util.logging.{TraceId, TraceProvider}
-import org.http4s.Method._
 import org.http4s._
+import org.http4s.syntax.literals._
 
 class CorrelationIdTracerSpec extends BaseSpec {
 
@@ -53,7 +53,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
     import org.http4s.dsl.impl.{->, /, Root}
 
     HttpRoutes.of[Eff] {
-      case GET -> Root / "api" / "balance-state" / _ =>
+      case Method.GET -> Root / "api" / "balance-state" / _ =>
         TraceProvider[Eff].ask.flatMap(m.put).as(Response[Eff](Status.Ok))
     }
   }

@@ -5,7 +5,7 @@ import java.time.Instant
 import cats.Eq
 import $organization$.util.logging.Loggable
 
-@scalaz.deriving(Eq, Loggable)
+@scalaz.annotation.deriving(Eq, Loggable)
 final case class Persisted[PK, A](
     id: PK,
     createdAt: Instant,

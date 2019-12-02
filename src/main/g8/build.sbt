@@ -20,22 +20,22 @@ lazy val root = (project in file("."))
   )
 
 lazy val commonSettings = Seq(
-  organization := Settings.organization,
-  scalaVersion := Versions.scala,
-  javacOptions ++= Seq("-source", "11"),
-  addCompilerPlugin("org.scalamacros" % "paradise"            % "2.1.1" cross CrossVersion.full),
-  addCompilerPlugin("org.typelevel"   %% "kind-projector"     % Versions.kindProjector cross CrossVersion.full),
-  addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % Versions.betterMonadicFor)
+  organization            := Settings.organization,
+  scalaVersion            := Versions.scala,
+  javacOptions            ++= Seq("-source", "11"),
+  Compile / scalacOptions += "-Ymacro-annotations",
+  addCompilerPlugin("org.typelevel" %% "kind-projector"     % Versions.kindProjector cross CrossVersion.full),
+  addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % Versions.betterMonadicFor)
 )
 
 lazy val scalazDerivingSettings = Seq(
-  // WORKAROUND for scalaz.deriving: https://github.com/sbt/sbt/issues/1965
+  // WORKAROUND for @scalaz.annotation.deriving: https://github.com/sbt/sbt/issues/1965
   Compile / managedClasspath := {
     val res = (Compile / resourceDirectory).value
     val old = (Compile / managedClasspath).value
     Attributed.blank(res) +: old
   },
-  addCompilerPlugin("org.scalaz" %% "deriving-plugin" % Versions.scalazDeriving)
+  addCompilerPlugin("org.scalaz" %% "deriving-plugin" % Versions.scalazDeriving cross CrossVersion.full)
 )
 
 lazy val testSettings = Seq(

@@ -11,7 +11,7 @@ import io.estatico.newtype.macros.newtype
 object NewTypes {
 
   @newtype
-  @scalaz.deriving(Loggable)
+  @scalaz.annotation.deriving(Loggable)
   final case class UserId(toInt: PosInt)
 
   object UserId {
