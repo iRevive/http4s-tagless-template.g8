@@ -93,13 +93,14 @@ lazy val buildSettings = Seq(
 
 lazy val wartRemoverSettings = Seq(
   Compile / compile / wartremoverErrors ++= Warts.allBut(
-    Wart.Any,                // false positives
-    Wart.Nothing,            // false positives
-    Wart.Product,            // false positives
-    Wart.Serializable,       // false positives
-    Wart.ImplicitParameter,  // only used for Pos, but evidently can't be suppressed
-    Wart.ImplicitConversion, // it's fine here
-    Wart.PublicInference     // fails https://github.com/wartremover/wartremover/issues/398
+    Wart.Any,                    // false positives
+    Wart.Nothing,                // false positives
+    Wart.Product,                // false positives
+    Wart.Serializable,           // false positives
+    Wart.ImplicitParameter,      // only used for Pos, but evidently can't be suppressed
+    Wart.ImplicitConversion,     // it's fine here
+    Wart.PublicInference,        // fails https://github.com/wartremover/wartremover/issues/398
+    Wart.EitherProjectionPartial // magnolia issue https://github.com/propensive/magnolia/issues/191
   )
 )
 
