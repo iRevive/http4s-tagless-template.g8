@@ -63,7 +63,7 @@ object Dependencies {
     "ch.qos.logback"             % "logback-classic"       % Versions.logback,
     "org.tpolecat"               %% "doobie-scalatest"     % Versions.doobie % "it",
     "org.scalatest"              %% "scalatest"            % Versions.scalatest % "it,test",
-    "org.scalatestplus"          %% "scalacheck-1.14"      % Versions.scalatestScalacheck % "it,test",
+    "org.scalatestplus"          %% "scalacheck-1-14"      % Versions.scalatestScalacheck % "it,test",
     "com.ironcorelabs"           %% "cats-scalatest"       % Versions.catsScalatest % "it,test",
     "org.scalacheck"             %% "scalacheck"           % Versions.scalacheck % "it,test",
     "eu.timepit"                 %% "refined-scalacheck"   % Versions.refined % "it,test"
