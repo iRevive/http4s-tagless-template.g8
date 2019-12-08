@@ -100,7 +100,8 @@ lazy val wartRemoverSettings = Seq(
     Wart.ImplicitParameter,      // only used for Pos, but evidently can't be suppressed
     Wart.ImplicitConversion,     // it's fine here
     Wart.PublicInference,        // fails https://github.com/wartremover/wartremover/issues/398
-    Wart.EitherProjectionPartial // magnolia issue https://github.com/propensive/magnolia/issues/191
+    Wart.EitherProjectionPartial,// magnolia issue https://github.com/propensive/magnolia/issues/191
+    Wart.JavaSerializable        // magnolia issue https://github.com/propensive/magnolia/issues/191
   )
 )
 
