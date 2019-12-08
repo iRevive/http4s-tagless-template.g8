@@ -14,9 +14,7 @@ jdk:
 
 script:
   - sbt -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M g8
-  - cp -R .git target/g8/.git/
   - cd target/g8
-  - echo 'addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.2.7")' >> project/coverall.sbt
   - sbt ci
 
   ## Tricks to avoid unnecessary cache updates
