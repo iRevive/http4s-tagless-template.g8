@@ -41,6 +41,7 @@ object Loggable extends LoggableInstances {
   }
 
   trait InterpolatorOps {
+
     @inline
     implicit def toLoggableInterpolator(sc: StringContext): LoggableInterpolator = new LoggableInterpolator(sc)
   }
