@@ -91,6 +91,7 @@ object Retry {
 
   @scalaz.deriving(Loggable)
   sealed trait Operation
+
   object Operation {
     final case object Result  extends Operation
     final case object Retry   extends Operation
