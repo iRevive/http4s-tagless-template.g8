@@ -3,11 +3,10 @@
 [![Build Status](https://travis-ci.org/iRevive/http4s-tagless-template.g8.svg?branch=master)](https://travis-ci.org/iRevive/http4s-tagless-template.g8)
 [![codecov](https://codecov.io/gh/iRevive/http4s-tagless-template.g8/branch/master/graph/badge.svg)](https://codecov.io/gh/iRevive/http4s-tagless-template.g8)
 
-You can use [Giter8](https://github.com/foundweekends/giter8) to create your own project from the template.
-
 Prerequisites:
 - JDK 11
-- Giter8 0.11.0
+- Giter8 0.12.0
+- SBT 1.x
 
 Open a console and run the following command to apply this template:
 ```
