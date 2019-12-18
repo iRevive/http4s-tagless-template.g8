@@ -1,6 +1,7 @@
 package $organization$.persistence
 
 import cats.effect._
+import cats.syntax.applicative._
 import cats.syntax.functor._
 import com.typesafe.config.Config
 import doobie.hikari.HikariTransactor
@@ -25,7 +26,7 @@ class PersistenceModuleResource[F[_]: Sync: ErrorHandle: TraceProvider: ErrorIdG
       config <- Resource.liftF(rootConfig.loadF[F, PostgresConfig]("application.persistence.postgres"))
       db     <- transactorResource.createAndVerify(config, blocker)
       _      <- Resource.liftF(logger.info(log"Run migration [\${config.runMigration}]"))
-      _      <- Resource.liftF(Sync[F].whenA(config.runMigration)(runFlywayMigration(db)))
+      _      <- Resource.liftF(runFlywayMigration(db).whenA(config.runMigration))
     } yield db
 
   private def runFlywayMigration(transactor: HikariTransactor[F]): F[Unit] =

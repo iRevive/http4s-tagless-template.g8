@@ -1,8 +1,8 @@
-package $organization$.service
+package $organization$.service.user
 
 import $organization$.persistence.postgres.Persisted
 
-package object user {
+package object domain {
 
   type UserId = NewTypes.UserId
   val UserId = NewTypes.UserId

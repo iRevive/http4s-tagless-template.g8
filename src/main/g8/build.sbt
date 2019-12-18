@@ -151,7 +151,5 @@ lazy val commandSettings = {
     "clean" :: "coverage" :: "test" :: "it:test" :: "coverageReport" :: state
   }
 
-  Seq(
-    commands ++= List(ci, testAll)
-  )
+  commands ++= List(ci, testAll)
 }

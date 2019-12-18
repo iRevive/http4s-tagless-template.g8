@@ -116,14 +116,9 @@ object LoggableDerivation {
     } else {
       val paramStrings = ctx.parameters.flatMap { param =>
         param.dereference(value) match {
-          case v: Option[_] if v.isEmpty =>
-            Nil
-
-          case v: Seq[_] if v.isEmpty =>
-            Nil
-
-          case other =>
-            List(s"\${param.label} = \${param.typeclass.show(other)}")
+          case v: Option[_] if v.isEmpty => Nil
+          case v: Seq[_] if v.isEmpty    => Nil
+          case other                     => List(s"\${param.label} = \${param.typeclass.show(other)}")
         }
       }
 

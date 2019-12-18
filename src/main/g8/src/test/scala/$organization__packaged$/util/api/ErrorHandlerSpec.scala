@@ -4,16 +4,19 @@ import cats.mtl.implicits._
 import $organization$.persistence.postgres.PostgresError
 import $organization$.test.BaseSpec
 import $organization$.util.Position
-import $organization$.util.error.RaisedError
+import $organization$.util.error.{AppError, RaisedError}
 import $organization$.util.logging.TracedLogger
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.headers.`Content-Type`
 import org.http4s.syntax.kleisli._
+import org.http4s.syntax.literals._
 import shapeless.syntax.inject._
 
 class ErrorHandlerSpec extends BaseSpec {
+
+  import $organization$.service.user.api.UserValidationErrorResponse._
 
   "ErrorHandler" should {
 

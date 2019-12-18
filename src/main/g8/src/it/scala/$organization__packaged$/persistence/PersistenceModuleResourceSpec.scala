@@ -4,7 +4,7 @@ import cats.effect.Blocker
 import cats.mtl.implicits._
 import $organization$.it.ITSpec
 import $organization$.util.config.ConfigParsingError
-import $organization$.util.error.ErrorHandle
+import $organization$.util.error.{ErrorHandle, RaisedError}
 import com.typesafe.config.ConfigFactory
 
 class PersistenceModuleResourceSpec extends ITSpec {
@@ -30,7 +30,7 @@ class PersistenceModuleResourceSpec extends ITSpec {
           } yield transactor
 
           for {
-            result <- ErrorHandle[Eff].attempt(fa.use(_ => Eff.unit))
+            result <- fa.use(_ => Eff.unit).attemptHandle[RaisedError]
           } yield {
             inside(result.leftValue.error.select[ConfigParsingError].value) {
               case ConfigParsingError(path, expectedClass, err) =>
@@ -65,7 +65,7 @@ class PersistenceModuleResourceSpec extends ITSpec {
           } yield transactor
 
           for {
-            result <- ErrorHandle[Eff].attempt(fa.use(_ => Eff.unit))
+            result <- fa.use(_ => Eff.unit).attemptHandle[RaisedError]
           } yield {
             inside(result.leftValue.error.select[ConfigParsingError].value) {
               case ConfigParsingError(path, expectedClass, err) =>
@@ -85,7 +85,7 @@ class PersistenceModuleResourceSpec extends ITSpec {
         } yield transactor
 
         for {
-          result <- ErrorHandle[Eff].attempt(fa.use(_ => Eff.unit))
+          result <- fa.use(_ => Eff.unit).attemptHandle[RaisedError]
         } yield {
           result should beRight(())
         }

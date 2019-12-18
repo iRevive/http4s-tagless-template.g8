@@ -1,22 +1,24 @@
 package $organization$
 
+import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.reducible._
 import $organization$.ApplicationResource.{ApiModule, Application}
 import $organization$.persistence.{PersistenceModule, PersistenceModuleResource}
 import $organization$.service.{ServiceModule, ServiceModuleResource}
-import $organization$.util.api.{ApiConfig, HealthApi}
+import $organization$.util.api._
 import $organization$.util.error.{ErrorHandle, ErrorIdGen}
 import $organization$.util.logging.{TraceProvider, TracedLogger}
 import $organization$.util.syntax.config._
 import $organization$.util.syntax.logging._
 import com.typesafe.config.Config
-import org.http4s.HttpApp
-import org.http4s.server.Router
+import org.http4s.server.middleware.Logger
 import org.http4s.syntax.kleisli._
+import org.http4s.{AuthedRoutes, HttpApp, HttpRoutes}
 
-class ApplicationResource[F[_]: Sync: TraceProvider: ErrorHandle: ErrorIdGen](
+class ApplicationResource[F[_]: Concurrent: TraceProvider: ErrorHandle: ErrorIdGen](
     persistenceModuleResource: PersistenceModuleResource[F],
     serviceModuleResource: ServiceModuleResource[F]
 ) {
@@ -37,15 +39,31 @@ class ApplicationResource[F[_]: Sync: TraceProvider: ErrorHandle: ErrorIdGen](
     for {
       apiConfig <- config.loadF[F, ApiConfig]("application.api")
       _         <- logger.info(log"Loading API module with config \$apiConfig")
-    } yield ApiModule(mkRoutes(persistenceModule, serviceModule), apiConfig)
+    } yield ApiModule(mkRoutes(apiConfig.auth, persistenceModule, serviceModule), apiConfig)
 
-  private def mkRoutes(persistenceModule: PersistenceModule[F], serviceModule: ServiceModule[F]): HttpApp[F] = {
-    val _         = serviceModule
+  private def mkRoutes(
+      authConfig: BasicAuthConfig,
+      persistenceModule: PersistenceModule[F],
+      serviceModule: ServiceModule[F]
+  ): HttpApp[F] = {
+    import $organization$.service.user.api.UserValidationErrorResponse._
+
     val healthApi = new HealthApi[F](persistenceModule.transactor)
 
-    Router(
-      "/" -> healthApi.routes
-    ).orNotFound
+    val serviceApi = NonEmptyList.of(serviceModule.userApi.routes).reduceK
+    val secured    = AuthUtils.basicAuth[F](authConfig).apply(AuthedRoutes[Unit, F](req => serviceApi(req.req)))
+
+    val allRoutes = NonEmptyList.of(healthApi.routes, secured).reduceK
+
+    val apiLogger = TracedLogger.named[F]("api")
+
+    val middleware: HttpRoutes[F] => HttpRoutes[F] = { http: HttpRoutes[F] =>
+      Logger.httpRoutes[F](logHeaders = true, logBody = true, logAction = Some(v => apiLogger.debug(v)))(http)
+    }.andThen(http => ErrorHandler.httpRoutes(apiLogger)(http))
+      .andThen(http => CorrelationIdTracer.httpRoutes(http))
+      .andThen(http => org.http4s.server.middleware.CORS(http))
+
+    middleware(allRoutes).orNotFound
   }
 
   private val logger: TracedLogger[F] = TracedLogger.create[F](getClass)

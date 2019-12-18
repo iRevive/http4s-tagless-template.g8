@@ -6,7 +6,7 @@ import cats.syntax.either._
 import $organization$.it.ITSpec
 import $organization$.persistence.postgres.PostgresError
 import $organization$.util.Position
-import $organization$.util.error.RaisedError
+import $organization$.util.error.{AppError, RaisedError}
 import shapeless.syntax.inject._
 
 class RunnerSpec extends ITSpec {
@@ -39,7 +39,7 @@ class RunnerSpec extends ITSpec {
 
     "return checked error" in {
       val error = RaisedError(
-        PostgresError.connectionAttemptTimeout("error").inject,
+        PostgresError.connectionAttemptTimeout("error").inject[AppError],
         Position.generate,
         "errorId"
       )

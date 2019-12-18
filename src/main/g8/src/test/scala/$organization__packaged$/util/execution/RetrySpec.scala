@@ -2,7 +2,6 @@ package $organization$.util.execution
 
 import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
-import cats.mtl.ApplicativeHandle
 import cats.syntax.applicativeError._
 import cats.syntax.apply._
 import cats.syntax.functor._
@@ -46,9 +45,9 @@ class RetrySpec extends EffectSpec[ExecutionError] {
 
       for {
         counter <- Ref.of(0)
-        result <- ApplicativeHandle[Eff, ExecutionError].attempt(
-          fa(counter).retry[ExecutionError](retryPolicy, Retry.Decider.default, Retry.Logger.noop)
-        )
+        result <- fa(counter)
+          .retry[ExecutionError](retryPolicy, Retry.Decider.default, Retry.Logger.noop)
+          .attemptHandle[ExecutionError]
         attempts <- counter.get
       } yield {
         result.leftValue shouldBe exception1

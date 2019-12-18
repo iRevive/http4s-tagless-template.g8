@@ -7,21 +7,21 @@ import $organization$.util.error._
 import com.typesafe.scalalogging.{Logger, LoggerTakingImplicit}
 
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync[F], traceProvider: TraceProvider[F]) {
+class TracedLogger[F[_]](logger: LoggerTakingImplicit[TraceId])(implicit F: Sync[F], T: TraceProvider[F]) {
 
-  def info(message: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
-    F.delay(logger.info(message))
-  }
+  def info(message: => String): F[Unit] =
+    T.ask.flatMap(implicit traceId => F.delay(logger.info(message)))
 
-  def warn(message: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
-    F.delay(logger.warn(message))
-  }
+  def debug(message: => String): F[Unit] =
+    T.ask.flatMap(implicit traceId => F.delay(logger.debug(message)))
 
-  def error(message: => String): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
-    F.delay(logger.error(message))
-  }
+  def warn(message: => String): F[Unit] =
+    T.ask.flatMap(implicit traceId => F.delay(logger.warn(message)))
 
-  def error[E: ThrowableSelect](message: => String, error: E): F[Unit] = traceProvider.ask.flatMap { implicit traceId =>
+  def error(message: => String): F[Unit] =
+    T.ask.flatMap(implicit traceId => F.delay(logger.error(message)))
+
+  def error[E: ThrowableSelect](message: => String, error: E): F[Unit] = T.ask.flatMap { implicit traceId =>
     F.delay {
       ThrowableSelect[E].select(error) match {
         case Some(cause) => logger.error(message, cause)
@@ -38,5 +38,8 @@ object TracedLogger {
 
   def create[F[_]: Sync: TraceProvider](clazz: Class[_]): TracedLogger[F] =
     new TracedLogger[F](Logger.takingImplicit[TraceId](clazz))
+
+  def named[F[_]: Sync: TraceProvider](name: String): TracedLogger[F] =
+    new TracedLogger[F](Logger.takingImplicit[TraceId](name))
 
 }

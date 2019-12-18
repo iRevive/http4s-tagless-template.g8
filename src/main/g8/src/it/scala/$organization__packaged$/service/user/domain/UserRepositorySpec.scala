@@ -1,4 +1,4 @@
-package $organization$.service.user
+package $organization$.service.user.domain
 
 import $organization$.it.{ITSpec, QueryChecker}
 import eu.timepit.refined.scalacheck.all._
