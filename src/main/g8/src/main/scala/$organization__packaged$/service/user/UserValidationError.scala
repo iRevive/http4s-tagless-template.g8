@@ -4,7 +4,7 @@ import $organization$.service.user.domain.UserId
 import $organization$.util.error.ThrowableSelect
 import $organization$.util.logging.Loggable
 
-@scalaz.deriving(Loggable, ThrowableSelect.Empty)
+@scalaz.annotation.deriving(Loggable, ThrowableSelect.Empty)
 sealed trait UserValidationError
 
 object UserValidationError {
