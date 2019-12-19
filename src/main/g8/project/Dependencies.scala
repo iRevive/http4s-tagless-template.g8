@@ -21,7 +21,7 @@ object Versions {
   val newtype             = "$newtype_version$"
   val refined             = "$refined_version$"
   val sourcecode          = "$sourcecode_version$"
-  val magnolia            = "$magnorlia_version$"
+  val magnolia            = "$magnolia_version$"
   val logback             = "$logback_version$"
   val scalaLogging        = "$scala_logging_version$"
   val scalatest           = "$scalatest_version$"

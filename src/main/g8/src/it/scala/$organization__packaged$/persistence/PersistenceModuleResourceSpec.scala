@@ -4,7 +4,7 @@ import cats.effect.Blocker
 import cats.mtl.implicits._
 import $organization$.it.ITSpec
 import $organization$.util.config.ConfigParsingError
-import $organization$.util.error.{ErrorHandle, RaisedError}
+import $organization$.util.error.RaisedError
 import com.typesafe.config.ConfigFactory
 
 class PersistenceModuleResourceSpec extends ITSpec {

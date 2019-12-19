@@ -39,7 +39,7 @@ class ErrorHandlerSpec extends BaseSpec {
 
     "handle checked error" in EffectAssertion() {
       val error = RaisedError(
-        PostgresError.connectionAttemptTimeout("error").inject,
+        PostgresError.connectionAttemptTimeout("error").inject[AppError],
         Position.generate,
         "test"
       )

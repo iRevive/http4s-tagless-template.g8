@@ -6,7 +6,7 @@ import cats.mtl.implicits._
 import cats.syntax.flatMap._
 import $organization$.test.BaseSpec
 import $organization$.util.execution.Retry
-import $organization$.util.error.{ErrorHandle, RaisedError}
+import $organization$.util.error.RaisedError
 import doobie.hikari.HikariTransactor
 import eu.timepit.refined.auto._
 
