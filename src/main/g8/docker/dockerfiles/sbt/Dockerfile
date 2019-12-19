@@ -1,4 +1,4 @@
-FROM eed3si9n/sbt:sbt1.3.2-jdk11-alpine
+FROM eed3si9n/sbt:sbt1.3.4-jdk11-alpine
 
 USER root
 RUN set -x && \

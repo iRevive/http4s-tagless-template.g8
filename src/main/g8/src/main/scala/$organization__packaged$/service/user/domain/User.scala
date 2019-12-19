@@ -1,4 +1,4 @@
-package $organization$.service.user
+package $organization$.service.user.domain
 
 import $organization$.util.logging.Loggable
 

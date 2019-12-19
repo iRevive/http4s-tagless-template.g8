@@ -37,7 +37,7 @@ object ErrorHandler {
               errorId  <- ErrorIdGen[F].gen
               body     <- ApiResponse.Error("Unhandled internal error", errorId).asJson.pure[F]
               response <- Response[F](Status.InternalServerError).withEntity(body).pure[F]
-              _        <- logger.error(log"Execution completed with an unhandled error \$error", error)
+              _        <- logger.error(log"Execution completed with an unhandled error \$error. Error ID [\$errorId]", error)
             } yield Option(response)
         }
       }

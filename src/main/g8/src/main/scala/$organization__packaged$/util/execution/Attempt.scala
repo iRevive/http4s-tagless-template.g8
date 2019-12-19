@@ -27,6 +27,7 @@ object Attempt {
     }
 
   sealed trait Result[E, A]
+
   object Result {
     final case class Success[E, A](value: A)                extends Result[E, A]
     final case class Error[E, A](cause: E)                  extends Result[E, A]

@@ -1,4 +1,4 @@
-package $organization$.service.user
+package $organization$.service.user.domain
 
 import eu.timepit.refined.types.numeric.PosInt
 import doobie.refined.implicits._

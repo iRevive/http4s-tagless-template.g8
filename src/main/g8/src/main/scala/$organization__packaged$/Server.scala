@@ -5,13 +5,12 @@ import java.time.Instant
 import cats.data.Kleisli
 import cats.effect._
 import cats.mtl.implicits._
-import cats.syntax.flatMap._
-import $organization$.ApplicationResource.Application
+import $organization$.ApplicationResource.{ApiModule, Application}
 import $organization$.util.api.ApiConfig
 import $organization$.util.execution.Eff
-import $organization$.util.logging.TracedLogger
+import $organization$.util.logging.{TraceProvider, TracedLogger}
 import $organization$.util.syntax.logging._
-import eu.timepit.refined.auto.autoUnwrap
+import eu.timepit.refined.auto._
 import org.http4s.server.blaze.BlazeServerBuilder
 
 // \$COVERAGE-OFF\$
@@ -19,21 +18,32 @@ object Server extends Runner.Default {
 
   override lazy val name: String = log"Server-\${Instant.now}"
 
-  override def job: Kleisli[Eff, Application[Eff], ExitCode] = Kleisli { app =>
-    val ApiConfig(host, port, _) = app.apiModule.config
+  override def job: Kleisli[Eff, Application[Eff], ExitCode] = new Server[Eff].serve
 
-    val server = BlazeServerBuilder[Eff]
+}
+
+class Server[F[_]: ConcurrentEffect: Timer: TraceProvider] {
+
+  def serve: Kleisli[F, Application[F], ExitCode] = Kleisli { app =>
+    bindHttpServer(app.apiModule).use(_ => ConcurrentEffect[F].never)
+  }
+
+  private def bindHttpServer(apiModule: ApiModule[F]): Resource[F, Unit] = {
+    val ApiConfig(host, port, _) = apiModule.config
+
+    val server = BlazeServerBuilder[F]
       .bindHttp(port, host)
-      .withHttpApp(app.apiModule.httpApp)
+      .withHttpApp(apiModule.httpApp)
       .resource
 
     for {
-      _ <- logger.info(log"Application trying to bind to host [\$host:\$port]")
-      _ <- server.use(_ => logger.info(log"Application bound to [\$host:\$port]") >> Eff.never[Unit])
-    } yield ExitCode.Success
+      _ <- Resource.liftF(logger.info(log"Application trying to bind to host [\$host:\$port]"))
+      _ <- server
+      _ <- Resource.liftF(logger.info(log"Application bound to [\$host:\$port]"))
+    } yield ()
   }
 
-  private val logger: TracedLogger[Eff] = TracedLogger.create[Eff](getClass)
+  private val logger: TracedLogger[F] = TracedLogger.create[F](getClass)
 
 }
 // \$COVERAGE-ON\$

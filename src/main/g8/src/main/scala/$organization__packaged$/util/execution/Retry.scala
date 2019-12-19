@@ -51,6 +51,7 @@ object Retry {
   }
 
   object Decider {
+
     def default[E, A]: Retry.Decider[E, A] = { (result, retries) =>
       result match {
         case Attempt.Result.Success(_) =>
@@ -63,6 +64,7 @@ object Retry {
           if (retries > 0) Retry.Operation.Retry else Retry.Operation.Rethrow
       }
     }
+
   }
 
   trait Logger[F[_], E, A] {
@@ -89,6 +91,7 @@ object Retry {
 
   @scalaz.annotation.deriving(Loggable)
   sealed trait Operation
+
   object Operation {
     final case object Result  extends Operation
     final case object Retry   extends Operation

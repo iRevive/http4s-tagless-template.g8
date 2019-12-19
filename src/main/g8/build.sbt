@@ -97,7 +97,7 @@ lazy val wartRemoverSettings = Seq(
     Wart.Nothing,            // false positives
     Wart.Product,            // false positives
     Wart.Serializable,       // false positives
-    Wart.ImplicitParameter,  // only used for Pos, but evidently can't be suppressed
+    Wart.ImplicitParameter,  // it's fine here
     Wart.ImplicitConversion, // it's fine here
     Wart.PublicInference     // fails https://github.com/wartremover/wartremover/issues/398
   )
@@ -149,7 +149,5 @@ lazy val commandSettings = {
     "clean" :: "coverage" :: "test" :: "it:test" :: "coverageReport" :: state
   }
 
-  Seq(
-    commands ++= List(ci, testAll)
-  )
+  commands ++= List(ci, testAll)
 }

@@ -6,7 +6,7 @@ import cats.mtl.implicits._
 import cats.syntax.flatMap._
 import $organization$.test.BaseSpec
 import $organization$.util.execution.Retry
-import $organization$.util.error.ErrorHandle
+import $organization$.util.error.RaisedError
 import doobie.hikari.HikariTransactor
 import eu.timepit.refined.auto._
 
@@ -44,7 +44,7 @@ class TransactorResourceSpec extends BaseSpec {
 
         for {
           counter <- Ref.of[Eff, Int](0)
-          result  <- ErrorHandle[Eff].attempt(fa(counter).use(_ => Eff.unit))
+          result  <- fa(counter).use(_ => Eff.unit).attemptHandle[RaisedError]
           retries <- counter.get
         } yield {
           result.leftValue.error.select[PostgresError].value
