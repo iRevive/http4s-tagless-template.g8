@@ -16,7 +16,7 @@ class RaisedErrorSpec extends BaseSpec {
         val expectedMessage =
           "RaisedError(" +
             s"error = ConnectionAttemptTimeout(message = \$message), " +
-            s"pos = $organization$.util.error.RaisedErrorSpec#:22, errorId = \$errorId)"
+            s"pos = $organization$.util.error.RaisedErrorSpec:22, errorId = \$errorId)"
 
         for {
           error <- RaisedError.withErrorId[Eff](PostgresError.connectionAttemptTimeout(message).inject[AppError])
@@ -31,7 +31,7 @@ class RaisedErrorSpec extends BaseSpec {
         val expectedMessage =
           "RaisedError(" +
             s"error = ConnectionAttemptTimeout(message = \$message), " +
-            s"pos = $organization$.util.error.RaisedErrorSpec#:37, errorId = \$errorId)"
+            s"pos = $organization$.util.error.RaisedErrorSpec:37, errorId = \$errorId)"
 
         for {
           error <- RaisedError.withErrorId[Eff](PostgresError.connectionAttemptTimeout(message).inject[AppError])

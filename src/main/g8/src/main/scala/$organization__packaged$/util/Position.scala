@@ -14,7 +14,6 @@ object Position {
 
   private def removeAnonEnclosing(enclosing: Enclosing): String =
     enclosing.value
-      .replace("\$anonfun", "")
       .replace("#applyOrElse", "")
       .replace("applyOrElse", "")
       .trim
