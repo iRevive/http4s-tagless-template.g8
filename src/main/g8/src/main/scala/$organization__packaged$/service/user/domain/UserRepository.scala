@@ -5,7 +5,7 @@ import cats.syntax.functor._
 import doobie.hikari.HikariTransactor
 import doobie.refined.implicits._
 import doobie.implicits._
-import doobie.implicits.javatime._
+import doobie.implicits.legacy.instant._
 import doobie.util.query.Query0
 
 class UserRepository[F[_]: Sync](transactor: HikariTransactor[F]) {
