@@ -8,7 +8,7 @@ import eu.timepit.refined.auto._
 import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
-import sup.data.Tagged
+import sup.data.{HealthReporter, Tagged}
 import sup.modules.circe._
 import sup.modules.doobie._
 import sup.modules.http4s._
@@ -18,19 +18,15 @@ import scala.concurrent.duration._
 
 class HealthApi[F[_]: Sync](transactor: HikariTransactor[F]) extends Http4sDsl[F] {
 
-  // TODO use healthCheckRoutes(reporter, "health") after sup 0.7.0 release
-  lazy val routes: HttpRoutes[F] = HttpRoutes.of[F] {
-    case GET -> Root / "health" =>
-      healthCheckResponse(reporter)
-  }
+  lazy val routes: HttpRoutes[F] = healthCheckRoutes(reporter, "health")
 
   private def reporter: HealthReporter[F, NonEmptyList, Tagged[String, *]] =
-    HealthReporter.fromChecks(doobieCheck, apiCheck)
+    HealthReporter.fromChecks(postgresCheck, apiCheck)
 
   private def apiCheck: HealthCheck[F, Tagged[String, *]] =
     HealthCheck.const[F, Id](Health.Healthy).through(mods.tagWith("api"))
 
-  private def doobieCheck: HealthCheck[F, Tagged[String, *]] =
+  private def postgresCheck: HealthCheck[F, Tagged[String, *]] =
     connectionCheck(transactor)(Some(5.seconds))
       .through(mods.recoverToSick)
       .through(mods.tagWith("postgres"))
