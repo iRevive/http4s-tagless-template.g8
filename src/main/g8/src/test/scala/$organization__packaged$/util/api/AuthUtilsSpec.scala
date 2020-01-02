@@ -34,7 +34,7 @@ class AuthUtilsSpec extends BaseSpec {
 
   }
 
-  private val routes: AuthedRoutes[Unit, Eff] = {
+  private lazy val routes: AuthedRoutes[Unit, Eff] = {
     object dsl extends Http4sDsl[Eff]
     import dsl._
 

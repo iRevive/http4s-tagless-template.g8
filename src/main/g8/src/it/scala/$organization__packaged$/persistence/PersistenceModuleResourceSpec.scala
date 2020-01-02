@@ -95,6 +95,6 @@ class PersistenceModuleResourceSpec extends ITSpec {
 
   }
 
-  private val moduleResource = PersistenceModuleResource.default[Eff]
+  private lazy val moduleResource = PersistenceModuleResource.default[Eff]
 
 }

@@ -17,7 +17,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
     "add `X-Correlation-Id` header to trace prefix" in EffectAssertion() {
       forAll { correlationId: String =>
         val header  = Header(CorrelationIdTracer.CorrelationIdHeader.value, correlationId)
-        val request = Request[Eff](Method.GET, uri"/api/balance-state/123", headers = Headers.of(header))
+        val request = Request[Eff](Method.GET, uri"/api/endpoint/123", headers = Headers.of(header))
 
         for {
           m       <- MVar.empty[Eff, TraceId]
@@ -26,7 +26,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
         } yield {
           inside(traceId) {
             case TraceId.ApiRoute(route) / TraceId.Const(value) / TraceId.Alphanumeric(_) =>
-              route shouldBe "/api/balance-state"
+              route shouldBe "/api/endpoint"
               value shouldBe correlationId
           }
         }
@@ -34,7 +34,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
     }
 
     "use api route if `X-Correlation-Id` header is missing" in EffectAssertion() {
-      val request = Request[Eff](Method.GET, uri"/api/balance-state/123")
+      val request = Request[Eff](Method.GET, uri"/api/endpoint/123")
 
       for {
         m       <- MVar.empty[Eff, TraceId]
@@ -43,7 +43,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
       } yield {
         inside(traceId) {
           case TraceId.ApiRoute(route) / TraceId.Alphanumeric(_) =>
-            route shouldBe "/api/balance-state"
+            route shouldBe "/api/endpoint"
         }
       }
     }
@@ -54,7 +54,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
     import org.http4s.dsl.impl.{->, /, Root}
 
     HttpRoutes.of[Eff] {
-      case GET -> Root / "api" / "balance-state" / _ =>
+      case GET -> Root / "api" / "endpoint" / _ =>
         TraceProvider[Eff].ask.flatMap(m.put).as(Response[Eff](Status.Ok))
     }
   }
