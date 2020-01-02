@@ -1,6 +1,7 @@
 package $organization$.test
 
 import cats.effect.ConcurrentEffect
+import cats.effect.testing.scalatest.scalacheck.EffectCheckerAsserting
 import $organization$.util.error.RaisedError
 import $organization$.util.execution.EffConcurrentEffect
 import org.scalatestplus.scalacheck.CheckerAsserting

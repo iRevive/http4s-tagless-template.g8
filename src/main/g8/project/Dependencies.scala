@@ -27,6 +27,7 @@ object Versions {
   val scalatest           = "$scalatest_version$"
   val scalatestScalacheck = "$scalatest_scalacheck_version$"
   val catsScalatest       = "$cats_scalatest_version$"
+  val catsEffectScalaTest = "$cats_effect_scalatest_version$"
   val scalacheck          = "$scalacheck_version$"
   val scalazDeriving      = "$scalaz_deriving_version$"
   val kindProjector       = "$kind_projector_version$"
@@ -34,6 +35,8 @@ object Versions {
 }
 
 object Dependencies {
+
+  val CatsEffectScalaTest = "cats-effect-testing-scalatest-scalacheck"
 
   val root: Seq[ModuleID] = Seq(
     "org.http4s"                 %% "http4s-dsl"           % Versions.http4s,
@@ -66,6 +69,7 @@ object Dependencies {
     "org.scalatest"              %% "scalatest"            % Versions.scalatest % "it,test",
     "org.scalatestplus"          %% "scalacheck-1-14"      % Versions.scalatestScalacheck % "it,test",
     "com.ironcorelabs"           %% "cats-scalatest"       % Versions.catsScalatest % "it,test",
+    "com.codecommit"             %% CatsEffectScalaTest    % Versions.catsEffectScalaTest % "it,test",
     "org.scalacheck"             %% "scalacheck"           % Versions.scalacheck % "it,test",
     "eu.timepit"                 %% "refined-scalacheck"   % Versions.refined % "it,test"
   )
