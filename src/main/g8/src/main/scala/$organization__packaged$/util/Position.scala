@@ -1,7 +1,7 @@
 package $organization$.util
 
-import $organization$.util.logging.Loggable
 import sourcecode.Enclosing
+import io.odin.meta.Render
 
 final case class Position(enclosing: sourcecode.Enclosing, line: sourcecode.Line) {
   def fullPosition: String = s"\${enclosing.value}:\${line.value}"
@@ -18,6 +18,6 @@ object Position {
       .replace("applyOrElse", "")
       .trim
 
-  implicit val positionLoggable: Loggable[Position] = _.fullPosition
+  implicit val renderPosition: Render[Position] = _.fullPosition
 
 }

@@ -1,6 +1,6 @@
 package $organization$.service.user.domain
 
-import $organization$.util.logging.Loggable
+import io.odin.meta.Render
 
-@scalaz.deriving(Loggable)
+@scalaz.deriving(Render)
 final case class User(username: String, password: String)

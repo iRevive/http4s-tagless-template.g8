@@ -4,9 +4,9 @@ import cats.syntax.applicative._
 import $organization$.it.ApiSpec
 import $organization$.service.user.domain.{User, UserId}
 import $organization$.util.api.ApiResponse
-import $organization$.util.syntax.logging._
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax._
+import io.odin.syntax._
 import org.http4s.circe.jsonEncoder
 import org.http4s.syntax.literals._
 import org.http4s.{Method, Request, Status}
@@ -56,7 +56,7 @@ class UserApiSpec extends ApiSpec {
         "user with specified userId does not exist" in withApplication() { implicit app =>
           forAll { userId: UserId =>
             val request      = withAuth(Request[Eff](Method.GET, uri"/api/user" / userId.toString))
-            val expectedBody = ApiResponse.Error(log"User with userId [\$userId] does not exist", "test")
+            val expectedBody = ApiResponse.Error(render"User with userId [\$userId] does not exist", "test")
 
             executeAndCheck[ApiResponse.Error](request, Status.NotFound, expectedBody)
           }

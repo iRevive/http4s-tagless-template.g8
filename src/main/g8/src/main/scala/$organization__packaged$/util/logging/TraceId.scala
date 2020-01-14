@@ -5,7 +5,7 @@ import java.util.UUID
 import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
-import com.typesafe.scalalogging.CanLog
+import io.odin.loggers.HasContext
 
 import scala.util.Random
 
@@ -48,8 +48,6 @@ object TraceId {
     loop(traceId, Nil).mkString(separator)
   }
 
-  implicit object CanLogTraceId extends CanLog[TraceId] {
-    override def logMessage(originalMsg: String, a: TraceId): String = s"[\${TraceId.render(a, "#")}] \$originalMsg"
-  }
+  implicit val hasContext: HasContext[TraceId] = (v: TraceId) => Map("traceId" -> TraceId.render(v, "#"))
 
 }

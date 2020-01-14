@@ -8,17 +8,20 @@ import cats.syntax.flatMap._
 import $organization$.ApplicationResource.Application
 import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
 import $organization$.util.execution.{Eff, EffConcurrentEffect}
-import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
+import $organization$.util.logging.RenderInstances._
+import $organization$.util.logging.{Loggers, TraceId, TraceProvider}
 import $organization$.util.syntax.logging._
+import io.odin.{Level, Logger}
+import io.odin.syntax._
 import com.typesafe.config.ConfigFactory
 import monix.eval.{Task, TaskApp}
 
-class Runner[F[_]: Sync: TraceProvider: ErrorHandle] {
+class Runner[F[_]: Sync: TraceProvider: ErrorHandle: Logger] {
 
   final def run(appResource: ApplicationResource[F], job: Kleisli[F, Application[F], ExitCode]): F[ExitCode] =
     loadApp(appResource)
       .use(job.run)
-      .handleWith[RaisedError](e => logger.error(log"Job completed with an error. \$e", e) >> e.raise[F, ExitCode])
+      .handleWith[RaisedError](e => logger.error(render"Job completed with an error. \$e", e) >> e.raise[F, ExitCode])
       .guaranteeCase(finalizer)
 
   private final def loadApp(appResource: ApplicationResource[F]): Resource[F, Application[F]] =
@@ -33,13 +36,13 @@ class Runner[F[_]: Sync: TraceProvider: ErrorHandle] {
       logger.info("Job completed")
 
     case ExitCase.Error(error) =>
-      logger.error(log"Error during job execution. \$error", error)
+      logger.error(render"Error during job execution. \$error", error)
 
     case ExitCase.Canceled =>
       logger.info("Job was canceled")
   }
 
-  private final val logger: TracedLogger[F] = TracedLogger.create[F](getClass)
+  private final val logger: Logger[F] = Logger[F]
 
 }
 
@@ -53,8 +56,13 @@ object Runner {
     override final def run(args: List[String]): Task[ExitCode] =
       (for {
         traceId <- TraceId.randomAlphanumeric[EitherT[Task, RaisedError, *]](name)
-        result  <- new Runner[Eff].run(ApplicationResource.default, job).run(traceId)
+        result  <- execute.run(traceId)
       } yield result).leftSemiflatMap(e => Task.raiseError(e.toException)).merge
+
+    private final def execute: Eff[ExitCode] =
+      Loggers
+        .createContextLogger(Level.Info)
+        .use(implicit logger => new Runner[Eff].run(ApplicationResource.default, job))
 
     def name: String
     def job: Kleisli[Eff, Application[Eff], ExitCode]

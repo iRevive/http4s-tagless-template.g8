@@ -8,8 +8,9 @@ import $organization$.service.user.domain.UserRepository
 import $organization$.util.error.{ErrorHandle, ErrorIdGen}
 import $organization$.util.logging.TraceProvider
 import com.typesafe.config.Config
+import io.odin.Logger
 
-class ServiceModuleResource[F[_]: Sync: ErrorHandle: TraceProvider: ErrorIdGen] {
+class ServiceModuleResource[F[_]: Sync: ErrorHandle: TraceProvider: ErrorIdGen: Logger] {
 
   def create(rootConfig: Config, persistenceModule: PersistenceModule[F]): Resource[F, ServiceModule[F]] = {
     val _       = rootConfig

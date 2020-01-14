@@ -9,9 +9,10 @@ import $organization$.ApplicationResource
 import $organization$.ApplicationResource.Application
 import $organization$.util.error.ErrorIdGen
 import $organization$.util.execution.EffConcurrentEffect
-import $organization$.util.logging.TraceId
+import $organization$.util.logging.{Loggers, TraceId}
 import com.typesafe.config.{Config, ConfigFactory}
 import io.estatico.newtype.Coercible
+import io.odin.Level
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalacheck.Arbitrary
@@ -42,7 +43,10 @@ trait ITSpec
   @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   protected def withApplication[A](timeout: Duration = DefaultTimeout)(program: Application[Eff] => Eff[A]): Unit =
     EffectAssertion(timeout) {
-      ApplicationResource.default[Eff].create(DefaultConfig).use(program)
+      Loggers
+        .createContextLogger(Level.Info)
+        .flatMap(implicit logger => ApplicationResource.default[Eff].create(DefaultConfig))
+        .use(program)
     }
 
   object EffectAssertion {

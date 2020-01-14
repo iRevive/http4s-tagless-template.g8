@@ -2,9 +2,9 @@ package $organization$.service.user
 
 import $organization$.service.user.domain.UserId
 import $organization$.util.error.ThrowableSelect
-import $organization$.util.logging.Loggable
+import io.odin.meta.Render
 
-@scalaz.deriving(Loggable, ThrowableSelect.Empty)
+@scalaz.deriving(Render, ThrowableSelect.Empty)
 sealed trait UserValidationError
 
 object UserValidationError {

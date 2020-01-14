@@ -1,17 +1,18 @@
 package $organization$.service.user.domain
 
+import $organization$.util.logging.RenderInstances._
 import eu.timepit.refined.types.numeric.PosInt
 import doobie.refined.implicits._
 import doobie.util.{Get, Put}
-import $organization$.util.logging.Loggable
 import io.estatico.newtype.macros.newtype
+import io.odin.meta.Render
 
 // \$COVERAGE-OFF\$
 @SuppressWarnings(Array("org.wartremover.warts.ExplicitImplicitTypes"))
 object NewTypes {
 
   @newtype
-  @scalaz.deriving(Loggable)
+  @scalaz.deriving(Render)
   final case class UserId(toInt: PosInt)
 
   object UserId {

@@ -1,10 +1,11 @@
 package $organization$.persistence
 
-import $organization$.util.logging.Loggable
+import $organization$.util.logging.RenderInstances._
 import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric.{NonNegInt, PosInt}
+import io.odin.meta.Render
 
-@scalaz.deriving(Loggable)
+@scalaz.deriving(Render)
 sealed trait Pagination
 
 object Pagination {

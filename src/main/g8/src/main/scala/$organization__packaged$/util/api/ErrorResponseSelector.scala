@@ -4,8 +4,8 @@ import cats.Applicative
 import $organization$.persistence.postgres.PostgresError
 import $organization$.util.config.ConfigParsingError
 import $organization$.util.json.JsonDecodingError
-import $organization$.util.syntax.logging._
 import io.circe.syntax._
+import io.odin.syntax._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.{Response, Status}
 import shapeless._
@@ -40,10 +40,10 @@ object ErrorResponseSelector extends ErrorResponseSelectorInstances {
 trait ErrorResponseSelectorInstances {
 
   implicit def configParsingErrorResponse[F[_]: Applicative]: ErrorResponseSelector[F, ConfigParsingError] =
-    ErrorResponseSelector.badRequestResponse(e => log"Cannot load config [\${e.expectedClass}] at [\${e.path}]")
+    ErrorResponseSelector.badRequestResponse(e => render"Cannot load config [\${e.expectedClass}] at [\${e.path}]")
 
   implicit def jsonDecodingErrorResponse[F[_]: Applicative]: ErrorResponseSelector[F, JsonDecodingError] =
-    ErrorResponseSelector.badRequestResponse(e => log"Json decoding error. \${e.errors}")
+    ErrorResponseSelector.badRequestResponse(e => render"Json decoding error. \${e.errors}")
 
   implicit def postgresErrorResponse[F[_]: Applicative]: ErrorResponseSelector[F, PostgresError] =
     ErrorResponseSelector.badRequestResponse {

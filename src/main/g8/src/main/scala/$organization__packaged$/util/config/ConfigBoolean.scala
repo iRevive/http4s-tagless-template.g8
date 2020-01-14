@@ -1,11 +1,12 @@
 package $organization$.util.config
 
-import $organization$.util.logging.Loggable
 import io.circe.Decoder
+import io.odin.meta.Render
 
 /**
   * See https://github.com/circe/circe-config/issues/12
   */
+@scalaz.deriving(Render)
 final case class ConfigBoolean(value: Boolean) extends AnyVal
 
 object ConfigBoolean {
@@ -22,7 +23,5 @@ object ConfigBoolean {
 
     booleanDecoder.or(stringDecoder)
   }
-
-  implicit val loggableInstance: Loggable[ConfigBoolean] = _.value.toString
 
 }

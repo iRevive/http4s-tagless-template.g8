@@ -7,8 +7,8 @@ import cats.syntax.apply._
 import cats.syntax.functor._
 import $organization$.test.EffectSpec
 import $organization$.util.execution.RetrySpec._
-import $organization$.util.logging.Loggable
 import eu.timepit.refined.auto._
+import io.odin.meta.Render
 import retry.syntax.all._
 import retry.mtl.syntax.all._
 
@@ -98,7 +98,7 @@ class RetrySpec extends EffectSpec[ExecutionError] {
 
 object RetrySpec {
 
-  @scalaz.deriving(Loggable)
+  @scalaz.deriving(Render)
   final case class ExecutionError(cause: String)
 
 }

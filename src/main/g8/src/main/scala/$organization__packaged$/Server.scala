@@ -4,13 +4,13 @@ import java.time.Instant
 
 import cats.data.Kleisli
 import cats.effect._
-import cats.mtl.implicits._
 import $organization$.ApplicationResource.{ApiModule, Application}
 import $organization$.util.api.ApiConfig
 import $organization$.util.execution.Eff
-import $organization$.util.logging.{TraceProvider, TracedLogger}
-import $organization$.util.syntax.logging._
+import $organization$.util.logging.RenderInstances._
 import eu.timepit.refined.auto._
+import io.odin.Logger
+import io.odin.syntax._
 import org.http4s.server.blaze.BlazeServerBuilder
 
 // \$COVERAGE-OFF\$
@@ -22,7 +22,7 @@ object Server extends Runner.Default {
 
 }
 
-class Server[F[_]: ConcurrentEffect: Timer: TraceProvider] {
+class Server[F[_]: ConcurrentEffect: Timer] {
 
   def serve: Kleisli[F, Application[F], ExitCode] = Kleisli { app =>
     bindHttpServer(app.apiModule).use(_ => ConcurrentEffect[F].never)
@@ -37,13 +37,13 @@ class Server[F[_]: ConcurrentEffect: Timer: TraceProvider] {
       .resource
 
     for {
-      _ <- Resource.liftF(logger.info(log"Application trying to bind to host [\$host:\$port]"))
+      _ <- Resource.liftF(logger.info(render"Application trying to bind to host [\$host:\$port]"))
       _ <- server
-      _ <- Resource.liftF(logger.info(log"Application bound to [\$host:\$port]"))
+      _ <- Resource.liftF(logger.info(render"Application bound to [\$host:\$port]"))
     } yield ()
   }
 
-  private val logger: TracedLogger[F] = TracedLogger.create[F](getClass)
+  private val logger: Logger[F] = io.odin.consoleLogger()
 
 }
 // \$COVERAGE-ON\$

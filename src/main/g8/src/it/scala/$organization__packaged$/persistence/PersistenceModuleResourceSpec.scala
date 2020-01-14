@@ -6,6 +6,7 @@ import $organization$.it.ITSpec
 import $organization$.util.config.ConfigParsingError
 import $organization$.util.error.RaisedError
 import com.typesafe.config.ConfigFactory
+import io.odin.Logger
 
 class PersistenceModuleResourceSpec extends ITSpec {
 
@@ -95,6 +96,10 @@ class PersistenceModuleResourceSpec extends ITSpec {
 
   }
 
-  private lazy val moduleResource = PersistenceModuleResource.default[Eff]
+  private lazy val moduleResource = {
+    implicit val logger: Logger[Eff] = io.odin.consoleLogger[Eff]()
+
+    PersistenceModuleResource.default[Eff]
+  }
 
 }

@@ -3,11 +3,11 @@ package $organization$.util.json
 import cats.mtl.implicits._
 import cats.data.NonEmptyList
 import $organization$.test.BaseSpec
-import $organization$.util.logging.Loggable
 import $organization$.util.syntax.json._
 import io.circe.{DecodingFailure, Json}
 import io.circe.generic.auto._
 import io.circe.syntax._
+import io.odin.meta.Render
 
 class JsonOpsSpec extends BaseSpec {
 
@@ -35,7 +35,7 @@ class JsonOpsSpec extends BaseSpec {
 
           result.json shouldBe input
           result.targetClass shouldBe "JsonModel"
-          result.errors.map(Loggable[DecodingFailure].show) shouldBe expectedErrors
+          result.errors.map(Render[DecodingFailure].render) shouldBe expectedErrors
         }
       }
 

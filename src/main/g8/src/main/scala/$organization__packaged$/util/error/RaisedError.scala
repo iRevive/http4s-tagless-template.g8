@@ -3,15 +3,16 @@ package $organization$.util.error
 import cats.Functor
 import cats.syntax.functor._
 import $organization$.util.Position
-import $organization$.util.logging.Loggable
+import $organization$.util.logging.RenderInstances._
+import io.odin.meta.Render
 
-@scalaz.deriving(Loggable)
+@scalaz.deriving(Render)
 final case class RaisedError(error: AppError, pos: Position, errorId: String) {
 
   def toException: RuntimeException =
     ThrowableSelect[AppError].select(error) match {
-      case Some(cause) => new RuntimeException(Loggable[RaisedError].show(this), cause)
-      case None        => new RuntimeException(Loggable[RaisedError].show(this))
+      case Some(cause) => new RuntimeException(Render[RaisedError].render(this), cause)
+      case None        => new RuntimeException(Render[RaisedError].render(this))
     }
 
 }

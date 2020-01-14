@@ -5,7 +5,6 @@ import $organization$.persistence.postgres.PostgresError
 import $organization$.test.BaseSpec
 import $organization$.util.Position
 import $organization$.util.error.{AppError, RaisedError}
-import $organization$.util.logging.TracedLogger
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
@@ -23,7 +22,7 @@ class ErrorHandlerSpec extends BaseSpec {
     "return result" in EffectAssertion() {
       val defaultResponse = Response[Eff]().withEntity(ApiResponse.Success("value").asJson)
       val routes          = mkRoutes(Eff.pure(defaultResponse))
-      val middleware      = ErrorHandler.httpRoutes[Eff](TracedLogger.create(getClass))(routes).orNotFound
+      val middleware      = ErrorHandler.httpRoutes[Eff](io.odin.consoleLogger())(routes).orNotFound
 
       for {
         response <- middleware.run(Request[Eff](Method.GET, uri"/api/endpoint"))
@@ -45,7 +44,7 @@ class ErrorHandlerSpec extends BaseSpec {
       )
 
       val routes     = mkRoutes(error.raise[Eff, Response[Eff]])
-      val middleware = ErrorHandler.httpRoutes[Eff](TracedLogger.create(getClass))(routes).orNotFound
+      val middleware = ErrorHandler.httpRoutes[Eff](io.odin.consoleLogger())(routes).orNotFound
 
       for {
         response <- middleware.run(Request[Eff](Method.GET, uri"/api/endpoint"))
@@ -62,7 +61,7 @@ class ErrorHandlerSpec extends BaseSpec {
     "handled exception" in EffectAssertion() {
       val error      = new RuntimeException("Something went wrong"): Throwable
       val routes     = mkRoutes(Eff.raiseError(error))
-      val middleware = ErrorHandler.httpRoutes[Eff](TracedLogger.create(getClass))(routes).orNotFound
+      val middleware = ErrorHandler.httpRoutes[Eff](io.odin.consoleLogger())(routes).orNotFound
 
       for {
         response <- middleware.run(Request[Eff](Method.GET, uri"/api/endpoint"))

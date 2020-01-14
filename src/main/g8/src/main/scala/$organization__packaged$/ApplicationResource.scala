@@ -10,15 +10,16 @@ import $organization$.persistence.{PersistenceModule, PersistenceModuleResource}
 import $organization$.service.{ServiceModule, ServiceModuleResource}
 import $organization$.util.api._
 import $organization$.util.error.{ErrorHandle, ErrorIdGen}
-import $organization$.util.logging.{TraceProvider, TracedLogger}
+import $organization$.util.logging.TraceProvider
 import $organization$.util.syntax.config._
-import $organization$.util.syntax.logging._
 import com.typesafe.config.Config
-import org.http4s.server.middleware.Logger
+import org.http4s.server.middleware.{Logger => Http4sLogger}
 import org.http4s.syntax.kleisli._
 import org.http4s.{AuthedRoutes, HttpApp, HttpRoutes}
+import io.odin.Logger
+import io.odin.syntax._
 
-class ApplicationResource[F[_]: Concurrent: TraceProvider: ErrorHandle: ErrorIdGen](
+class ApplicationResource[F[_]: Concurrent: TraceProvider: ErrorHandle: ErrorIdGen: Logger](
     persistenceModuleResource: PersistenceModuleResource[F],
     serviceModuleResource: ServiceModuleResource[F]
 ) {
@@ -38,7 +39,7 @@ class ApplicationResource[F[_]: Concurrent: TraceProvider: ErrorHandle: ErrorIdG
   ): F[ApiModule[F]] =
     for {
       apiConfig <- config.loadF[F, ApiConfig]("application.api")
-      _         <- logger.info(log"Loading API module with config \$apiConfig")
+      _         <- logger.info(render"Loading API module with config \$apiConfig")
     } yield ApiModule(mkRoutes(apiConfig.auth, persistenceModule, serviceModule), apiConfig)
 
   private def mkRoutes(
@@ -55,24 +56,22 @@ class ApplicationResource[F[_]: Concurrent: TraceProvider: ErrorHandle: ErrorIdG
 
     val allRoutes = NonEmptyList.of(healthApi.routes, secured).reduceK
 
-    val apiLogger = TracedLogger.named[F]("api")
-
     val middleware: HttpRoutes[F] => HttpRoutes[F] = { http: HttpRoutes[F] =>
-      Logger.httpRoutes[F](logHeaders = true, logBody = true, logAction = Some(v => apiLogger.debug(v)))(http)
-    }.andThen(http => ErrorHandler.httpRoutes(apiLogger)(http))
+      Http4sLogger.httpRoutes[F](logHeaders = true, logBody = true, logAction = Some(v => logger.debug(v)))(http)
+    }.andThen(http => ErrorHandler.httpRoutes(logger)(http))
       .andThen(http => CorrelationIdTracer.httpRoutes(http))
       .andThen(http => org.http4s.server.middleware.CORS(http))
 
     middleware(allRoutes).orNotFound
   }
 
-  private val logger: TracedLogger[F] = TracedLogger.create[F](getClass)
+  private val logger: Logger[F] = Logger[F]
 
 }
 
 object ApplicationResource {
 
-  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen]: ApplicationResource[F] =
+  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen: Logger]: ApplicationResource[F] =
     new ApplicationResource[F](
       PersistenceModuleResource.default,
       new ServiceModuleResource[F]

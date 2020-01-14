@@ -60,7 +60,6 @@ Detailed instruction is [here](https://docs.docker.com/install/)
 All settings are stored in the `application.conf`.  
 1) `application.http.host` - http host;  
 2) `application.http.port` - http port;  
-3) `LOG_LEVEL` - specify an environment variable to change a log level.  
 By default, application is listening on port 9001.  
 
 

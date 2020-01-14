@@ -2,14 +2,14 @@ package $organization$.util.error
 
 import $organization$.persistence.postgres.PostgresError
 import $organization$.test.BaseSpec
-import $organization$.util.logging.Loggable
 import shapeless.syntax.inject._
+import io.odin.meta.Render
 
 class RaisedErrorSpec extends BaseSpec {
 
   "RaisedError" should {
 
-    "use correct loggable instance" in EffectAssertion() {
+    "use correct render instance" in EffectAssertion() {
       forAll { (message: String, errorId: String) =>
         implicit val errorIdGen: ErrorIdGen[Eff] = ErrorIdGen.const(errorId)
 
@@ -20,7 +20,7 @@ class RaisedErrorSpec extends BaseSpec {
 
         for {
           error <- RaisedError.withErrorId[Eff](PostgresError.connectionAttemptTimeout(message).inject[AppError])
-        } yield Loggable[RaisedError].show(error) shouldBe expectedMessage
+        } yield Render[RaisedError].render(error) shouldBe expectedMessage
       }
     }
 

@@ -5,11 +5,10 @@ import cats.effect.Sync
 import cats.syntax.either._
 import cats.syntax.flatMap._
 import $organization$.util.error.{ErrorIdGen, ErrorRaise, ThrowableSelect}
-import $organization$.util.logging.Loggable
-import $organization$.util.syntax.logging._
 import $organization$.util.syntax.mtl.raise._
 import com.typesafe.config.{Config, ConfigFactory}
 import io.circe.{Decoder, Error, ParsingFailure}
+import io.odin.meta.Render
 
 import scala.reflect.ClassTag
 
@@ -37,9 +36,9 @@ final class ConfigOps(private val config: Config) extends AnyVal {
   private def parseStringAsConfig(input: => String): Either[Error, Config] =
     Either
       .catchNonFatal(ConfigFactory.parseString(input))
-      .leftMap(e => ParsingFailure(log"Couldn't parse [\$input] as config", e))
+      .leftMap(e => ParsingFailure(s"Couldn't parse [\$input] as config", e))
 
 }
 
-@scalaz.deriving(Loggable, ThrowableSelect.Empty)
+@scalaz.deriving(Render, ThrowableSelect.Empty)
 final case class ConfigParsingError(path: String, expectedClass: String, error: Error)

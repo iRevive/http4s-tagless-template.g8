@@ -1,9 +1,9 @@
 package $organization$.util.config
 
-import $organization$.util.logging.Loggable
 import com.typesafe.config.ConfigFactory
 import io.circe.config.syntax._
 import io.circe.generic.auto._
+import io.odin.meta.Render
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -36,8 +36,8 @@ class ConfigBooleanSpec extends AnyWordSpec with Matchers {
     }
 
     "return flat value " in {
-      Loggable[ConfigBoolean].show(true) shouldBe "true"
-      Loggable[ConfigBoolean].show(false) shouldBe "false"
+      Render[ConfigBoolean].render(true) shouldBe "true"
+      Render[ConfigBoolean].render(false) shouldBe "false"
     }
 
   }

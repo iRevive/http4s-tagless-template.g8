@@ -1,9 +1,10 @@
 package $organization$.persistence.postgres
 
-import $organization$.util.logging.Loggable
 import $organization$.util.error.ThrowableSelect
+import $organization$.util.logging.RenderInstances._
+import io.odin.meta.Render
 
-@scalaz.deriving(Loggable)
+@scalaz.deriving(Render)
 sealed trait PostgresError
 
 object PostgresError {

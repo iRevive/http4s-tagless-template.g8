@@ -6,9 +6,9 @@ import cats.effect.Sync
 import cats.syntax.either._
 import cats.syntax.flatMap._
 import $organization$.util.error.{ErrorIdGen, ErrorRaise, ThrowableSelect}
-import $organization$.util.logging.Loggable
 import $organization$.util.syntax.mtl.raise._
 import io.circe._
+import io.odin.meta.Render
 
 import scala.reflect.ClassTag
 
@@ -29,7 +29,7 @@ final class JsonOps(private val json: Json) extends AnyVal {
 
 }
 
-@scalaz.deriving(Loggable, ThrowableSelect.Empty)
+@scalaz.deriving(Render, ThrowableSelect.Empty)
 final case class JsonDecodingError(
     json: Json,
     targetClass: String,
