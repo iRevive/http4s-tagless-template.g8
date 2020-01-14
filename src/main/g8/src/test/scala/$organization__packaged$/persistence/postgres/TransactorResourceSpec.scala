@@ -48,7 +48,7 @@ class TransactorResourceSpec extends BaseSpec {
           retries <- counter.get
         } yield {
           result.leftValue.error.select[PostgresError].value
-          retries shouldBe 5
+          retries shouldBe 6
         }
       }
 

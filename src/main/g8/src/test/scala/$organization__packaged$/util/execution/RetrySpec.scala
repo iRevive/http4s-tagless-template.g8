@@ -8,8 +8,9 @@ import cats.syntax.functor._
 import $organization$.test.EffectSpec
 import $organization$.util.execution.RetrySpec._
 import $organization$.util.logging.Loggable
-import $organization$.util.syntax.retry._
 import eu.timepit.refined.auto._
+import retry.syntax.all._
+import retry.mtl.syntax.all._
 
 import scala.concurrent.duration._
 
@@ -27,7 +28,7 @@ class RetrySpec extends EffectSpec[ExecutionError] {
 
       for {
         counter  <- Ref.of(0)
-        result   <- fa(counter).retry[ExecutionError](retryPolicy, Retry.Decider.default, Retry.Logger.noop)
+        result   <- fa(counter).retryingOnAllMtlErrors[ExecutionError](Retry.makePolicy(retryPolicy), retry.noop)
         attempts <- counter.get
       } yield {
         result shouldBe executionResult
@@ -46,12 +47,12 @@ class RetrySpec extends EffectSpec[ExecutionError] {
       for {
         counter <- Ref.of(0)
         result <- fa(counter)
-          .retry[ExecutionError](retryPolicy, Retry.Decider.default, Retry.Logger.noop)
+          .retryingOnAllMtlErrors[ExecutionError](Retry.makePolicy(retryPolicy), retry.noop)
           .attemptHandle[ExecutionError]
         attempts <- counter.get
       } yield {
         result.leftValue shouldBe exception1
-        attempts shouldBe 5
+        attempts shouldBe 6
       }
     }
 
@@ -61,15 +62,33 @@ class RetrySpec extends EffectSpec[ExecutionError] {
       def fa(counter: Ref[Eff, Int]) =
         counter.update(_ + 1) *> Eff.delay[Unit](throw exception)
 
+      val retryPolicy = Retry.Policy(5, 30.millis, 400.millis)
+
+      for {
+        counter  <- Ref.of(0)
+        result   <- fa(counter).retryingOnAllErrors(Retry.makePolicy(retryPolicy), retry.noop).attempt
+        attempts <- counter.get
+      } yield {
+        result.leftValue shouldBe exception
+        attempts shouldBe 6
+      }
+    }
+
+    "give up when timeout reached" in EffectAssertion() {
+      val exception = new Exception("It's not working")
+
+      def fa(counter: Ref[Eff, Int]) =
+        counter.update(_ + 1) *> Eff.delay[Unit](throw exception)
+
       val retryPolicy = Retry.Policy(5, 30.millis, 40.millis)
 
       for {
         counter  <- Ref.of(0)
-        result   <- fa(counter).retry[ExecutionError](retryPolicy, Retry.Decider.default, Retry.Logger.noop).attempt
+        result   <- fa(counter).retryingOnAllErrors(Retry.makePolicy(retryPolicy), retry.noop).attempt
         attempts <- counter.get
       } yield {
         result.leftValue shouldBe exception
-        attempts shouldBe 5
+        attempts shouldBe 2
       }
     }
 

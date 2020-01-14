@@ -1,19 +1,19 @@
 package $organization$.persistence.postgres
 
 import cats.effect._
-import cats.effect.syntax.concurrent._
 import cats.mtl.syntax.local._
 import cats.syntax.applicativeError._
 import cats.syntax.either._
 import cats.syntax.functor._
 import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
+import $organization$.util.execution.Retry
 import $organization$.util.logging.{TraceId, TraceProvider, TracedLogger}
 import $organization$.util.syntax.logging._
-import $organization$.util.syntax.retry._
 import $organization$.util.syntax.mtl.raise._
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import eu.timepit.refined.auto._
+import retry.mtl.syntax.all._
 
 import scala.concurrent.duration._
 
@@ -35,11 +35,7 @@ class TransactorResource[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Tra
 
   private def verifyConnection(config: PostgresConfig, transactor: HikariTransactor[F]): F[Unit] =
     verifyConnectionOnce(transactor, config.connectionAttemptTimeout)
-      .retryDefault[RaisedError](config.retryPolicy, logger)
-      .timeoutTo(
-        config.retryPolicy.timeout,
-        timeoutError(log"Cannot acquire Postgres connection in [\${config.retryPolicy.timeout}]")
-      )
+      .retryingOnAllMtlErrors[RaisedError](Retry.makePolicy(config.retryPolicy), Retry.logErrors(logger))
       .local[TraceId](_.child(TraceId.Const("verify-postgres-connection")))
 
   private[postgres] def verifyConnectionOnce(transactor: HikariTransactor[F], timeout: FiniteDuration): F[Unit] = {
@@ -52,13 +48,13 @@ class TransactorResource[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Tra
       .handleErrorWith(e => PostgresError.unavailableConnection(e).asLeft.pureOrRaise)
       .void
 
-    val timeoutTo = timeoutError[Unit](log"Failed attempt to acquire Postgres connection in [\$timeout]")
+    val timeoutTo = PostgresError
+      .connectionAttemptTimeout(log"Failed attempt to acquire Postgres connection in [\$timeout]")
+      .asLeft[Unit]
+      .pureOrRaise
 
     Concurrent.timeoutTo(attempt, timeout, timeoutTo)
   }
-
-  private def timeoutError[A](cause: String): F[A] =
-    PostgresError.connectionAttemptTimeout(cause).asLeft[A].pureOrRaise
 
   private val logger: TracedLogger[F] = TracedLogger.create(getClass)
 

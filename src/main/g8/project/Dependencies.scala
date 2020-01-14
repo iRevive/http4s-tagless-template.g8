@@ -14,6 +14,7 @@ object Versions {
   val cats                = "$cats_version$"
   val catsEffect          = "$cats_effect_version$"
   val catsMTL             = "$cats_mtl_version$"
+  val catsRetry           = "$cats_retry_version$"
   val monix               = "$monix_version$"
   val sup                 = "$sup_version$"
   val doobie              = "$doobie_version$"
@@ -46,6 +47,7 @@ object Dependencies {
     "org.typelevel"              %% "cats-core"            % Versions.cats,
     "org.typelevel"              %% "cats-effect"          % Versions.catsEffect,
     "org.typelevel"              %% "cats-mtl-core"        % Versions.catsMTL,
+    "com.github.cb372"           %% "cats-retry-mtl"       % Versions.catsRetry,
     "org.scalaz"                 %% "deriving-macro"       % Versions.scalazDeriving,
     "io.circe"                   %% "circe-generic"        % Versions.circe,
     "io.circe"                   %% "circe-refined"        % Versions.circe,
