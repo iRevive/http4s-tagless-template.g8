@@ -13,9 +13,12 @@ jdk:
   - openjdk11
 
 script:
+  - mkdir -p target/g8 && cd target/g8 && sh ./../../scripts/push-to-demo-repository.sh clone_repo
+  - cd ./../..
   - sbt -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M g8
   - cd target/g8
-  - sbt ci
+  # - sbt ci
+  - sh ./../../scripts/push-to-demo-repository.sh push_changes
 
   ## Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
