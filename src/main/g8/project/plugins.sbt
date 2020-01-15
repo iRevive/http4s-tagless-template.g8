@@ -6,3 +6,4 @@ addSbtPlugin("org.wartremover"           % "sbt-wartremover"           % "$sbt_w
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"              % "$sbt_tpolecat_version$")
 addSbtPlugin("com.github.cb372"          % "sbt-explicit-dependencies" % "$sbt_explicit_dependencies_version$")
 addSbtPlugin("com.timushev.sbt"          % "sbt-updates"               % "$sbt_updates_version$")
+addSbtPlugin("org.scalameta"             % "sbt-mdoc"                  % "$sbt_mdoc_version$")

@@ -1,4 +1,7 @@
-# Database
+---
+id: database
+title: Database
+---
 
 The database connection can be configured by the configuration file or by the environment variables.  
 

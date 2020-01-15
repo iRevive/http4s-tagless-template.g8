@@ -1,4 +1,7 @@
-# Continuous integration
+---
+id: index
+title: Continuous integration
+---
 
 - [Overview](#overview)  
 - [How to create a CI image](#how-to-create-a-ci-image)  
@@ -7,18 +10,18 @@
 ## <a name="overview"></a> Overview
 
 CI uses custom docker image (`ci-sbt`) for compilation of the project. The image has all necessary dependencies: 
-sbt, docker, docker-compose, and cached jar dependencies. More info in [Dockerfile](../../docker/dockerfiles/sbt/Dockerfile).
+sbt, docker, docker-compose, and cached jar dependencies. More info in [Dockerfile](@REPO_URL@/docker/dockerfiles/sbt/Dockerfile).
 
 ## <a name="how-to-create-a-ci-image"></a> How to create a CI image
 
 Execute in a `<root>` project folder:  
-```
-docker build -f docker/dockerfiles/sbt/Dockerfile . -t $name_normalized$/ci-sbt:latest
+```sh
+\$ docker build -f docker/dockerfiles/sbt/Dockerfile . -t $name_normalized$/ci-sbt:latest
 ```
 
 ## <a name="semi-automated-release"></a> Semi-automated release
 
-GitLab CI can make a release only from the `release` branch.   
+According to the [gitlab-ci.yaml](@REPO_URL@/.gitlab-ci.yml) release can be done only from the `release` branch.   
 
 Release steps:
 1) Execute unit and integration tests;

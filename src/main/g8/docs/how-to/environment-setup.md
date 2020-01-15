@@ -1,8 +1,11 @@
-# Environment setup
+---
+id: environment-setup
+title: Environment setup
+---
 
 - [How to install sbt](#how-to-install-sbt)  
 - [How to install docker](#how-to-install-docker)  
-  
+
 ## <a name="how-to-install-sbt"></a> How to install sbt
 1) [MacOS](http://www.scala-sbt.org/1.x/docs/Installing-sbt-on-Mac.html)  
 2) [Windows](http://www.scala-sbt.org/1.x/docs/Installing-sbt-on-Windows.html)   

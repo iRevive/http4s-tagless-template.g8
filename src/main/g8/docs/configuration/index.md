@@ -1,7 +1,10 @@
-# Configuration
+---
+id: index
+title: Configuration
+---
 
-- [HTTP server](./http_server.md)
-- [Database](./database.md)
+- [HTTP server](http-server.md)
+- [Database](database.md)
 
 ## Configuration via application.conf
 

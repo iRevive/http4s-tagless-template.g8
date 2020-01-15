@@ -1,6 +1,9 @@
-# HTTP server
+---
+id: http-server
+title: HTTP server
+---
 
-The HTTP server can be configured by the configuration file or by the environment variables.  
+The HTTP server can be configured by the configuration file or by the environment variables.   
 
 | Config path                   |  Env variable           | Default value     | Description             |
 |-------------------------------|-------------------------|-------------------|-------------------------|
