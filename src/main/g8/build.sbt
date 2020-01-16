@@ -1,6 +1,7 @@
 import sbtrelease.ReleaseStateTransformations._
 
-lazy val root = (project in file("."))
+lazy val root = project
+  .in(file("."))
   .enablePlugins(JavaAppPackaging, AshScriptPlugin)
   .configs(IntegrationTest)
   .settings(Defaults.itSettings)
@@ -18,6 +19,17 @@ lazy val root = (project in file("."))
     name                := Settings.name,
     libraryDependencies ++= Dependencies.root
   )
+
+lazy val docs = project
+  .in(file(s"\${Settings.name}-docs"))
+  .enablePlugins(MdocPlugin, DocusaurusPlugin)
+  .settings(
+    moduleName := s"\${Settings.name}-docs",
+    mdocVariables := Map(
+      "REPO_URL" -> sys.env.getOrElse("REPO_URL", "")
+    )
+  )
+  .dependsOn(root)
 
 lazy val commonSettings = Seq(
   organization := Settings.organization,

@@ -1,0 +1,24 @@
+{
+  "docs": {
+    "Getting started": [
+      "index"
+    ],
+    "Newcomers guide": [
+      "how-to/how-to",
+      "how-to/environment-setup",
+      "how-to/tests-execution",
+      "how-to/run-dockerized-application"
+    ],
+    "CI/CD": [
+      "continuous-integration/index"
+    ],
+    "Design notes": [
+      "design-notes/index"
+    ],
+    "Application configuration": [
+      "configuration/index",
+      "configuration/http-server",
+      "configuration/database"
+    ]
+  }
+}
