@@ -8,7 +8,9 @@ title: Tests execution
 - [How to calculate test coverage](#how-to-calculate-test-coverage)  
 
 ## <a name="how-to-run-tests"></a> How to run tests
-In a `<root>` project directory write in a console  
+
+The unit tests can be executed by:  
+
 ```sh
 \$ sbt test
 ```
@@ -16,14 +18,15 @@ In a `<root>` project directory write in a console
 ## <a name="how-to-run-integration-tests"></a> How to run integration tests
 **Note.** Installed docker is required for integration tests.
 
-In a `<root>` project directory write in a console  
+The integration tests can be executed by:  
+
 ```sh
 \$ sbt it:test
 ```
 
 ## <a name="how-to-calculate-test-coverage"></a> How to calculate coverage
 
-In a `<root>` project directory write in a console  
+The coverage can be calculated by:  
 
 ```sh
 \$ sbt clean coverage test it:test coverageReport

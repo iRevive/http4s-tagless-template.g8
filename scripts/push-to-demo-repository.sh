@@ -11,6 +11,7 @@ clone_repo() {
   git checkout -b "$REMOTE_BRANCH"
   git rm -r *
   git checkout HEAD -- .travis.yml || true
+  git checkout HEAD -- README.md || true
   git commit -m "Clean up"
 
   pwd && ls -la && git status && git remote -v
@@ -25,7 +26,8 @@ push_changes() {
 
   git add .*
   git add -A
-  git rm "default.properties"
+  git rm -f "default.properties"
+  git reset -- README.md
   git commit -m "$TRAVIS_COMMIT_MESSAGE"
 
   git push --force --quiet --set-upstream origin "$REMOTE_BRANCH"
