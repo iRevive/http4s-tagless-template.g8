@@ -24,7 +24,7 @@ object Server extends Runner.Default {
 
 }
 
-class Server[F[_]: ConcurrentEffect: ContextShift: Timer: TraceProvider] {
+class Server[F[_]: ConcurrentEffect: Timer: TraceProvider] {
 
   def serve: Kleisli[F, Application[F], ExitCode] = Kleisli { app =>
     bindHttpServer(app.apiModule).use(_ => ConcurrentEffect[F].never)
@@ -45,7 +45,7 @@ class Server[F[_]: ConcurrentEffect: ContextShift: Timer: TraceProvider] {
     } yield ()
   }
 
-  private val logger: Logger[F] = Loggers.createContextLogger(Level.Info)
+  private val logger: Logger[F] = Loggers.consoleContextLogger(Level.Info)
 
 }
 // \$COVERAGE-ON\$

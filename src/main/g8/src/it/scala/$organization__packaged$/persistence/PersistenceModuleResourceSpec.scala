@@ -98,7 +98,7 @@ class PersistenceModuleResourceSpec extends ITSpec {
   }
 
   private lazy val moduleResource = {
-    implicit val logger: Logger[Eff] = Loggers.createContextLogger(Level.Info)
+    implicit val logger: Logger[Eff] = Loggers.consoleContextLogger(Level.Info)
 
     PersistenceModuleResource.default[Eff]
   }

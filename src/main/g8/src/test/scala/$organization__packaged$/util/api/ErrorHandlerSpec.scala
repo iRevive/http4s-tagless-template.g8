@@ -24,7 +24,7 @@ class ErrorHandlerSpec extends BaseSpec {
     "return result" in EffectAssertion() {
       val defaultResponse = Response[Eff]().withEntity(ApiResponse.Success("value").asJson)
       val routes          = mkRoutes(Eff.pure(defaultResponse))
-      val middleware      = ErrorHandler.httpRoutes[Eff](Loggers.createContextLogger(Level.Info))(routes).orNotFound
+      val middleware      = ErrorHandler.httpRoutes[Eff](Loggers.consoleContextLogger(Level.Info))(routes).orNotFound
 
       for {
         response <- middleware.run(Request[Eff](Method.GET, uri"/api/endpoint"))
@@ -46,7 +46,7 @@ class ErrorHandlerSpec extends BaseSpec {
       )
 
       val routes     = mkRoutes(error.raise[Eff, Response[Eff]])
-      val middleware = ErrorHandler.httpRoutes[Eff](Loggers.createContextLogger(Level.Info))(routes).orNotFound
+      val middleware = ErrorHandler.httpRoutes[Eff](Loggers.consoleContextLogger(Level.Info))(routes).orNotFound
 
       for {
         response <- middleware.run(Request[Eff](Method.GET, uri"/api/endpoint"))
@@ -63,7 +63,7 @@ class ErrorHandlerSpec extends BaseSpec {
     "handled exception" in EffectAssertion() {
       val error      = new RuntimeException("Something went wrong"): Throwable
       val routes     = mkRoutes(Eff.raiseError(error))
-      val middleware = ErrorHandler.httpRoutes[Eff](Loggers.createContextLogger(Level.Info))(routes).orNotFound
+      val middleware = ErrorHandler.httpRoutes[Eff](Loggers.consoleContextLogger(Level.Info))(routes).orNotFound
 
       for {
         response <- middleware.run(Request[Eff](Method.GET, uri"/api/endpoint"))

@@ -21,7 +21,7 @@ class TransactorResourceSpec extends BaseSpec {
     "return an error" when {
 
       "connection in unreachable" in EffectAssertion() {
-        implicit val logger: Logger[Eff] = Loggers.createContextLogger(Level.Info)
+        implicit val logger: Logger[Eff] = Loggers.consoleContextLogger(Level.Info)
 
         def mkResource(counter: Ref[Eff, Int]): TransactorResource[Eff] = new TransactorResource[Eff] {
           override private[postgres] def verifyConnectionOnce(

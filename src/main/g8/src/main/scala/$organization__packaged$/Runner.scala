@@ -5,6 +5,7 @@ import cats.effect._
 import cats.effect.syntax.bracket._
 import cats.mtl.implicits._
 import cats.syntax.flatMap._
+import cats.syntax.monoid._
 import $organization$.ApplicationResource.Application
 import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
 import $organization$.util.execution.{Eff, EffConcurrentEffect}
@@ -59,10 +60,21 @@ object Runner {
       } yield result).leftSemiflatMap(e => Task.raiseError(e.toException)).merge
 
     private final def execute: Eff[ExitCode] =
-      Loggers
-        .createContextLogger[Eff](Loggers.envLogLevel.getOrElse(Level.Info))
-        .withAsync()
-        .use(implicit logger => new Runner[Eff].run(ApplicationResource.default, job))
+      createLogger.use(implicit logger => new Runner[Eff].run(ApplicationResource.default, job))
+
+    private final def createLogger: Resource[Eff, Logger[Eff]] = {
+      val logFile      = s"logs/\$name"
+      val consoleLevel = Loggers.envLogLevel("LOG_LEVEL").getOrElse(Level.Info)
+      val fileLevel    = Loggers.envLogLevel("FILE_LOG_LEVEL").getOrElse(Level.Error)
+
+      val console = Loggers.consoleContextLogger[Eff](consoleLevel)
+
+      for {
+        _      <- Resource.liftF(console.error(render"Using console logger with level \$consoleLevel."))
+        _      <- Resource.liftF(console.error(render"Using file logger with level \$fileLevel. Output \$logFile."))
+        logger <- console.withAsync() |+| Loggers.fileContextLogger(logFile, fileLevel)
+      } yield logger
+    }
 
     def name: String
     def job: Kleisli[Eff, Application[Eff], ExitCode]

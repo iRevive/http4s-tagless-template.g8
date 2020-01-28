@@ -45,7 +45,7 @@ trait ITSpec
   protected def withApplication[A](timeout: Duration = DefaultTimeout)(program: Application[Eff] => Eff[A]): Unit =
     EffectAssertion(timeout) {
       Loggers
-        .createContextLogger(Level.Info)
+        .consoleContextLogger(Level.Info)
         .withAsync()
         .flatMap(implicit logger => ApplicationResource.default[Eff].create(DefaultConfig))
         .use(program)
