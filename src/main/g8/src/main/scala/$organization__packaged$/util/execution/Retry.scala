@@ -2,8 +2,7 @@ package $organization$.util.execution
 
 import cats.Applicative
 import $organization$.util.error.ThrowableSelect
-import $organization$.util.logging.RenderInstances._
-import $organization$.util.syntax.logging._
+import $organization$.util.instances.render._
 import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.Decoder
@@ -27,7 +26,12 @@ object Retry {
   }
 
   def logErrors[F[_]: Applicative, E: Render: ThrowableSelect](logger: Logger[F]): (E, RetryDetails) => F[Unit] =
-    (error, details) => logger.error(render"Retry policy. Error \$error. \$details", error)
+    (error, details) => {
+      ThrowableSelect[E].select(error) match {
+        case Some(cause) => logger.error(render"Retry policy. Error \$error. \$details", cause)
+        case None        => logger.error(render"Retry policy. Error \$error. \$details")
+      }
+    }
 
   @scalaz.deriving(Decoder, Render)
   final case class Policy(retries: NonNegInt, delay: FiniteDuration, timeout: FiniteDuration)

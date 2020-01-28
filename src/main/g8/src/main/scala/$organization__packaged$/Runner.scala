@@ -8,9 +8,8 @@ import cats.syntax.flatMap._
 import $organization$.ApplicationResource.Application
 import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
 import $organization$.util.execution.{Eff, EffConcurrentEffect}
-import $organization$.util.logging.RenderInstances._
+import $organization$.util.instances.render._
 import $organization$.util.logging.{Loggers, TraceId, TraceProvider}
-import $organization$.util.syntax.logging._
 import io.odin.{Level, Logger}
 import io.odin.syntax._
 import com.typesafe.config.ConfigFactory

@@ -1,7 +1,7 @@
 package $organization$.persistence.postgres
 
 import $organization$.util.error.ThrowableSelect
-import $organization$.util.logging.RenderInstances._
+import $organization$.util.instances.render._
 import io.odin.meta.Render
 
 @scalaz.deriving(Render)

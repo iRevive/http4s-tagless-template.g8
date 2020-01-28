@@ -7,7 +7,7 @@ import cats.effect._
 import $organization$.ApplicationResource.{ApiModule, Application}
 import $organization$.util.api.ApiConfig
 import $organization$.util.execution.Eff
-import $organization$.util.logging.RenderInstances._
+import $organization$.util.instances.render._
 import eu.timepit.refined.auto._
 import io.odin.Logger
 import io.odin.syntax._

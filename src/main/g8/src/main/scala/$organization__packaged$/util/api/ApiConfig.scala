@@ -1,6 +1,6 @@
 package $organization$.util.api
 
-import $organization$.util.logging.RenderInstances._
+import $organization$.util.instances.render._
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Decoder

@@ -7,7 +7,7 @@ import cats.syntax.either._
 import cats.syntax.functor._
 import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
 import $organization$.util.execution.Retry
-import $organization$.util.logging.RenderInstances._
+import $organization$.util.instances.render._
 import $organization$.util.logging.{TraceId, TraceProvider}
 import $organization$.util.syntax.mtl.raise._
 import doobie.hikari.HikariTransactor

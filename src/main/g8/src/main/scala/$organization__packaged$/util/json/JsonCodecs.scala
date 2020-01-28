@@ -5,7 +5,7 @@ import io.circe.{Decoder, Encoder}
 import io.estatico.newtype.Coercible
 import org.http4s.Uri
 
-object JsonCodecs {
+trait JsonCodecs {
 
   implicit def coercibleDecoder[R, N](implicit ev: Coercible[Decoder[R], Decoder[N]], R: Decoder[R]): Decoder[N] =
     ev(R)

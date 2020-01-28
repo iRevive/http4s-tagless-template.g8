@@ -7,8 +7,8 @@ import $organization$.service.user.UserService
 import $organization$.service.user.domain.{PersistedUser, User, UserId}
 import $organization$.util.api.ApiResponse
 import $organization$.util.error.{ErrorIdGen, ErrorRaise}
+import $organization$.util.instances.circe._
 import $organization$.util.syntax.json._
-import $organization$.util.json.JsonCodecs._
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.refined._
 import io.circe.syntax._

@@ -9,7 +9,7 @@ import shapeless.{:+:, CNil, Coproduct, Lazy}
 
 import scala.concurrent.duration.FiniteDuration
 
-object RenderInstances {
+trait RenderInstances {
 
   implicit val renderInstant: Render[Instant] = Render.fromToString
 
@@ -36,3 +36,5 @@ object RenderInstances {
     value => value.eliminate(h.value.render, t.render)
 
 }
+
+object RenderInstances extends RenderInstances
