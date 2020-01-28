@@ -5,8 +5,9 @@ import cats.mtl.implicits._
 import $organization$.it.ITSpec
 import $organization$.util.config.ConfigParsingError
 import $organization$.util.error.RaisedError
+import $organization$.util.logging.Loggers
 import com.typesafe.config.ConfigFactory
-import io.odin.Logger
+import io.odin.{Level, Logger}
 
 class PersistenceModuleResourceSpec extends ITSpec {
 
@@ -97,7 +98,7 @@ class PersistenceModuleResourceSpec extends ITSpec {
   }
 
   private lazy val moduleResource = {
-    implicit val logger: Logger[Eff] = io.odin.consoleLogger[Eff]()
+    implicit val logger: Logger[Eff] = Loggers.createContextLogger(Level.Info)
 
     PersistenceModuleResource.default[Eff]
   }

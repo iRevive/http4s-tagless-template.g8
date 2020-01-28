@@ -7,9 +7,10 @@ import cats.syntax.flatMap._
 import $organization$.test.BaseSpec
 import $organization$.util.execution.Retry
 import $organization$.util.error.RaisedError
+import $organization$.util.logging.Loggers
 import doobie.hikari.HikariTransactor
 import eu.timepit.refined.auto._
-import io.odin.Logger
+import io.odin.{Level, Logger}
 
 import scala.concurrent.duration._
 
@@ -20,7 +21,7 @@ class TransactorResourceSpec extends BaseSpec {
     "return an error" when {
 
       "connection in unreachable" in EffectAssertion() {
-        implicit val logger: Logger[Eff] = io.odin.consoleLogger()
+        implicit val logger: Logger[Eff] = Loggers.createContextLogger(Level.Info)
 
         def mkResource(counter: Ref[Eff, Int]): TransactorResource[Eff] = new TransactorResource[Eff] {
           override private[postgres] def verifyConnectionOnce(
