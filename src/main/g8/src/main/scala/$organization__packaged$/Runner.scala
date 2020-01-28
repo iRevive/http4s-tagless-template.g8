@@ -63,7 +63,7 @@ object Runner {
       createLogger.use(implicit logger => new Runner[Eff].run(ApplicationResource.default, job))
 
     private final def createLogger: Resource[Eff, Logger[Eff]] = {
-      val logFile      = s"logs/\$name"
+      val logFile      = s"logs/\$name.log"
       val consoleLevel = Loggers.envLogLevel("LOG_LEVEL").getOrElse(Level.Info)
       val fileLevel    = Loggers.envLogLevel("FILE_LOG_LEVEL").getOrElse(Level.Error)
 
