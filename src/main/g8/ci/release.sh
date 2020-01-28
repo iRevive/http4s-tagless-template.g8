@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 
-if [ -z "\$1" ]; then
+declare -r sbt_image="\$1"
+
+if [ -z "\$sbt_image" ]; then
   echo "CI SBT docker image name is missing"
   exit 1
 fi
 
-sbt_image=\$1
-
 set -euf pipefail
 
 echo "Pulling CI SBT image \$sbt_image"
-docker pull \$sbt_image || true
+docker pull "\$sbt_image" || true
 
 echo "Releasing application"
 
-CI_NETWORK=$name_normalized$-ci-network
+declare -r ci_network="$name_normalized$-ci-network"
 
-docker network rm \$CI_NETWORK || true
-docker network create -d bridge \$CI_NETWORK
+docker network rm "\$ci_network" || true
+docker network create -d bridge "\$ci_network"
 
 # Prepare git
 git config user.email "ci@gitlab.com"
@@ -38,8 +38,8 @@ docker run --rm \
     --user \$(id -u):\$(id -g) \
     -v /var/run/docker.sock:/var/run/docker.sock \
     --mount src="\$(pwd)",target=/opt/workspace,type=bind \
-    --network=\$CI_NETWORK \
-    -e DOCKER_NETWORK=\$CI_NETWORK \
-    -e DOCKER_REGISTRY_IMAGE=\$CI_REGISTRY_IMAGE \
-    \$sbt_image \
+    --network="\$ci_network" \
+    -e DOCKER_NETWORK="\$ci_network" \
+    -e DOCKER_REGISTRY_IMAGE="\$CI_REGISTRY_IMAGE" \
+    "\$sbt_image" \
     bash ./ci/release_entrypoint.sh
