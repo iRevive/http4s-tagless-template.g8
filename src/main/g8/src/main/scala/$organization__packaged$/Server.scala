@@ -24,7 +24,7 @@ object Server extends Runner.Default {
 
 }
 
-class Server[F[_]: ConcurrentEffect: Timer: TraceProvider] {
+class Server[F[_]: ConcurrentEffect: ContextShift: Timer: TraceProvider] {
 
   def serve: Kleisli[F, Application[F], ExitCode] = Kleisli { app =>
     bindHttpServer(app.apiModule).use(_ => ConcurrentEffect[F].never)
