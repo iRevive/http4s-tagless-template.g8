@@ -36,4 +36,4 @@ or
 \$ sbt testAll
 ```
 
-Coverage reports will be in `target/scala-2.12/scoverage-report`. There are HTML and XML reports.  
+Coverage reports will be in `target/scala-2.13/scoverage-report`. There are HTML and XML reports.  
