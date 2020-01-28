@@ -36,8 +36,8 @@ lazy val commonSettings = Seq(
   scalaVersion  := Versions.scala,
   javacOptions  ++= Seq("-source", "11"),
   scalacOptions += "-Ymacro-annotations",
-  addCompilerPlugin("org.typelevel"   %% "kind-projector"     % Versions.kindProjector cross CrossVersion.full),
-  addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % Versions.betterMonadicFor)
+  addCompilerPlugin("org.typelevel" %% "kind-projector"     % Versions.kindProjector cross CrossVersion.full),
+  addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % Versions.betterMonadicFor)
 )
 
 lazy val scalazDerivingSettings = Seq(
