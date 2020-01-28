@@ -9,7 +9,7 @@ import $organization$.ApplicationResource.{ApiModule, Application}
 import $organization$.util.api.ApiConfig
 import $organization$.util.execution.Eff
 import $organization$.util.instances.render._
-import $organization$.util.logging.TraceProvider
+import $organization$.util.logging.{Loggers, TraceProvider}
 import eu.timepit.refined.auto._
 import io.odin.{Level, Logger}
 import io.odin.syntax._

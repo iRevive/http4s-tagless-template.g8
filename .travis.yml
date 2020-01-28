@@ -15,8 +15,7 @@ jdk:
 script:
   - sbt -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M g8
   - cd target/g8
-  - sbt ci
-  - bash ./../../scripts/push-to-demo-repository.sh
+  - sbt ci && bash ./../../scripts/push-to-demo-repository.sh
 
   ## Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
