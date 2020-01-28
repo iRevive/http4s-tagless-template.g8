@@ -13,6 +13,7 @@ import $organization$.util.logging.{Loggers, TraceId}
 import com.typesafe.config.{Config, ConfigFactory}
 import io.estatico.newtype.Coercible
 import io.odin.Level
+import io.odin.syntax._
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalacheck.Arbitrary
@@ -45,6 +46,7 @@ trait ITSpec
     EffectAssertion(timeout) {
       Loggers
         .createContextLogger(Level.Info)
+        .withAsync()
         .flatMap(implicit logger => ApplicationResource.default[Eff].create(DefaultConfig))
         .use(program)
     }

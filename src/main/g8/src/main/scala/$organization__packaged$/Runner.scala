@@ -61,7 +61,8 @@ object Runner {
 
     private final def execute: Eff[ExitCode] =
       Loggers
-        .createContextLogger(Level.Info)
+        .createContextLogger[Eff](Loggers.envLogLevel.getOrElse(Level.Info))
+        .withAsync()
         .use(implicit logger => new Runner[Eff].run(ApplicationResource.default, job))
 
     def name: String
