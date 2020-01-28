@@ -35,7 +35,7 @@ object ErrorHandler {
 
     def onApplicativeHandleError(error: RaisedError): F[Option[Response[F]]] =
       for {
-        ctx <- Map("error_id" -> errorId).pure[F]
+        ctx <- Map("error_id" -> error.errorId).pure[F]
         _   <- logger.error(render"Execution completed with an error \$error", ctx, error)
       } yield Option(ErrorResponseSelector[F, AppError].toResponse(error.error, error.errorId))
 

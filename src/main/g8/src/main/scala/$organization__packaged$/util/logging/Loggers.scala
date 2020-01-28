@@ -1,6 +1,6 @@
 package $organization$.util.logging
 
-import cats.effect.{Concurrent, ContextShift, Resource, Timer}
+import cats.effect.{Concurrent, ContextShift, Timer}
 import io.odin.formatter.Formatter
 import io.odin.formatter.options.ThrowableFormat
 import io.odin.syntax._
