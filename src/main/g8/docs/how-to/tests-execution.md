@@ -9,7 +9,8 @@ title: Tests execution
 
 ## <a name="how-to-run-tests"></a> How to run tests
 
-Execute in the project's `<root>` directory:  
+The unit tests can be executed by:  
+
 ```sh
 \$ sbt test
 ```
@@ -17,14 +18,15 @@ Execute in the project's `<root>` directory:
 ## <a name="how-to-run-integration-tests"></a> How to run integration tests
 **Note.** Installed docker is required for integration tests.
 
-Execute in the project's `<root>` directory:
+The integration tests can be executed by:  
+
 ```sh
 \$ sbt it:test
 ```
 
 ## <a name="how-to-calculate-test-coverage"></a> How to calculate coverage
 
-Execute in the project's `<root>` directory:
+The coverage can be calculated by:  
 
 ```sh
 \$ sbt clean coverage test it:test coverageReport
