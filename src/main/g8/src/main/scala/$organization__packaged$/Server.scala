@@ -18,7 +18,7 @@ import org.http4s.server.blaze.BlazeServerBuilder
 // \$COVERAGE-OFF\$
 object Server extends Runner.Default {
 
-  override lazy val name: String = s"Server-\${Instant.now}"
+  override lazy val name: String = render"Server-\${Instant.now}"
 
   override def job: Kleisli[Eff, Application[Eff], ExitCode] = new Server[Eff].serve
 

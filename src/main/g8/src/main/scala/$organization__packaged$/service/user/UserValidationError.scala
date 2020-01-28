@@ -4,7 +4,7 @@ import $organization$.service.user.domain.UserId
 import $organization$.util.error.ThrowableSelect
 import io.odin.meta.Render
 
-@scalaz.deriving(Render, ThrowableSelect.Empty)
+@scalaz.annotation.deriving(Render, ThrowableSelect.Empty)
 sealed trait UserValidationError
 
 object UserValidationError {

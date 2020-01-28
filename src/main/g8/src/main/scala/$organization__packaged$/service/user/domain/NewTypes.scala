@@ -12,7 +12,7 @@ import io.odin.meta.Render
 object NewTypes {
 
   @newtype
-  @scalaz.deriving(Render)
+  @scalaz.annotation.deriving(Render)
   final case class UserId(toInt: PosInt)
 
   object UserId {

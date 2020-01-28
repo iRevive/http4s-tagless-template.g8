@@ -7,5 +7,5 @@ import io.circe.Decoder
 import io.circe.refined._
 import io.odin.meta.Render
 
-@scalaz.deriving(Decoder, Render)
+@scalaz.annotation.deriving(Decoder, Render)
 final case class ApiConfig(host: NonEmptyString, port: PosInt, auth: BasicAuthConfig)

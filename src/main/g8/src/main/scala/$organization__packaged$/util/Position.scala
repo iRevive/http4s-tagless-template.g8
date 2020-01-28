@@ -4,7 +4,7 @@ import sourcecode.Enclosing
 import io.odin.meta.Render
 
 final case class Position(enclosing: sourcecode.Enclosing, line: sourcecode.Line) {
-  def fullPosition: String = s"\${enclosing.value}:\${line.value}"
+  def fullPosition: String = s"\${enclosing.value}:\${line.value.toString}"
 }
 
 object Position {
@@ -13,10 +13,7 @@ object Position {
     new Position(removeAnonEnclosing(enclosing), line)
 
   private def removeAnonEnclosing(enclosing: Enclosing): String =
-    enclosing.value
-      .replace("#applyOrElse", "")
-      .replace("applyOrElse", "")
-      .trim
+    enclosing.value.replace("applyOrElse", "").trim
 
   implicit val renderPosition: Render[Position] = _.fullPosition
 

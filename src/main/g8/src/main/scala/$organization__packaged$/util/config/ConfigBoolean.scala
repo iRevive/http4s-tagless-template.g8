@@ -6,7 +6,7 @@ import io.odin.meta.Render
 /**
   * See https://github.com/circe/circe-config/issues/12
   */
-@scalaz.deriving(Render)
+@scalaz.annotation.deriving(Render)
 final case class ConfigBoolean(value: Boolean) extends AnyVal
 
 object ConfigBoolean {

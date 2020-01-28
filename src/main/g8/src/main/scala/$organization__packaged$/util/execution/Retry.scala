@@ -33,7 +33,7 @@ object Retry {
       }
     }
 
-  @scalaz.deriving(Decoder, Render)
+  @scalaz.annotation.deriving(Decoder, Render)
   final case class Policy(retries: NonNegInt, delay: FiniteDuration, timeout: FiniteDuration)
 
   implicit val renderRetryDetails: Render[RetryDetails] = io.odin.extras.derivation.render.derive

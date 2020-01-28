@@ -98,7 +98,7 @@ class RetrySpec extends EffectSpec[ExecutionError] {
 
 object RetrySpec {
 
-  @scalaz.deriving(Render)
+  @scalaz.annotation.deriving(Render)
   final case class ExecutionError(cause: String)
 
 }

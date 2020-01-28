@@ -29,7 +29,7 @@ final class JsonOps(private val json: Json) extends AnyVal {
 
 }
 
-@scalaz.deriving(Render, ThrowableSelect.Empty)
+@scalaz.annotation.deriving(Render, ThrowableSelect.Empty)
 final case class JsonDecodingError(
     json: Json,
     targetClass: String,

@@ -51,10 +51,10 @@ class UserApi[F[_]: Sync: ErrorRaise: ErrorIdGen](val service: UserService[F]) e
 
 }
 
-@scalaz.deriving(Decoder, Encoder)
+@scalaz.annotation.deriving(Decoder, Encoder)
 final case class UserView(id: UserId, username: String)
 
-@scalaz.deriving(Decoder, Encoder)
+@scalaz.annotation.deriving(Decoder, Encoder)
 final case class CreateUser(username: String, password: String)
 
 object UserIdVar {

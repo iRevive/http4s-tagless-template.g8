@@ -40,5 +40,5 @@ final class ConfigOps(private val config: Config) extends AnyVal {
 
 }
 
-@scalaz.deriving(Render, ThrowableSelect.Empty)
+@scalaz.annotation.deriving(Render, ThrowableSelect.Empty)
 final case class ConfigParsingError(path: String, expectedClass: String, error: Error)

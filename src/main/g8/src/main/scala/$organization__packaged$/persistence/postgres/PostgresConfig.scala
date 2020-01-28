@@ -14,7 +14,7 @@ import io.odin.meta.Render
 
 import scala.concurrent.duration.FiniteDuration
 
-@scalaz.deriving(Render)
+@scalaz.annotation.deriving(Render)
 final case class PostgresConfig(
     driver: NonEmptyString,
     uri: NonEmptyString,
