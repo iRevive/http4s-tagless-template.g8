@@ -23,6 +23,7 @@ lazy val root = project
 lazy val docs = project
   .in(file(s"\${Settings.name}-docs"))
   .enablePlugins(MdocPlugin, DocusaurusPlugin)
+  .settings(commonSettings)
   .settings(
     moduleName := s"\${Settings.name}-docs",
     mdocVariables := Map(
