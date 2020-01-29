@@ -67,12 +67,12 @@ object Runner {
       val consoleLevel = Loggers.envLogLevel("LOG_LEVEL").getOrElse(Level.Info)
       val fileLevel    = Loggers.envLogLevel("FILE_LOG_LEVEL").getOrElse(Level.Error)
 
-      val console = Loggers.consoleContextLogger[Eff](consoleLevel)
+      val console = Loggers.consoleContextLogger[Eff](Level.Info)
 
       for {
         _      <- Resource.liftF(console.error(render"Using console logger with level \$consoleLevel."))
         _      <- Resource.liftF(console.error(render"Using file logger with level \$fileLevel. Output \$logFile."))
-        logger <- console.withAsync() |+| Loggers.fileContextLogger(logFile, fileLevel)
+        logger <- Loggers.consoleContextLoggerAsync(consoleLevel) |+| Loggers.fileContextLoggerAsync(logFile, fileLevel)
       } yield logger
     }
 

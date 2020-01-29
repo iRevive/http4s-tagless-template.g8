@@ -14,7 +14,10 @@ object Loggers {
   def consoleContextLogger[F[_]: Sync: Timer: TraceProvider](minLevel: Level): Logger[F] =
     io.odin.consoleLogger[F](formatter, minLevel).withContext
 
-  def fileContextLogger[F[_]: Concurrent: ContextShift: Timer: TraceProvider](
+  def consoleContextLoggerAsync[F[_]: Concurrent: ContextShift: Timer: TraceProvider](minLevel: Level): Resource[F, Logger[F]] =
+    io.odin.consoleLogger[F](formatter, minLevel).withAsync().withContext
+
+  def fileContextLoggerAsync[F[_]: Concurrent: ContextShift: Timer: TraceProvider](
       fileName: String,
       minLevel: Level
   ): Resource[F, Logger[F]] =
