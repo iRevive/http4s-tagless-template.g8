@@ -26,4 +26,4 @@ docker run --rm \
     -e DOCKER_NETWORK="\$ci-network" \
     -e DOCKER_REGISTRY_IMAGE="\$CI_REGISTRY_IMAGE" \
     "\$sbt_image" \
-    sbt ci
+    ci
