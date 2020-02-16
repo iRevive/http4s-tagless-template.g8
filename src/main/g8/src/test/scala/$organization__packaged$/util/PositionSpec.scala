@@ -39,7 +39,7 @@ class PositionSpec extends BaseSpec {
     Position.generate
 
   def lambda(): Position =
-    Some("x").map(_ =>Position.generate).get
+    Some("x").map(_ => Position.generate).get
 
   def partialFunction(): PartialFunction[Unit, Position] = {
     case _ => Position.generate
