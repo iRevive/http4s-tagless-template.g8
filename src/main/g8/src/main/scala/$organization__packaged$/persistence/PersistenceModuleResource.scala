@@ -31,9 +31,7 @@ class PersistenceModuleResource[F[_]: Sync: ErrorHandle: TraceProvider: ErrorIdG
     } yield db
 
   private def runFlywayMigration(transactor: HikariTransactor[F]): F[Unit] =
-    transactor.configure { dataSource =>
-      Sync[F].delay(Flyway.configure().dataSource(dataSource).load().migrate()).void
-    }
+    transactor.configure(dataSource => Sync[F].delay(Flyway.configure().envVars().dataSource(dataSource).load().migrate()).void)
 
   private val logger: Logger[F] = Logger[F]
 

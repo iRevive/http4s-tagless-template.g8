@@ -14,23 +14,23 @@ class PositionSpec extends BaseSpec {
 
       fakeMethod() shouldBe Position(s"\$pkg.PositionSpec#fakeMethod", 39)
 
-      lambda() shouldBe Position(s"\$pkg.PositionSpec#lambda", 43)
+      lambda() shouldBe Position(s"\$pkg.PositionSpec#lambda", 42)
 
-      partialFunction().apply(()) shouldBe Position(s"\$pkg.PositionSpec#partialFunction", 47)
+      partialFunction().apply(()) shouldBe Position(s"\$pkg.PositionSpec#partialFunction", 45)
 
-      recoverLambda() shouldBe Position(s"\$pkg.PositionSpec#recoverLambda", 51)
+      recoverLambda() shouldBe Position(s"\$pkg.PositionSpec#recoverLambda", 49)
 
       val fakeClass = new FakeClass
 
-      fakeClass.method() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#method", 55)
+      fakeClass.method() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#method", 53)
 
-      fakeClass.lambda() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#lambda", 58)
+      fakeClass.lambda() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#lambda", 56)
 
-      fakeClass.forComprehension() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#forComprehension", 63)
+      fakeClass.forComprehension() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#forComprehension", 61)
 
-      fakeClass.generatedPos() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#generatedPos", 66)
+      fakeClass.generatedPos() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#generatedPos", 64)
 
-      fakeClass.nestedPos() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#nestedPos nested2", 73)
+      fakeClass.nestedPos() shouldBe Position(s"\$pkg.PositionSpec#FakeClass#nestedPos nested2", 71)
 
     }
   }
@@ -39,9 +39,7 @@ class PositionSpec extends BaseSpec {
     Position.generate
 
   def lambda(): Position =
-    Some("x").map { _ =>
-      Position.generate
-    }.get
+    Some("x").map(_ =>Position.generate).get
 
   def partialFunction(): PartialFunction[Unit, Position] = {
     case _ => Position.generate

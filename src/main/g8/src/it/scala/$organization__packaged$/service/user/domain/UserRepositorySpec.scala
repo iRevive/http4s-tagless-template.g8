@@ -9,21 +9,15 @@ class UserRepositorySpec extends ITSpec with QueryChecker {
   "UserRepository" should {
 
     "have a correct mapping of byUsername query" in withApplication() { _ =>
-      forAll { username: String =>
-        checkQuery(UserRepository.byUsernameQuery(username))
-      }
+      forAll { username: String => checkQuery(UserRepository.byUsernameQuery(username)) }
     }
 
     "have a correct mapping of markDeletedQuery query" in withApplication() { _ =>
-      forAll { userId: UserId =>
-        checkQuery(UserRepository.markDeletedQuery(userId))
-      }
+      forAll { userId: UserId => checkQuery(UserRepository.markDeletedQuery(userId)) }
     }
 
     "have a correct mapping of insert query" in withApplication() { _ =>
-      forAll { user: User =>
-        checkQuery(UserRepository.insertQuery(user))
-      }
+      forAll { user: User => checkQuery(UserRepository.insertQuery(user)) }
     }
   }
 
