@@ -158,9 +158,8 @@ lazy val commandSettings = {
       state
   }
 
-  val testAll = Command.command("testAll") { state =>
-    "clean" :: "coverage" :: "test" :: "it:test" :: "coverageReport" :: state
-  }
+  val testAll =
+    Command.command("testAll")(state => "clean" :: "coverage" :: "test" :: "it:test" :: "coverageReport" :: state)
 
   commands ++= List(ci, testAll)
 }
