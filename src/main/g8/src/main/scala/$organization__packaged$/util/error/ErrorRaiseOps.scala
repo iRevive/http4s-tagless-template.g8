@@ -1,8 +1,8 @@
-package $organization$.util
-package error
+package $organization$.util.error
 
 import cats.Monad
 import cats.syntax.flatMap._
+import io.odin.meta.Position
 import shapeless.ops.coproduct.Inject
 
 trait ToErrorRaiseOps {
