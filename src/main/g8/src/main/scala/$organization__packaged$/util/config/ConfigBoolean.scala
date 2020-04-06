@@ -23,6 +23,6 @@ object ConfigBoolean {
     booleanDecoder.or(stringDecoder)
   }
 
-  implicit val rednerConfigBoolean: Render[ConfigBoolean] = Render(_.value.toString)
+  implicit val renderConfigBoolean: Render[ConfigBoolean] = Render(_.value.toString)
 
 }
