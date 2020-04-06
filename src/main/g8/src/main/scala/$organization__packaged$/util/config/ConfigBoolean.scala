@@ -6,7 +6,6 @@ import io.odin.meta.Render
 /**
   * See https://github.com/circe/circe-config/issues/12
   */
-@scalaz.annotation.deriving(Render)
 final case class ConfigBoolean(value: Boolean) extends AnyVal
 
 object ConfigBoolean {
@@ -23,5 +22,7 @@ object ConfigBoolean {
 
     booleanDecoder.or(stringDecoder)
   }
+
+  implicit val rednerConfigBoolean: Render[ConfigBoolean] = Render(_.value.toString)
 
 }
