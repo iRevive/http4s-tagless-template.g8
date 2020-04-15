@@ -2,11 +2,7 @@ import sbtrelease.ReleaseStateTransformations._
 
 lazy val root = project
   .in(file("."))
-  .enablePlugins(JavaAppPackaging, AshScriptPlugin)
-  .configs(IntegrationTest)
-  .settings(Defaults.itSettings)
-  .settings(inConfig(IntegrationTest)(ScalafmtPlugin.scalafmtConfigSettings))
-  .settings(itEnvironment)
+  .enablePlugins(JavaAppPackaging, AshScriptPlugin, IntegrationEnv)
   .settings(commonSettings)
   .settings(scalazDerivingSettings)
   .settings(wartRemoverSettings)
@@ -55,42 +51,6 @@ lazy val testSettings = Seq(
   Test / fork              := true,
   Test / parallelExecution := true
 )
-
-lazy val itEnvironment = {
-  val startItEnv = TaskKey[Unit]("start-it-env", "Create integration environment")
-  val stopItEnv  = TaskKey[Unit]("stop-it-env", "Destroy integration environment")
-  val env        = DockerEnvironment.createEnv(sys.env.get("DOCKER_NETWORK"))
-
-  Seq(
-    stopItEnv := {
-      env.destroy(sourceDirectory.value)
-    },
-    startItEnv := {
-      env.destroy(sourceDirectory.value)
-      env.start(sourceDirectory.value)
-    },
-    IntegrationTest / testOptions ++= Def.task {
-      val log       = streams.value.log
-      val sourceDir = sourceDirectory.value
-
-      val setup = Tests.Setup { () =>
-        log.info("Re-creating integration environment")
-        env.destroy(sourceDir)
-        env.start(sourceDir)
-      }
-
-      val cleanup = Tests.Cleanup { () =>
-        log.info("Destroying integration environment")
-        env.destroy(sourceDir)
-      }
-
-      Seq(setup, cleanup)
-    }.value,
-    IntegrationTest / fork              := true,
-    IntegrationTest / parallelExecution := false,
-    IntegrationTest / javaOptions       := env.javaOpts
-  )
-}
 
 lazy val buildSettings = Seq(
   Universal / packageName                := name.value,
