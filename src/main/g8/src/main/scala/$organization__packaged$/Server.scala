@@ -13,6 +13,7 @@ import $organization$.util.logging.{Loggers, TraceProvider}
 import eu.timepit.refined.auto._
 import io.odin.{Level, Logger}
 import io.odin.syntax._
+import monix.execution.Scheduler
 import org.http4s.server.blaze.BlazeServerBuilder
 
 // \$COVERAGE-OFF\$
@@ -24,7 +25,7 @@ object Server extends Runner.Default {
 
 }
 
-class Server[F[_]: ConcurrentEffect: Timer: TraceProvider] {
+class Server[F[_]: ConcurrentEffect: Timer: TraceProvider](scheduler: Scheduler) {
 
   def serve: Kleisli[F, Application[F], ExitCode] = Kleisli { app =>
     bindHttpServer(app.apiModule).use(_ => ConcurrentEffect[F].never)
@@ -33,7 +34,7 @@ class Server[F[_]: ConcurrentEffect: Timer: TraceProvider] {
   private def bindHttpServer(apiModule: ApiModule[F]): Resource[F, Unit] = {
     val ApiConfig(host, port, _) = apiModule.config
 
-    val server = BlazeServerBuilder[F]
+    val server = BlazeServerBuilder[F](scheduler)
       .bindHttp(port, host)
       .withHttpApp(apiModule.httpApp)
       .resource
