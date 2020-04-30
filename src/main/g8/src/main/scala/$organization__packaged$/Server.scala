@@ -21,7 +21,7 @@ object Server extends Runner.Default {
 
   override lazy val name: String = render"Server-\${Instant.now}"
 
-  override def job: Kleisli[Eff, Application[Eff], ExitCode] = new Server[Eff].serve
+  override def job: Kleisli[Eff, Application[Eff], ExitCode] = new Server[Eff](scheduler).serve
 
 }
 
