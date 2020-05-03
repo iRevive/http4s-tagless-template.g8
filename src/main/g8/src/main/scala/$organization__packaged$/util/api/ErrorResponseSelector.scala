@@ -29,8 +29,8 @@ object ErrorResponseSelector extends ErrorResponseSelectorInstances {
     (value: CNil, _: String) => value.impossible
   // \$COVERAGE-ON\$
 
-  implicit def coproductErrorSelector[F[_], H, T <: Coproduct](
-      implicit h: Lazy[ErrorResponseSelector[F, H]],
+  implicit def coproductErrorSelector[F[_], H, T <: Coproduct](implicit
+      h: Lazy[ErrorResponseSelector[F, H]],
       t: ErrorResponseSelector[F, T]
   ): ErrorResponseSelector[F, H :+: T] =
     (value, errorId) => value.eliminate(h.value.toResponse(_, errorId), t.toResponse(_, errorId))

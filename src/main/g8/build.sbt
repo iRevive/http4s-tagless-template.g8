@@ -12,7 +12,7 @@ lazy val root = project
   .settings(releaseSettings)
   .settings(commandSettings)
   .settings(
-    name                := Settings.name,
+    name                 := Settings.name,
     libraryDependencies ++= Dependencies.root
   )
 
@@ -31,7 +31,7 @@ lazy val docs = project
 lazy val commonSettings = Seq(
   organization  := Settings.organization,
   scalaVersion  := Versions.scala,
-  javacOptions  ++= Seq("-source", "11"),
+  javacOptions ++= Seq("-source", "11"),
   scalacOptions += "-Ymacro-annotations",
   addCompilerPlugin("org.typelevel" %% "kind-projector"     % Versions.kindProjector cross CrossVersion.full),
   addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % Versions.betterMonadicFor)

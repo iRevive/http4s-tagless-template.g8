@@ -27,9 +27,10 @@ object Server extends Runner.Default {
 
 class Server[F[_]: ConcurrentEffect: Timer: TraceProvider](scheduler: Scheduler) {
 
-  def serve: Kleisli[F, Application[F], ExitCode] = Kleisli { app =>
-    bindHttpServer(app.apiModule).use(_ => ConcurrentEffect[F].never)
-  }
+  def serve: Kleisli[F, Application[F], ExitCode] =
+    Kleisli { app =>
+      bindHttpServer(app.apiModule).use(_ => ConcurrentEffect[F].never)
+    }
 
   private def bindHttpServer(apiModule: ApiModule[F]): Resource[F, Unit] = {
     val ApiConfig(host, port, _) = apiModule.config

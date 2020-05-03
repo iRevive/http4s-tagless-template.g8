@@ -60,8 +60,8 @@ trait ITSpec
 
   }
 
-  protected implicit def coercibleArbitrary[R, N](
-      implicit ev: Coercible[Arbitrary[R], Arbitrary[N]],
+  protected implicit def coercibleArbitrary[R, N](implicit
+      ev: Coercible[Arbitrary[R], Arbitrary[N]],
       R: Arbitrary[R]
   ): Arbitrary[N] =
     ev(R)

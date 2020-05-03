@@ -57,9 +57,7 @@ trait ApiSpec extends ITSpec {
 
       for {
         (response, _) <- executeRequest[ApiResponse.Error](request)
-      } yield {
-        response.status shouldBe Status.BadRequest
-      }
+      } yield response.status shouldBe Status.BadRequest
     }
 
   }

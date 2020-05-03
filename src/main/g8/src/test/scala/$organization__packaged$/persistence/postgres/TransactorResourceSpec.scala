@@ -23,12 +23,13 @@ class TransactorResourceSpec extends BaseSpec {
       "connection in unreachable" in EffectAssertion() {
         implicit val logger: Logger[Eff] = Loggers.consoleContextLogger(Level.Info)
 
-        def mkResource(counter: Ref[Eff, Int]): TransactorResource[Eff] = new TransactorResource[Eff] {
-          override private[postgres] def verifyConnectionOnce(
-              transactor: HikariTransactor[Eff],
-              timeout: FiniteDuration
-          ): Eff[Unit] = counter.update(_ + 1) >> super.verifyConnectionOnce(transactor, timeout)
-        }
+        def mkResource(counter: Ref[Eff, Int]): TransactorResource[Eff] =
+          new TransactorResource[Eff] {
+            override private[postgres] def verifyConnectionOnce(
+                transactor: HikariTransactor[Eff],
+                timeout: FiniteDuration
+            ): Eff[Unit] = counter.update(_ + 1) >> super.verifyConnectionOnce(transactor, timeout)
+          }
 
         val config = PostgresConfig(
           driver = "org.postgresql.Driver",

@@ -61,17 +61,17 @@ object Dependencies {
     "org.tpolecat"         %% "doobie-hikari"        % Versions.doobie,
     "org.tpolecat"         %% "doobie-refined"       % Versions.doobie,
     "org.tpolecat"         %% "doobie-postgres"      % Versions.doobie,
-    "org.flywaydb"         % "flyway-core"           % Versions.flyway,
+    "org.flywaydb"          % "flyway-core"          % Versions.flyway,
     "com.propensive"       %% "magnolia"             % Versions.magnolia,
     "com.github.valskalla" %% "odin-extras"          % Versions.odin,
-    "ch.qos.logback"       % "logback-classic"       % Versions.logback,
-    "org.tpolecat"         %% "doobie-scalatest"     % Versions.doobie % "it",
-    "org.scalatest"        %% "scalatest"            % Versions.scalatest % "it,test",
+    "ch.qos.logback"        % "logback-classic"      % Versions.logback,
+    "org.tpolecat"         %% "doobie-scalatest"     % Versions.doobie              % "it",
+    "org.scalatest"        %% "scalatest"            % Versions.scalatest           % "it,test",
     "org.scalatestplus"    %% "scalacheck-1-14"      % Versions.scalatestScalacheck % "it,test",
-    "com.ironcorelabs"     %% "cats-scalatest"       % Versions.catsScalatest % "it,test",
+    "com.ironcorelabs"     %% "cats-scalatest"       % Versions.catsScalatest       % "it,test",
     "com.codecommit"       %% CatsEffectScalaTest    % Versions.catsEffectScalaTest % "it,test",
-    "org.scalacheck"       %% "scalacheck"           % Versions.scalacheck % "it,test",
-    "eu.timepit"           %% "refined-scalacheck"   % Versions.refined % "it,test"
+    "org.scalacheck"       %% "scalacheck"           % Versions.scalacheck          % "it,test",
+    "eu.timepit"           %% "refined-scalacheck"   % Versions.refined             % "it,test"
   )
 
 }

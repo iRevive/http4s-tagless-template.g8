@@ -33,13 +33,11 @@ class PersistenceModuleResourceSpec extends ITSpec {
 
           for {
             result <- fa.use(_ => Eff.unit).attemptHandle[RaisedError]
-          } yield {
-            inside(result.leftValue.error.select[ConfigParsingError].value) {
-              case ConfigParsingError(path, expectedClass, err) =>
-                path shouldBe "application.persistence.postgres"
-                expectedClass shouldBe "PostgresConfig"
-                err.getMessage shouldBe "Path not found in config"
-            }
+          } yield inside(result.leftValue.error.select[ConfigParsingError].value) {
+            case ConfigParsingError(path, expectedClass, err) =>
+              path shouldBe "application.persistence.postgres"
+              expectedClass shouldBe "PostgresConfig"
+              err.getMessage shouldBe "Path not found in config"
           }
         }
 
@@ -68,13 +66,11 @@ class PersistenceModuleResourceSpec extends ITSpec {
 
           for {
             result <- fa.use(_ => Eff.unit).attemptHandle[RaisedError]
-          } yield {
-            inside(result.leftValue.error.select[ConfigParsingError].value) {
-              case ConfigParsingError(path, expectedClass, err) =>
-                path shouldBe "application.persistence.postgres"
-                expectedClass shouldBe "PostgresConfig"
-                err.getMessage shouldBe "Attempt to decode value on failed cursor: DownField(delay),DownField(retry-policy)"
-            }
+          } yield inside(result.leftValue.error.select[ConfigParsingError].value) {
+            case ConfigParsingError(path, expectedClass, err) =>
+              path shouldBe "application.persistence.postgres"
+              expectedClass shouldBe "PostgresConfig"
+              err.getMessage shouldBe "Attempt to decode value on failed cursor: DownField(delay),DownField(retry-policy)"
           }
         }
 
@@ -88,9 +84,7 @@ class PersistenceModuleResourceSpec extends ITSpec {
 
         for {
           result <- fa.use(_ => Eff.unit).attemptHandle[RaisedError]
-        } yield {
-          result should beRight(())
-        }
+        } yield result should beRight(())
       }
 
     }

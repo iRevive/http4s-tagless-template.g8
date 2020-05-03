@@ -28,8 +28,8 @@ object ThrowableSelect {
   implicit val cnilThrowableSelect: ThrowableSelect[CNil] = _.impossible
   // \$COVERAGE-ON\$
 
-  implicit def coproductThrowableSelect[H, T <: Coproduct](
-      implicit h: Lazy[ThrowableSelect[H]],
+  implicit def coproductThrowableSelect[H, T <: Coproduct](implicit
+      h: Lazy[ThrowableSelect[H]],
       t: ThrowableSelect[T]
   ): ThrowableSelect[H :+: T] =
     value => value.eliminate(h.value.select, t.select)
