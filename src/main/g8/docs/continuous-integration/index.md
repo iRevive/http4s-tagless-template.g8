@@ -9,14 +9,14 @@ title: Continuous integration
 
 ## <a name="overview"></a> Overview
 
-CI uses custom docker image (`ci-sbt`) for compilation of the project. The image has all necessary dependencies: 
+CI uses custom docker image (`ci-container`) for compilation of the project. The image has all necessary dependencies: 
 sbt, docker, docker-compose, and cached jar dependencies. More info in [Dockerfile](@REPO_URL@/docker/dockerfiles/sbt/Dockerfile).
 
 ## <a name="how-to-create-a-ci-image"></a> How to create a CI image
 
 Execute in a `<root>` project folder:  
 ```sh
-\$ docker build -f docker/dockerfiles/sbt/Dockerfile . -t $name_normalized$/ci-sbt:latest
+\$ docker build -f docker/dockerfiles/sbt/Dockerfile . -t $name_normalized$/ci-container:latest
 ```
 
 ## <a name="semi-automated-release"></a> Semi-automated release
