@@ -6,7 +6,7 @@
 Prerequisites:
 - JDK 11
 - Giter8 0.12.0
-- SBT 1.x
+- SBT 1.3.11+
 
 Open a console and run the following command to apply this template:
 ```
