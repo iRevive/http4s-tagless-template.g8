@@ -3,10 +3,12 @@ import sbtrelease.ReleaseStateTransformations._
 lazy val root = project
   .in(file("."))
   .enablePlugins(JavaAppPackaging, AshScriptPlugin, IntegrationEnvPlugin)
+  .configs(IntegrationTest)
   .settings(commonSettings)
   .settings(scalazDerivingSettings)
   .settings(wartRemoverSettings)
   .settings(testSettings)
+  .settings(integrationTestSettings)
   .settings(buildSettings)
   .settings(dockerSettings)
   .settings(releaseSettings)
