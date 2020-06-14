@@ -25,6 +25,6 @@ docker run --rm \
     --network="\$ci_network" \
     -e DOCKER_NETWORK="\$ci_network" \
     -e DOCKER_REGISTRY_IMAGE="\$CI_REGISTRY_IMAGE" \
-    -e ENV_MODE="CI" \
+    -e CI="true" \
     "\$sbt_image" \
     ci

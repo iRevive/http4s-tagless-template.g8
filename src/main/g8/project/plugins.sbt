@@ -8,3 +8,4 @@ addSbtPlugin("com.github.cb372"          % "sbt-explicit-dependencies" % "$sbt_e
 addSbtPlugin("com.timushev.sbt"          % "sbt-updates"               % "$sbt_updates_version$")
 addSbtPlugin("org.scalameta"             % "sbt-mdoc"                  % "$sbt_mdoc_version$")
 addSbtPlugin("ch.epfl.scala"             % "sbt-missinglink"           % "$sbt_missinglink_version$")
+addSbtPlugin("io.github.irevive"         % "sbt-integration-env"       % "$sbt_integration_env_version$")
