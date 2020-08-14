@@ -30,7 +30,7 @@ object Loggers {
     sys.env.get(variable).map(_.toUpperCase).flatMap(stringToLevel.lift)
 
   private val formatter: Formatter = Formatter.create(
-    ThrowableFormat(ThrowableFormat.Depth.Full, ThrowableFormat.Indent.Fixed(4)),
+    ThrowableFormat(ThrowableFormat.Depth.Full, ThrowableFormat.Indent.Fixed(4), ThrowableFormat.Filter.NoFilter),
     colorful = false
   )
 
