@@ -1,7 +1,6 @@
 package $organization$.util.api
 
 import cats.effect.Sync
-import cats.instances.string._
 import cats.syntax.eq._
 import org.http4s.BasicCredentials
 import org.http4s.server.AuthMiddleware
