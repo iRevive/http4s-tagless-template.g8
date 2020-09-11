@@ -23,10 +23,9 @@ class CorrelationIdTracerSpec extends BaseSpec {
           m       <- MVar.empty[Eff, TraceId]
           _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
           traceId <- m.read
-        } yield inside(traceId) {
-          case TraceId.ApiRoute(route) / TraceId.Const(value) / TraceId.Alphanumeric(_) =>
-            route shouldBe "/api/endpoint"
-            value shouldBe correlationId
+        } yield inside(traceId) { case TraceId.ApiRoute(route) / TraceId.Const(value) / TraceId.Alphanumeric(_) =>
+          route shouldBe "/api/endpoint"
+          value shouldBe correlationId
         }
       }
     }
@@ -38,9 +37,8 @@ class CorrelationIdTracerSpec extends BaseSpec {
         m       <- MVar.empty[Eff, TraceId]
         _       <- CorrelationIdTracer.httpRoutes[Eff](contextRecorder(m)).run(request).value
         traceId <- m.read
-      } yield inside(traceId) {
-        case TraceId.ApiRoute(route) / TraceId.Alphanumeric(_) =>
-          route shouldBe "/api/endpoint"
+      } yield inside(traceId) { case TraceId.ApiRoute(route) / TraceId.Alphanumeric(_) =>
+        route shouldBe "/api/endpoint"
       }
     }
 
@@ -49,9 +47,8 @@ class CorrelationIdTracerSpec extends BaseSpec {
   private def contextRecorder(m: MVar[Eff, TraceId]): HttpRoutes[Eff] = {
     import org.http4s.dsl.impl.{->, /, Root}
 
-    HttpRoutes.of[Eff] {
-      case GET -> Root / "api" / "endpoint" / _ =>
-        TraceProvider[Eff].ask.flatMap(m.put).as(Response[Eff](Status.Ok))
+    HttpRoutes.of[Eff] { case GET -> Root / "api" / "endpoint" / _ =>
+      TraceProvider[Eff].ask.flatMap(m.put).as(Response[Eff](Status.Ok))
     }
   }
 

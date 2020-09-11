@@ -82,9 +82,8 @@ class ErrorHandlerSpec extends BaseSpec {
   private def mkRoutes(response: Eff[Response[Eff]]): HttpRoutes[Eff] = {
     import org.http4s.dsl.impl.{->, /, Root}
 
-    HttpRoutes.of[Eff] {
-      case Method.GET -> Root / "api" / "endpoint" =>
-        response
+    HttpRoutes.of[Eff] { case Method.GET -> Root / "api" / "endpoint" =>
+      response
     }
   }
 

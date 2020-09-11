@@ -38,9 +38,8 @@ class AuthUtilsSpec extends BaseSpec {
     object dsl extends Http4sDsl[Eff]
     import dsl._
 
-    AuthedRoutes.of[Unit, Eff] {
-      case Method.GET -> Root / "api" / "endpoint" as _ =>
-        Eff.pure(Response[Eff]())
+    AuthedRoutes.of[Unit, Eff] { case Method.GET -> Root / "api" / "endpoint" as _ =>
+      Eff.pure(Response[Eff]())
     }
   }
 
