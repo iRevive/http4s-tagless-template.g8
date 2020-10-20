@@ -45,7 +45,7 @@ object Dependencies {
     "io.monix"             %% "monix"                % Versions.monix,
     "org.typelevel"        %% "cats-core"            % Versions.cats,
     "org.typelevel"        %% "cats-effect"          % Versions.catsEffect,
-    "org.typelevel"        %% "cats-mtl-core"        % Versions.catsMTL,
+    "org.typelevel"        %% "cats-mtl"             % Versions.catsMTL,
     "com.github.cb372"     %% "cats-retry-mtl"       % Versions.catsRetry,
     "org.scalaz"           %% "deriving-macro"       % Versions.scalazDeriving,
     "io.circe"             %% "circe-generic"        % Versions.circe,

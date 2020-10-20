@@ -1,7 +1,6 @@
 package $organization$.util.api
 
-import cats.effect.concurrent.MVar
-import cats.mtl.implicits._
+import cats.effect.concurrent.{MVar, MVar2}
 import cats.syntax.functor._
 import $organization$.test.BaseSpec
 import $organization$.util.logging.TraceId./

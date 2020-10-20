@@ -1,6 +1,7 @@
 package $organization$.util.json
 
 import cats.mtl.implicits._
+import cats.mtl.Handle.handleKleisli
 import cats.data.NonEmptyList
 import $organization$.test.BaseSpec
 import $organization$.util.syntax.json._

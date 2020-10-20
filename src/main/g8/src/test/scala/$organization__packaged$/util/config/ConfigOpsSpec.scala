@@ -1,6 +1,7 @@
 package $organization$.util.config
 
 import cats.mtl.implicits._
+import cats.mtl.Handle.handleKleisli
 import $organization$.test.BaseSpec
 import $organization$.util.syntax.config._
 import com.typesafe.config.ConfigFactory

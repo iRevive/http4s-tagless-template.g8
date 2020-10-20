@@ -1,6 +1,6 @@
 package $organization$.it
 
-import cats.mtl.implicits._
+import cats.mtl.Handle.handleKleisli
 import $organization$.ApplicationResource.Application
 import $organization$.util.api.ApiResponse
 import $organization$.util.syntax.json._

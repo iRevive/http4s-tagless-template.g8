@@ -33,7 +33,7 @@ object ErrorHandler {
         _        <- logger.error(render"Execution completed with an unhandled error \$error", ctx, error)
       } yield Option(response)
 
-    def onApplicativeHandleError(error: RaisedError): F[Option[Response[F]]] =
+    def onHandleError(error: RaisedError): F[Option[Response[F]]] =
       for {
         ctx <- Map("error_id" -> error.errorId).pure[F]
         _   <- logger.error(render"Execution completed with an error \$error", ctx, error)
@@ -45,7 +45,7 @@ object ErrorHandler {
           .run(req)
           .value
           .handleErrorWith(onMonadError)
-          .handleWith[RaisedError](onApplicativeHandleError)
+          .handleWith[RaisedError](onHandleError)
       }
     }
   }

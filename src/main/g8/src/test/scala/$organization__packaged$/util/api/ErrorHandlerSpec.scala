@@ -1,6 +1,7 @@
 package $organization$.util.api
 
 import cats.mtl.implicits._
+import cats.mtl.Handle.handleKleisli
 import $organization$.persistence.postgres.PostgresError
 import $organization$.test.BaseSpec
 import $organization$.util.error.{AppError, RaisedError}

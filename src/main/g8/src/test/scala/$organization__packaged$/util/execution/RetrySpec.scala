@@ -2,6 +2,7 @@ package $organization$.util.execution
 
 import cats.effect.concurrent.Ref
 import cats.mtl.implicits._
+import cats.mtl.Handle.handleKleisli
 import cats.syntax.applicativeError._
 import cats.syntax.apply._
 import cats.syntax.functor._

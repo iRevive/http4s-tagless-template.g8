@@ -2,7 +2,6 @@ package $organization$.it
 
 import cats.effect.ConcurrentEffect
 import cats.effect.testing.scalatest.scalacheck.EffectCheckerAsserting
-import cats.mtl.implicits._
 import cats.scalatest.{EitherMatchers, EitherValues}
 import cats.syntax.functor._
 import $organization$.ApplicationResource
