@@ -43,7 +43,7 @@ class CorrelationIdTracerSpec extends BaseSpec {
 
   }
 
-  private def contextRecorder(m: MVar[Eff, TraceId]): HttpRoutes[Eff] = {
+  private def contextRecorder(m: MVar2[Eff, TraceId]): HttpRoutes[Eff] = {
     import org.http4s.dsl.impl.{->, /, Root}
 
     HttpRoutes.of[Eff] { case GET -> Root / "api" / "endpoint" / _ =>
