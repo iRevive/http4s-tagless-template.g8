@@ -36,7 +36,7 @@ object TraceId {
 
   def render(traceId: TraceId, separator: String): String = {
     @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-    def loop(elem: TraceId, out: List[String]): List[String] =
+    def loop(elem: TraceId, out: Vector[String]): Vector[String] =
       elem match {
         case h / t               => loop(t, loop(h, out))
         case ApiRoute(value)     => out :+ value
@@ -45,7 +45,7 @@ object TraceId {
         case Uuid(value)         => out :+ value.toString
       }
 
-    loop(traceId, Nil).mkString(separator)
+    loop(traceId, Vector.empty).mkString(separator)
   }
 
   implicit val hasContext: HasContext[TraceId] = (v: TraceId) => Map("traceId" -> TraceId.render(v, "#"))

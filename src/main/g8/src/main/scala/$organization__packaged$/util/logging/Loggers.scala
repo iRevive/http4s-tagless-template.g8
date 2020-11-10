@@ -1,6 +1,7 @@
 package $organization$.util.logging
 
 import java.io.File
+import java.util.Locale
 
 import cats.effect.{Concurrent, ContextShift, Resource, Sync, Timer}
 import cats.syntax.applicativeError._
@@ -27,7 +28,7 @@ object Loggers {
     } yield logger
 
   def envLogLevel(variable: String): Option[Level] =
-    sys.env.get(variable).map(_.toUpperCase).flatMap(stringToLevel.lift)
+    sys.env.get(variable).map(_.toUpperCase(Locale.ENGLISH)).flatMap(stringToLevel.lift)
 
   private val formatter: Formatter = Formatter.create(
     ThrowableFormat(ThrowableFormat.Depth.Full, ThrowableFormat.Indent.Fixed(4), ThrowableFormat.Filter.NoFilter),
