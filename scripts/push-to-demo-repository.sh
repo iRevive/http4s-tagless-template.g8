@@ -49,7 +49,7 @@ perform_update() {
   clone_repo
   pwd
   cd ./..
-  cp -R g8/. external-repository
+  cp -R target/g8/. external-repository
   cd external-repository
   pwd
   push_changes
