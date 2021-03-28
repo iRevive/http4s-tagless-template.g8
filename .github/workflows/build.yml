@@ -35,12 +35,16 @@ jobs:
           sbt g8
           cd target/g8
 
+
       - name: Push to demo repository
         #if: contains(github.ref, 'master')
+        env:
+          GITHUB_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           pwd
           ls
           ls target/g8 || true
+          echo "$GITHUB_COMMIT_MESSAGE"
           bash ./scripts/push-to-demo-repository.sh
 
       - name: Deploy coverage report
