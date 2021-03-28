@@ -42,7 +42,7 @@ jobs:
           fail_ci_if_error: true
 
       - name: Publish microsite
-        #if: contains(github.ref, 'master')
+        if: contains(github.ref, 'master')
         run: sbt docs/docusaurusPublishGhpages
         env:
           GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
