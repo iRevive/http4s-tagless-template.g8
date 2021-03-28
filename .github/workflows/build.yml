@@ -1,0 +1,52 @@
+name: Build & Test
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+  push:
+    branches:
+      - master
+      - develop
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  build:
+    name: Build and Test
+    strategy:
+      matrix:
+        scala: [2.13.5]
+        java: [adopt@1.11]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+
+      - name: Setup Java and Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Cache coursier
+        uses: coursier/cache-action@v5
+
+      - name: Generate and test
+        run: |
+          sbt g8
+          cd target/g8
+          sbt ci
+
+      - name: Push to demo repository
+        if: contains(github.ref, 'master')
+        env:
+          GITHUB_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: bash ./scripts/push-to-demo-repository.sh
+
+      - name: Deploy coverage report
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true

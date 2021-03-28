@@ -1,10 +1,10 @@
 clone_repo() {
   echo "Cloning repo"
 
-  REMOTE_BRANCH="update-$TRAVIS_COMMIT"
+  REMOTE_BRANCH="update-$GITHUB_SHA"
 
-  git config --global user.email "travis@travis-ci.org"
-  git config --global user.name "Travis CI"
+  git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  git config --global user.name "github-actions[bot]"
 
   git clone "https://${GH_TOKEN}@github.com/iRevive/http4s-tagless-example.git" . > /dev/null 2>&1
 
@@ -22,18 +22,18 @@ push_changes() {
 
   pwd && ls -la && git status && git remote -v
 
-  REMOTE_BRANCH="update-$TRAVIS_COMMIT"
+  REMOTE_BRANCH="update-$GITHUB_SHA"
 
   git add .*
   git add -A
   git rm -f "default.properties"
   git reset -- README.md
-  git commit -m "$TRAVIS_COMMIT_MESSAGE" > /dev/null
+  git commit -m "$GITHUB_COMMIT_MESSAGE" > /dev/null
 
   git push --force --quiet --set-upstream origin "$REMOTE_BRANCH"
 
   PR_URL="https://api.github.com/repos/iRevive/http4s-tagless-example/pulls"
-  BODY="{\"title\":\"$TRAVIS_COMMIT_MESSAGE\",\"head\":\"$REMOTE_BRANCH\",\"base\":\"master\"}"
+  BODY="{\"title\":\"$GITHUB_COMMIT_MESSAGE\",\"head\":\"$REMOTE_BRANCH\",\"base\":\"master\"}"
 
   echo "Branch $REMOTE_BRANCH"
   echo "Body $BODY"
@@ -42,14 +42,13 @@ push_changes() {
 }
 
 perform_update() {
-  cd ./..
   mkdir external-repository
   pwd
   cd external-repository
   clone_repo
   pwd
   cd ./..
-  cp -R g8/. external-repository
+  cp -R target/g8/. external-repository
   cd external-repository
   pwd
   push_changes
