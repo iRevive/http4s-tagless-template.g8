@@ -41,7 +41,7 @@ jobs:
         run: |
           pwd
           ls
-          ls g8
+          ls target/g8 || true
           bash ./scripts/push-to-demo-repository.sh
 
       - name: Deploy coverage report
