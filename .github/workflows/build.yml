@@ -40,7 +40,9 @@ jobs:
         #if: contains(github.ref, 'master')
         run: |
           pwd
-          bash ./../../scripts/push-to-demo-repository.sh
+          ls
+          ls g8
+          bash ./scripts/push-to-demo-repository.sh
 
       - name: Deploy coverage report
         uses: codecov/codecov-action@v1
