@@ -16,7 +16,7 @@ jobs:
     if: contains(github.event.head_commit.message, 'do not build') == false
     strategy:
       matrix:
-        scala: [$scala_version$]
+        scala: [2.13.5]
         java: [adopt@1.11]
     runs-on: ubuntu-latest
     timeout-minutes: 30

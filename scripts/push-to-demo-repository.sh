@@ -11,7 +11,6 @@ clone_repo() {
   git checkout -b "$REMOTE_BRANCH"
   git rm -r * > /dev/null
   git checkout HEAD -- .travis.yml || true
-  git checkout HEAD -- .github/actions/ci.yml || true
   git checkout HEAD -- README.md || true
   git commit -m "Clean up" > /dev/null
 
