@@ -42,7 +42,6 @@ push_changes() {
 }
 
 perform_update() {
-  cd ./..
   mkdir external-repository
   pwd
   cd external-repository
