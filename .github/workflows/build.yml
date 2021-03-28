@@ -39,8 +39,6 @@ jobs:
           sbt g8
           cd target/g8
           sbt ci
-          ls -lha target/
-          ls -lha target/scala-2.13
 
       - name: Push to demo repository
         if: contains(github.ref, 'master')
