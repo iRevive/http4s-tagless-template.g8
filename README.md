@@ -1,6 +1,6 @@
 ## Http4s tagless template
 
-[![Build Status](https://travis-ci.org/iRevive/http4s-tagless-template.g8.svg?branch=master)](https://travis-ci.org/iRevive/http4s-tagless-template.g8)
+[![Build & Test](https://github.com/iRevive/http4s-tagless-template.g8/actions/workflows/build.yml/badge.svg)](https://github.com/iRevive/http4s-tagless-template.g8/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/iRevive/http4s-tagless-template.g8/branch/master/graph/badge.svg)](https://codecov.io/gh/iRevive/http4s-tagless-template.g8)
 
 Prerequisites:
