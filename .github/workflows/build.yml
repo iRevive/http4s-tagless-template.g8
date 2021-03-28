@@ -31,11 +31,14 @@ jobs:
         uses: coursier/cache-action@v5
 
       - name: Generate and test
-        run: sbt g8Test
+        run: |
+          sbt g8
+          cd target/g8
+          sbt ci
 
       - name: Push to demo repository
-        if: contains(github.ref, 'master')
-        run: bash ./scripts/push-to-demo-repository.sh
+        #if: contains(github.ref, 'master')
+        run: bash ./../../scripts/push-to-demo-repository.sh
 
       - name: Deploy coverage report
         uses: codecov/codecov-action@v1
