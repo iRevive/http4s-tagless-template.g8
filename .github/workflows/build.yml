@@ -7,7 +7,7 @@ on:
     branches: ['*']
 
 env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
   build:
@@ -34,7 +34,6 @@ jobs:
         run: |
           sbt g8
           cd target/g8
-          sbt ci
 
       - name: Push to demo repository
         #if: contains(github.ref, 'master')
