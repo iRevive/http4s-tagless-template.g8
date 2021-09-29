@@ -1,26 +1,43 @@
 package $organization$.util
 
-import cats.mtl.{Handle, Raise}
+import cats.Applicative
 import $organization$.persistence.postgres.PostgresError
 import $organization$.service.user.UserValidationError
-import $organization$.util.config.ConfigParsingError
+import $organization$.service.user.api.UserValidationErrorResponse
+import $organization$.util.api.ErrorResponseSelector
 import $organization$.util.json.JsonDecodingError
-import shapeless._
+import $organization$.util.logging.RenderInstances
+import io.odin.meta.Render
+import io.github.irevive.union.derivation.UnionDerivation
+import org.http4s.Response
+
+import scala.reflect.TypeTest
 
 package object error {
 
-  type AppError = UserValidationError :+: PostgresError :+: JsonDecodingError :+: ConfigParsingError :+: CNil
+  type AppError = UserValidationError | PostgresError | JsonDecodingError
 
-  type ErrorRaise[F[_]] = Raise[F, RaisedError]
+  object AppError {
+    extension (error: AppError) {
+      def select[E <: AppError](using TypeTest[AppError, E]): Option[E] =
+        error match {
+          case err: E => Some(err)
+          case _      => None
+        }
+    }
 
-  object ErrorRaise {
-    def apply[F[_]](implicit instance: ErrorRaise[F]): ErrorRaise[F] = instance
-  }
+    given Render[AppError]          = UnionDerivation.derive[Render, AppError]
+    given ThrowableSelect[AppError] = UnionDerivation.derive[ThrowableSelect, AppError]
 
-  type ErrorHandle[F[_]] = Handle[F, RaisedError]
-
-  object ErrorHandle {
-    def apply[F[_]](implicit instance: ErrorHandle[F]): ErrorHandle[F] = instance
+    implicit def appErrorResponse[F[_]: Applicative]: ErrorResponseSelector[F, AppError] =
+      new ErrorResponseSelector[F, AppError] {
+        def toResponse(value: AppError, errorId: String): Response[F] =
+          value match {
+            case error: UserValidationError => UserValidationErrorResponse.userValidationErrorResponse.toResponse(error, errorId)
+            case error: PostgresError       => ErrorResponseSelector.postgresErrorResponse[F].toResponse(error, errorId)
+            case error: JsonDecodingError   => ErrorResponseSelector.jsonDecodingErrorResponse[F].toResponse(error, errorId)
+          }
+      }
   }
 
 }

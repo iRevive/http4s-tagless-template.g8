@@ -1,6 +1,6 @@
 package $organization$.service.user.domain
 
+import io.odin.extras.derivation.render.derived
 import io.odin.meta.Render
 
-@scalaz.annotation.deriving(Render)
-final case class User(username: String, password: String)
+final case class User(username: Username, password: Password) derives Render

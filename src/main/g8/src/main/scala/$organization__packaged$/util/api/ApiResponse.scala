@@ -1,6 +1,6 @@
 package $organization$.util.api
 
-import io.circe.syntax._
+import io.circe.syntax.*
 import io.circe.{Encoder, Json}
 
 sealed trait ApiResponse

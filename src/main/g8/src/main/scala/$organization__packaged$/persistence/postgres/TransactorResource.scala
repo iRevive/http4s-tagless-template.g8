@@ -1,61 +1,66 @@
 package $organization$.persistence.postgres
 
-import cats.effect._
-import cats.mtl.syntax.local._
-import cats.syntax.applicativeError._
-import cats.syntax.either._
-import cats.syntax.functor._
-import $organization$.util.error.{ErrorHandle, ErrorIdGen, RaisedError}
+import cats.effect.*
+import cats.mtl.syntax.local.*
+import cats.syntax.applicative.*
+import cats.syntax.applicativeError.*
+import cats.syntax.either.*
+import cats.syntax.functor.*
+import $organization$.util.ConfigSource
+import $organization$.util.error.{ErrorChannel, RaisedError}
 import $organization$.util.execution.Retry
-import $organization$.util.instances.render._
-import $organization$.util.logging.{TraceId, TraceProvider}
-import $organization$.util.syntax.mtl.raise._
+import $organization$.util.instances.render.*
+import $organization$.util.trace.{LogContext, TraceId, TraceProvider}
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
-import eu.timepit.refined.auto._
+import eu.timepit.refined.auto.*
 import io.odin.Logger
-import io.odin.syntax._
-import retry.mtl.syntax.all._
+import io.odin.syntax.*
+import org.flywaydb.core.Flyway
+import retry.mtl.syntax.all.*
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
-class TransactorResource[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen: Logger] {
+class TransactorResource[F[_]: Async: ErrorChannel: TraceProvider: Logger] {
 
-  def createAndVerify(config: PostgresConfig, blocker: Blocker): Resource[F, HikariTransactor[F]] =
+  def createAndVerify(config: PostgresConfig): Resource[F, HikariTransactor[F]] =
     for {
-      _  <- Resource.liftF(logger.info(render"Creating Postgres module with config \$config"))
-      xa <- createFromConfig(config, blocker)
-      _  <- Resource.liftF(logger.info("Verifying Postgres connection"))
-      _  <- Resource.liftF(verifyConnection(config, xa))
+      _  <- Resource.eval(logger.info(render"Creating Postgres module with config \$config"))
+      xa <- createFromConfig(config)
+      _  <- Resource.eval(logger.info("Verifying Postgres connection"))
+      _  <- Resource.eval(verifyConnection(config, xa))
     } yield xa
 
-  private def createFromConfig(config: PostgresConfig, blocker: Blocker): Resource[F, HikariTransactor[F]] =
+  private def createFromConfig(config: PostgresConfig): Resource[F, HikariTransactor[F]] =
     for {
       ce <- ExecutionContexts.fixedThreadPool[F](32)
-      xa <- HikariTransactor.newHikariTransactor[F](config.driver, config.uri, config.user, config.password, ce, blocker)
+      xa <- HikariTransactor.newHikariTransactor[F](config.driver, config.uri, config.user, config.password, ce)
     } yield xa
 
   private def verifyConnection(config: PostgresConfig, transactor: HikariTransactor[F]): F[Unit] =
-    verifyConnectionOnce(transactor, config.connectionAttemptTimeout)
-      .retryingOnAllMtlErrors[RaisedError](Retry.makePolicy(config.retryPolicy), Retry.logErrors(logger))
-      .local[TraceId](_.child(TraceId.Const("verify-postgres-connection")))
+    ErrorChannel[F]
+      .retryMtl(
+        fa = verifyConnectionOnce(transactor, config.connectionAttemptTimeout),
+        policy = Retry.makePolicy(config.retryPolicy),
+        onError = Retry.logErrors(logger)
+      )
+      .local[LogContext](ctx => ctx.copy(traceId = ctx.traceId.child(TraceId.Const("verify-postgres-connection"))))
 
   private[postgres] def verifyConnectionOnce(transactor: HikariTransactor[F], timeout: FiniteDuration): F[Unit] = {
-    import doobie.implicits._
+    import doobie.implicits.*
 
     val query = sql"""SELECT 1""".query[Int].nel
 
     val attempt = query
       .transact(transactor)
-      .handleErrorWith(e => PostgresError.unavailableConnection(e).asLeft.pureOrRaise)
+      .handleErrorWith(e => ErrorChannel[F].raise(PostgresError.UnavailableConnection(e)))
       .void
 
-    val timeoutTo = PostgresError
-      .connectionAttemptTimeout(render"Failed attempt to acquire Postgres connection in [\$timeout]")
-      .asLeft[Unit]
-      .pureOrRaise
+    val timeoutTo: F[Unit] = ErrorChannel[F].raise(
+      PostgresError.ConnectionAttemptTimeout(render"Failed attempt to acquire Postgres connection in [\$timeout]")
+    )
 
-    Concurrent.timeoutTo(attempt, timeout, timeoutTo)
+    Async[F].timeoutTo(attempt, timeout, timeoutTo)
   }
 
   private val logger: Logger[F] = Logger[F]
@@ -64,7 +69,20 @@ class TransactorResource[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: Tra
 
 object TransactorResource {
 
-  def default[F[_]: Concurrent: Timer: ContextShift: ErrorHandle: TraceProvider: ErrorIdGen: Logger] =
-    new TransactorResource[F]
+  def create[F[_]: Async: ErrorChannel: TraceProvider: Logger](
+      config: ConfigSource[F]
+  ): Resource[F, HikariTransactor[F]] = {
+    def runFlywayMigration(transactor: HikariTransactor[F]): F[Unit] =
+      transactor.configure(dataSource => Sync[F].delay(Flyway.configure().envVars().dataSource(dataSource).load().migrate()).void)
+
+    val transactorResource = new TransactorResource[F]
+
+    for {
+      cfg <- Resource.eval(config.get[PostgresConfig]("application.persistence.postgres"))
+      db  <- transactorResource.createAndVerify(cfg)
+      _   <- Resource.eval(Logger[F].info(render"Run migration [\${cfg.runMigration}]"))
+      _   <- Resource.eval(runFlywayMigration(db).whenA(cfg.runMigration))
+    } yield db
+  }
 
 }

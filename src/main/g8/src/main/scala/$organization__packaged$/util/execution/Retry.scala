@@ -2,15 +2,14 @@ package $organization$.util.execution
 
 import cats.Applicative
 import $organization$.util.error.ThrowableSelect
-import $organization$.util.instances.render._
-import eu.timepit.refined.auto._
+import $organization$.util.instances.render.*
+import eu.timepit.refined.auto.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.Decoder
-import io.circe.config.syntax.durationDecoder
-import io.circe.refined._
+import io.circe.refined.*
 import io.odin.Logger
 import io.odin.meta.Render
-import io.odin.syntax._
+import io.odin.syntax.*
 import retry.{RetryDetails, RetryPolicies, RetryPolicy}
 
 import scala.concurrent.duration.FiniteDuration
@@ -26,16 +25,24 @@ object Retry {
   }
 
   def logErrors[F[_]: Applicative, E: Render: ThrowableSelect](logger: Logger[F]): (E, RetryDetails) => F[Unit] =
-    (error, details) => {
+    (error, details) =>
       ThrowableSelect[E].select(error) match {
         case Some(cause) => logger.error(render"Retry policy. Error \$error. \$details", cause)
         case None        => logger.error(render"Retry policy. Error \$error. \$details")
       }
+
+  final case class Policy(retries: Int, delay: FiniteDuration, timeout: FiniteDuration)
+
+  object Policy {
+    given policyRender: Render[Policy] = {
+      import io.odin.extras.derivation.render.derived
+      Render.derived
     }
+  }
 
-  @scalaz.annotation.deriving(Decoder, Render)
-  final case class Policy(retries: NonNegInt, delay: FiniteDuration, timeout: FiniteDuration)
-
-  implicit val renderRetryDetails: Render[RetryDetails] = io.odin.extras.derivation.render.derive
+  given retryDetailsRender: Render[RetryDetails] = {
+    import io.odin.extras.derivation.render.derived
+    Render.derived
+  }
 
 }

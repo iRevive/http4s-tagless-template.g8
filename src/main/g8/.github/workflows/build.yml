@@ -16,7 +16,7 @@ jobs:
     if: contains(github.event.head_commit.message, 'do not build') == false
     strategy:
       matrix:
-        scala: [2.13.5]
+        scala: [3.0.2]
         java: [adopt@1.11]
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -29,7 +29,7 @@ jobs:
       - name: Setup Java and Scala
         uses: olafurpg/setup-scala@v10
         with:
-          java-version: ${{ matrix.java }}
+          java-version: \${{ matrix.java }}
 
       - name: Cache coursier
         uses: coursier/cache-action@v5

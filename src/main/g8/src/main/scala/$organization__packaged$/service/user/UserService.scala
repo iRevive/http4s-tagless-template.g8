@@ -1,25 +1,24 @@
 package $organization$.service.user
 
 import cats.effect.Sync
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import $organization$.service.user.domain.{PersistedUser, User, UserId, UserRepository}
-import $organization$.util.error.{ErrorHandle, ErrorIdGen}
-import $organization$.util.syntax.mtl.raise._
+import cats.syntax.flatMap.*
+import cats.syntax.functor.*
+import $organization$.service.user.domain.{PersistedUser, User, UserId, UserRepository, Username}
+import $organization$.util.error.ErrorChannel
 import io.odin.Logger
-import io.odin.syntax._
+import io.odin.syntax.*
 
-class UserService[F[_]: Sync: ErrorHandle: ErrorIdGen: Logger](repository: UserRepository[F]) {
+class UserService[F[_]: Sync: ErrorChannel: Logger](repository: UserRepository[F]) {
 
   def findById(userId: UserId): F[PersistedUser] =
     for {
       _       <- logger.info(render"Looking for user id [\$userId]")
       userOpt <- repository.findById(userId)
       _       <- logger.info(render"Found user \$userOpt")
-      user    <- userOpt.toRight(UserValidationError.userNotFound(userId)).pureOrRaise
+      user    <- ErrorChannel[F].raiseEither(userOpt.toRight(UserValidationError.UserNotFound(userId)))
     } yield user
 
-  def findByUsername(username: String): F[Option[PersistedUser]] =
+  def findByUsername(username: Username): F[Option[PersistedUser]] =
     for {
       _    <- logger.info(render"Looking for user by username [\$username]")
       user <- repository.findByUsername(username)

@@ -1,20 +1,20 @@
 package $organization$.util.api
 
-import cats.Id
 import cats.data.NonEmptyList
 import cats.effect.Sync
+import cats.{Id, catsInstancesForId}
 import doobie.hikari.HikariTransactor
-import eu.timepit.refined.auto._
+import eu.timepit.refined.auto.*
 import org.http4s.HttpRoutes
-import org.http4s.circe.CirceEntityCodec._
+import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.dsl.Http4sDsl
 import sup.data.{HealthReporter, Tagged}
-import sup.modules.circe._
-import sup.modules.doobie._
-import sup.modules.http4s._
-import sup.{mods, Health, HealthCheck, HealthReporter}
+import sup.modules.circe.*
+import sup.modules.doobie.*
+import sup.modules.http4s.*
+import sup.{Health, HealthCheck, HealthReporter, mods}
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 class HealthApi[F[_]: Sync](transactor: HikariTransactor[F]) extends Http4sDsl[F] {
 

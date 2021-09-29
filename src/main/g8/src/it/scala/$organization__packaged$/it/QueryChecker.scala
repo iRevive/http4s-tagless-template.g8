@@ -1,32 +1,26 @@
 package $organization$.it
 
-import cats.effect.Effect
+import cats.effect.Async
+import $organization$.Application
 import $organization$.persistence.postgres.PostgresConfig
+import $organization$.util.ConfigSource
 import $organization$.util.execution.Eff
-import $organization$.util.syntax.config._
 import com.typesafe.config.ConfigFactory
-import doobie.scalatest.Checker
-import doobie.syntax.connectionio._
-import doobie.util.testing.{analyze, formatReport, Analyzable}
-import doobie.util.transactor.Transactor
-import eu.timepit.refined.auto._
+import doobie.syntax.connectionio.*
+import doobie.util.Colors
+import doobie.util.testing.{Analyzable, UnsafeRun as DobieUnsafeRun, analyze, formatReport}
+import eu.timepit.refined.auto.*
+import weaver.{Expectations, SourceLocation}
 
-trait QueryChecker extends Checker[Eff] {
-  self: ITSpec =>
+trait QueryChecker {
+  self: AppSuite =>
 
-  override implicit val M: Effect[Eff] = self.Eff
-
-  override lazy val transactor: doobie.Transactor[Eff] = {
-    val config = ConfigFactory.load().load[PostgresConfig]("application.persistence.postgres").value
-    Transactor.fromDriverManager[Eff](config.driver, config.uri, config.user, config.password)
-  }
-
-  def checkQuery[A: Analyzable](a: A): Eff[Unit] = {
+  def checkQuery[A: Analyzable](a: A)(implicit app: Application[Eff], pos: SourceLocation): Eff[Expectations] = {
     val args = Analyzable.unpack(a)
 
-    analyze(args).transact(transactor).flatMap {
-      case report if report.succeeded => Eff.unit
-      case report                     => Eff.delay(fail(formatReport(args, report, colors).padLeft("  ").toString))
+    analyze(args).transact(app.persistence.transactor).map {
+      case report if report.succeeded => success
+      case report                     => failure(formatReport(args, report, Colors.Ansi).padLeft("  ").toString)
     }
   }
 

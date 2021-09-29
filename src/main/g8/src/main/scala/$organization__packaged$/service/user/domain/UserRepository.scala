@@ -1,11 +1,11 @@
 package $organization$.service.user.domain
 
 import cats.effect.Sync
-import cats.syntax.functor._
+import cats.syntax.functor.*
 import doobie.hikari.HikariTransactor
-import doobie.refined.implicits._
-import doobie.implicits._
-import doobie.implicits.legacy.instant._
+import doobie.implicits.*
+import doobie.implicits.legacy.instant.*
+import doobie.refined.implicits.*
 import doobie.util.query.Query0
 
 class UserRepository[F[_]: Sync](transactor: HikariTransactor[F]) {
@@ -13,7 +13,7 @@ class UserRepository[F[_]: Sync](transactor: HikariTransactor[F]) {
   def findById(userId: UserId): F[Option[PersistedUser]] =
     UserRepository.byId(userId).option.transact(transactor)
 
-  def findByUsername(username: String): F[Option[PersistedUser]] =
+  def findByUsername(username: Username): F[Option[PersistedUser]] =
     UserRepository.byUsernameQuery(username).option.transact(transactor)
 
   def insert(user: User): F[PersistedUser] =
@@ -33,7 +33,7 @@ object UserRepository {
          WHERE id = \$userId;
        """.query
 
-  def byUsernameQuery(username: String): Query0[PersistedUser] =
+  def byUsernameQuery(username: Username): Query0[PersistedUser] =
     sql"""
          SELECT id, created_at, updated_at, deleted_at, username, password
          FROM users

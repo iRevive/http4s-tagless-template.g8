@@ -9,7 +9,7 @@ sealed trait ErrorIdGen[F[_]] {
 
 object ErrorIdGen {
 
-  def apply[F[_]](implicit ev: ErrorIdGen[F]): ErrorIdGen[F] = ev
+  def apply[F[_]](using ev: ErrorIdGen[F]): ErrorIdGen[F] = ev
 
   def alphanumeric[F[_]: Sync](length: Int): ErrorIdGen[F] =
     new ErrorIdGen[F] {

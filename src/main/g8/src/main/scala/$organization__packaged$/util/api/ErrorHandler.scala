@@ -1,51 +1,49 @@
 package $organization$.util.api
 
-import cats.MonadError
+import cats.MonadThrow
 import cats.data.{Kleisli, OptionT}
-import cats.syntax.applicativeError._
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import cats.mtl.syntax.handle._
-import $organization$.util.error.{AppError, ErrorHandle, ErrorIdGen, RaisedError}
-import $organization$.util.instances.render._
-import io.circe.syntax._
-import org.http4s.circe._
-import org.http4s.{HttpRoutes, Request, Response, Status}
+import cats.mtl.syntax.handle.*
+import cats.syntax.applicative.*
+import cats.syntax.applicativeError.*
+import cats.syntax.flatMap.*
+import cats.syntax.functor.*
+import $organization$.util.error.{AppError, ErrorChannel, RaisedError}
+import $organization$.util.instances.render.*
+import io.circe.syntax.*
 import io.odin.Logger
-import io.odin.syntax._
+import io.odin.syntax.*
+import org.http4s.circe.*
+import org.http4s.{HttpRoutes, Request, Response, Status}
 
 object ErrorHandler {
 
-  type MonadThrow[F[_]]       = MonadError[F, Throwable]
   type AppErrorResponse[F[_]] = ErrorResponseSelector[F, AppError]
 
-  def httpRoutes[F[_]: MonadThrow: ErrorIdGen: ErrorHandle: AppErrorResponse](logger: Logger[F])(
-      routes: HttpRoutes[F]
-  ): HttpRoutes[F] = {
+  def httpRoutes[F[_]: ErrorChannel: AppErrorResponse: Logger](routes: HttpRoutes[F]): HttpRoutes[F] = {
+    implicit val monadThrow: MonadThrow[F] = ErrorChannel[F].monadThrow
 
     def onMonadError(error: Throwable): F[Option[Response[F]]] =
       for {
-        errorId  <- ErrorIdGen[F].gen
+        errorId  <- ErrorChannel[F].errorIdGen.gen
         body     <- ApiResponse.Error("Unhandled internal error", errorId).asJson.pure[F]
         response <- Response[F](Status.InternalServerError).withEntity(body).pure[F]
         ctx      <- Map("error_id" -> errorId).pure[F]
-        _        <- logger.error(render"Execution completed with an unhandled error \$error", ctx, error)
+        _        <- Logger[F].error(render"Execution completed with an unhandled error \$error", ctx, error)
       } yield Option(response)
 
     def onHandleError(error: RaisedError): F[Option[Response[F]]] =
       for {
         ctx <- Map("error_id" -> error.errorId).pure[F]
-        _   <- logger.error(render"Execution completed with an error \$error", ctx, error)
+        _   <- Logger[F].error(render"Execution completed with an error \$error", ctx, error)
       } yield Option(ErrorResponseSelector[F, AppError].toResponse(error.error, error.errorId))
 
-    Kleisli { req: Request[F] =>
+    Kleisli { (req: Request[F]) =>
       OptionT {
         routes
           .run(req)
           .value
           .handleErrorWith(onMonadError)
-          .handleWith[RaisedError](onHandleError)
+          .handleWith[RaisedError](onHandleError)(ErrorChannel[F].handle)
       }
     }
   }

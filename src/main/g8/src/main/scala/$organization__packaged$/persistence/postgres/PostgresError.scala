@@ -1,22 +1,18 @@
 package $organization$.persistence.postgres
 
 import $organization$.util.error.ThrowableSelect
-import $organization$.util.instances.render._
+import $organization$.util.instances.render.*
+import io.odin.extras.derivation.render.derived
 import io.odin.meta.Render
 
-@scalaz.annotation.deriving(Render)
-sealed trait PostgresError
+enum PostgresError derives Render {
+  case UnavailableConnection(cause: Throwable)
+  case ConnectionAttemptTimeout(message: String)
+}
 
 object PostgresError {
 
-  final case class UnavailableConnection(cause: Throwable) extends PostgresError
-
-  final case class ConnectionAttemptTimeout(message: String) extends PostgresError
-
-  def unavailableConnection(cause: Throwable): PostgresError   = UnavailableConnection(cause)
-  def connectionAttemptTimeout(message: String): PostgresError = ConnectionAttemptTimeout(message)
-
-  implicit val postgresErrorThrowableSelect: ThrowableSelect[PostgresError] = {
+  given postgresErrorThrowableSelect: ThrowableSelect[PostgresError] = {
     case _: ConnectionAttemptTimeout  => None
     case UnavailableConnection(cause) => Option(cause)
   }

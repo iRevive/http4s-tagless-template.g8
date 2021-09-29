@@ -1,11 +1,10 @@
-package $organization$.util.logging
+package $organization$.util
+package logging
 
 import java.time.Instant
 
 import eu.timepit.refined.api.RefType
-import io.estatico.newtype.Coercible
 import io.odin.meta.Render
-import shapeless.{:+:, CNil, Coproduct, Lazy}
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -22,18 +21,8 @@ trait RenderInstances {
     s"\$className(\$message)"
   }
 
-  implicit def renderCoercible[R, N](implicit ev: Coercible[Render[R], Render[N]], r: Render[R]): Render[N] =
-    ev(r)
-
   implicit def renderRefined[T, P, F[_, _]](implicit ev: Render[T], refType: RefType[F]): Render[F[T, P]] =
     value => ev.render(refType.unwrap(value))
-
-  // \$COVERAGE-OFF\$
-  implicit val renderCNil: Render[CNil] = _.impossible
-  // \$COVERAGE-ON\$
-
-  implicit def renderCoproduct[H, T <: Coproduct](implicit h: Lazy[Render[H]], t: Render[T]): Render[H :+: T] =
-    value => value.eliminate(h.value.render, t.render)
 
 }
 
