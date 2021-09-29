@@ -9,17 +9,17 @@ import io.odin.loggers.HasContext
 
 import scala.util.Random
 
-sealed trait TraceId {
-  def child(traceId: TraceId): TraceId = TraceId./(this, traceId)
+enum TraceId {
+  case /(parent: TraceId, child: TraceId)
+  case ApiRoute(value: String)
+  case Const(value: String)
+  case Alphanumeric(value: String)
+  case Uuid(value: UUID)
+
+  def child(traceId: TraceId): TraceId = /(this, traceId)
 }
 
 object TraceId {
-
-  final case class /(parent: TraceId, child: TraceId) extends TraceId
-  final case class ApiRoute(value: String)            extends TraceId
-  final case class Const(value: String)               extends TraceId
-  final case class Alphanumeric(value: String)        extends TraceId
-  final case class Uuid(value: UUID)                  extends TraceId
 
   def randomUuid[F[_]: Sync]: F[Uuid] =
     Sync[F].delay(Uuid(UUID.randomUUID()))

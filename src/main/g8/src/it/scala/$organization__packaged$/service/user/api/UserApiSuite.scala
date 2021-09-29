@@ -23,7 +23,7 @@ object UserApiSuite extends ApiSuite {
   test("return empty response when user with specified username does not exist") { implicit app =>
     forall { (username: Username) =>
       val request      = withAuth(Request[Eff](Method.GET, uri"/api/user/find" / username.value))
-      val expectedBody = ApiResponse.Success(Option.empty[UserView])
+      val expectedBody = ApiResponse.Success(None): ApiResponse.Success[Option[UserView]]
 
       executeAndCheck[ApiResponse.Success[Option[UserView]]](request, Status.Ok, expectedBody)
     }
@@ -47,7 +47,7 @@ object UserApiSuite extends ApiSuite {
   test("user with specified userId does not exist") { implicit app =>
     forall { (userId: UserId) =>
       val request      = withAuth(Request[Eff](Method.GET, uri"/api/user" / userId.toString))
-      val expectedBody = ApiResponse.Error(render"User with userId [\$userId] does not exist", "test")
+      val expectedBody = ApiResponse.Error(render"User with userId [\$userId] does not exist", "test"): ApiResponse.Error
 
       executeAndCheck[ApiResponse.Error](request, Status.NotFound, expectedBody)
     }
