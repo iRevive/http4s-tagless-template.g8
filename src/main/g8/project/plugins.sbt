@@ -1,5 +1,5 @@
 addSbtPlugin("com.typesafe.sbt"          % "sbt-native-packager"       % "$sbt_native_packager_version$")
-addSbtPlugin("org.scoverage"             % "sbt-scoverage"             % "$sbt_scoverage_version$")
+//addSbtPlugin("org.scoverage"             % "sbt-scoverage"             % "$sbt_scoverage_version$")
 addSbtPlugin("org.scalameta"             % "sbt-scalafmt"              % "$sbt_scalafmt_version$")
 addSbtPlugin("org.scalameta"             % "sbt-mdoc"                  % "$sbt_mdoc_version$")
 addSbtPlugin("ch.epfl.scala"             % "sbt-scalafix"              % "$sbt_scalafix_version$")
