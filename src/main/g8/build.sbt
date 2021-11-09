@@ -1,4 +1,4 @@
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "$organize-imports-version$"
 
 lazy val root = project
   .in(file("."))
