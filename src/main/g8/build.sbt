@@ -113,7 +113,7 @@ lazy val dockerSettings = Seq(
 lazy val commandSettings = {
   val ci = Command.command("ci") { state =>
     "clean" ::
-      "coverage" ::
+     // "coverage" ::
       "scalafmtSbtCheck" ::
       "scalafmtCheckAll" ::
       "test:compile" ::
@@ -125,7 +125,7 @@ lazy val commandSettings = {
   }
 
   val testAll =
-    Command.command("testAll")(state => "clean" :: "coverage" :: "test" :: "it:test" :: "coverageReport" :: state)
+    Command.command("testAll")(state => "clean" /*:: "coverage"*/ :: "test" :: "it:test" :: "coverageReport" :: state)
 
   commands ++= List(ci, testAll)
 }
