@@ -114,7 +114,7 @@ lazy val commandSettings = {
   val ci = Command.command("ci") { state =>
     "clean" ::
      // "coverage" ::
-      "scalafmtSbtCheck" ::
+     // "scalafmtSbtCheck" ::
       "scalafmtCheckAll" ::
       "test:compile" ::
       "it:compile" ::
