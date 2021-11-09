@@ -27,7 +27,7 @@ object Server extends Runner.Simple {
   private def bindHttpServer(app: Application[Eff]): Resource[Eff, Unit] = {
     val ApiConfig(host, port, _) = app.api.config
 
-    val server = BlazeServerBuilder[Eff](runtime.compute)
+    val server = BlazeServerBuilder[Eff]
       .bindHttp(port, host)
       .withHttpApp(app.api.httpApp)
       .resource
