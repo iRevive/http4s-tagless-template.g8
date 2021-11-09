@@ -2,7 +2,6 @@ package $organization$.util.execution
 
 import cats.data.EitherT
 import cats.data.EitherT.catsDataMonadErrorFForEitherT
-import cats.effect.kernel.Async
 import cats.effect.{Async, IO, Ref}
 import cats.mtl.Handle.{handleEitherT, handleKleisli}
 import cats.mtl.implicits.*

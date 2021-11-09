@@ -1,6 +1,6 @@
 package $organization$.util.api
 
-import cats.effect.kernel.Deferred
+import cats.effect.Deferred
 import cats.syntax.functor.*
 import $organization$.test.SimpleEffSuite
 import $organization$.util.trace.TraceId./

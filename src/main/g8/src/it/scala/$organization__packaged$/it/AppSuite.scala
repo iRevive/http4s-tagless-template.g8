@@ -1,6 +1,6 @@
 package $organization$.it
 
-import cats.effect.kernel.Resource
+import cats.effect.Resource
 import cats.effect.syntax.monadCancel.*
 import cats.mtl.syntax.local.*
 import cats.syntax.flatMap.*

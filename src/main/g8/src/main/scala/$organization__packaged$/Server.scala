@@ -4,7 +4,6 @@ import java.time.Instant
 
 import cats.data.Kleisli
 import cats.effect.*
-import cats.effect.kernel.Resource
 import $organization$.Application
 import $organization$.util.api.ApiConfig
 import $organization$.util.instances.render.*

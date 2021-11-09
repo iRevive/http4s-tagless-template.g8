@@ -1,7 +1,6 @@
 package $organization$.test
 
-import cats.effect.IO
-import cats.effect.kernel.{Async, Resource}
+import cats.effect.{Async, IO, Resource}
 import $organization$.util.execution.Eff
 import fs2.Stream
 import weaver.*

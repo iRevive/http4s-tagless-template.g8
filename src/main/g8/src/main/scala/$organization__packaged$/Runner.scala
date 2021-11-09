@@ -1,7 +1,6 @@
 package $organization$
 
 import cats.data.Kleisli
-import cats.effect.kernel.Outcome
 import cats.effect.syntax.monadCancel.*
 import cats.effect.{Async, ExitCode, IO, IOApp, Outcome, Resource}
 import cats.mtl.implicits.*

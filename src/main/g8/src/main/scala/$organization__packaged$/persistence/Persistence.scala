@@ -1,6 +1,6 @@
 package $organization$.persistence
 
-import cats.effect.kernel.{Async, Resource}
+import cats.effect.{Async, Resource}
 import $organization$.persistence.postgres.TransactorResource
 import $organization$.util.ConfigSource
 import $organization$.util.error.ErrorChannel
