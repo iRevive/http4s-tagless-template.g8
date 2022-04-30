@@ -1,11 +1,18 @@
 package $organization$.util.api
 
-import io.circe.{Decoder, Encoder}
 import io.odin.meta.Render
+import pureconfig.ConfigReader
+import pureconfig.generic.derivation.default.*
 
-@scalaz.annotation.deriving(Decoder, Encoder, Render)
 final case class BasicAuthConfig(
     realm: String,
     user: String,
     password: String
-)
+) derives ConfigReader
+
+object BaseAuthConfig {
+  given baseAuthConfigRender: Render[BasicAuthConfig] = {
+    import io.odin.extras.derivation.render.derived
+    Render.derived
+  }
+}

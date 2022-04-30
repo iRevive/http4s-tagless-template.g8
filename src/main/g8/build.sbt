@@ -1,24 +1,30 @@
-import sbtrelease.ReleaseStateTransformations._
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "$organize-imports-version$"
 
 lazy val root = project
   .in(file("."))
-  .enablePlugins(JavaAppPackaging, AshScriptPlugin, IntegrationEnvPlugin)
-  .configs(IntegrationTest)
+  .enablePlugins(JavaAppPackaging, AshScriptPlugin, IntegrationEnvPlugin, TestSharedPlugin)
   .settings(commonSettings)
-  .settings(scalazDerivingSettings)
   .settings(wartRemoverSettings)
   .settings(testSettings)
   .settings(integrationTestSettings)
   .settings(buildSettings)
   .settings(dockerSettings)
-  .settings(releaseSettings)
   .settings(commandSettings)
   .settings(
     name                 := Settings.name,
-    libraryDependencies ++= Dependencies.root
+    libraryDependencies ++= Dependencies.root,
+    testFrameworks       := Seq(new TestFramework("weaver.framework.CatsEffect")),
+    semanticdbEnabled    := true,
+    scalacOptions ++= Seq(
+      "-source:future",
+      "-language:adhocExtensions",
+      "-no-indent",
+      "-old-syntax", // let's be conservative for a while
+      "-Yretain-trees"
+    )
   )
 
-lazy val docs = project
+/*lazy val docs = project
   .in(file(s"\${Settings.name}-docs"))
   .enablePlugins(MdocPlugin, DocusaurusPlugin)
   .settings(commonSettings)
@@ -28,25 +34,12 @@ lazy val docs = project
       "REPO_URL" -> sys.env.getOrElse("REPO_URL", "")
     )
   )
-  .dependsOn(root)
+  .dependsOn(root)*/
 
 lazy val commonSettings = Seq(
   organization  := Settings.organization,
   scalaVersion  := Versions.scala,
-  javacOptions ++= Seq("-source", "11"),
-  scalacOptions += "-Ymacro-annotations",
-  addCompilerPlugin("org.typelevel" %% "kind-projector"     % Versions.kindProjector cross CrossVersion.full),
-  addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % Versions.betterMonadicFor)
-)
-
-lazy val scalazDerivingSettings = Seq(
-  // WORKAROUND for scalaz.annotation.deriving: https://github.com/sbt/sbt/issues/1965
-  Compile / managedClasspath := {
-    val res = (Compile / resourceDirectory).value
-    val old = (Compile / managedClasspath).value
-    Attributed.blank(res) +: old
-  },
-  addCompilerPlugin("org.scalaz" %% "deriving-plugin" % Versions.scalazDeriving cross CrossVersion.full)
+  javacOptions ++= Seq("-source", "11")
 )
 
 lazy val testSettings = Seq(
@@ -55,9 +48,7 @@ lazy val testSettings = Seq(
 )
 
 lazy val integrationTestSettings = Seq(
-  IntegrationTest / testOptions       := integrationEnvTestOpts.value,
-  IntegrationTest / fork              := true,
-  IntegrationTest / parallelExecution := false,
+  IntegrationTest / fork := true,
   IntegrationTest / javaOptions := {
     val externalNetwork = sys.env.isDefinedAt("DOCKER_NETWORK")
 
@@ -79,9 +70,10 @@ lazy val integrationTestSettings = Seq(
     val dockerComposeFile  = sourceDirectory.value / "it" / "docker" / "docker-compose.yml"
     val network            = sys.env.get("DOCKER_NETWORK").orElse(Some(s"\$projectName-network"))
 
-    new DockerComposeEnvProvider(composeProjectName, dockerComposeFile, network)
-  }
-) ++ Defaults.itSettings ++ inConfig(IntegrationTest)(ScalafmtPlugin.scalafmtConfigSettings)
+    IntegrationEnv.DockerCompose.Provider(composeProjectName, dockerComposeFile, network)
+  },
+  IntegrationTest / testOptions := integrationEnvTestOpts.value
+)
 
 lazy val buildSettings = Seq(
   Universal / packageName                := name.value,
@@ -118,28 +110,11 @@ lazy val dockerSettings = Seq(
   )
 )
 
-lazy val releaseSettings = Seq(
-  releaseVersionBump := sbtrelease.Version.Bump.Next,
-  releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    inquireVersions,
-    runTest,
-    releaseStepTask(test in IntegrationTest),
-    setReleaseVersion,
-    releaseStepTask(publish in Docker),
-    commitReleaseVersion,
-    tagRelease,
-    setNextVersion,
-    commitNextVersion,
-    pushChanges
-  )
-)
-
 lazy val commandSettings = {
   val ci = Command.command("ci") { state =>
     "clean" ::
-      "coverage" ::
-      "scalafmtSbtCheck" ::
+     // "coverage" ::
+     // "scalafmtSbtCheck" ::
       "scalafmtCheckAll" ::
       "test:compile" ::
       "it:compile" ::
@@ -150,7 +125,7 @@ lazy val commandSettings = {
   }
 
   val testAll =
-    Command.command("testAll")(state => "clean" :: "coverage" :: "test" :: "it:test" :: "coverageReport" :: state)
+    Command.command("testAll")(state => "clean" /*:: "coverage"*/ :: "test" :: "it:test" :: "coverageReport" :: state)
 
   commands ++= List(ci, testAll)
 }

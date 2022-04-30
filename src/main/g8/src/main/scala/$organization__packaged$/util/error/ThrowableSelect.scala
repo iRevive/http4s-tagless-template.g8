@@ -1,6 +1,7 @@
-package $organization$.util.error
+package $organization$.util
+package error
 
-import shapeless.{:+:, CNil, Coproduct, Lazy}
+import cats.Contravariant
 
 trait ThrowableSelect[E] {
   def select(e: E): Option[Throwable]
@@ -8,7 +9,7 @@ trait ThrowableSelect[E] {
 
 object ThrowableSelect {
 
-  def apply[E](implicit ev: ThrowableSelect[E]): ThrowableSelect[E] = ev
+  def apply[E](using ev: ThrowableSelect[E]): ThrowableSelect[E] = ev
 
   sealed abstract class Empty[E] extends ThrowableSelect[E] {
     override def select(e: E): Option[Throwable] = None
@@ -16,21 +17,12 @@ object ThrowableSelect {
 
   object Empty {
     def create[E]: Empty[E] = new Empty[E] {}
+
+    given derived[A]: ThrowableSelect.Empty[A] = create[A]
   }
 
-  implicit val raisedErrorThrowableSelect: ThrowableSelect[RaisedError] =
-    v => ThrowableSelect[AppError].select(v.error)
+  given Contravariant[ThrowableSelect] with {
+    def contramap[A, B](fa: ThrowableSelect[A])(f: B => A): ThrowableSelect[B] = error => fa.select(f(error))
+  }
 
-  implicit def throwableSelect[E <: Throwable]: ThrowableSelect[E] =
-    e => Option(e)
-
-  // \$COVERAGE-OFF\$
-  implicit val cnilThrowableSelect: ThrowableSelect[CNil] = _.impossible
-  // \$COVERAGE-ON\$
-
-  implicit def coproductThrowableSelect[H, T <: Coproduct](implicit
-      h: Lazy[ThrowableSelect[H]],
-      t: ThrowableSelect[T]
-  ): ThrowableSelect[H :+: T] =
-    value => value.eliminate(h.value.select, t.select)
 }

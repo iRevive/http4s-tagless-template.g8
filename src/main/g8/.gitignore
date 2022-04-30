@@ -1,8 +1,14 @@
 *.class
 .idea
+.vscode
+.metals
+.bsp
+.bloop
 .DS_Store
 logs/
 project/project/
 project/target/
+project/.bloop
 target/
 ci/shared
+website/

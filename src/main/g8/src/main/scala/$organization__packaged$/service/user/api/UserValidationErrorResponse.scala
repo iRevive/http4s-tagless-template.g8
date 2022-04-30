@@ -3,7 +3,7 @@ package $organization$.service.user.api
 import cats.Applicative
 import $organization$.service.user.UserValidationError
 import $organization$.util.api.ErrorResponseSelector
-import io.odin.syntax._
+import io.odin.syntax.*
 import org.http4s.Status
 
 object UserValidationErrorResponse {

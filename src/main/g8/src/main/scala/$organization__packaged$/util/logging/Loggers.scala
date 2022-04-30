@@ -3,34 +3,35 @@ package $organization$.util.logging
 import java.io.File
 import java.util.Locale
 
-import cats.effect.{Concurrent, ContextShift, Resource, Sync, Timer}
-import cats.syntax.applicativeError._
+import cats.effect.{Async, Resource}
+import cats.syntax.applicativeError.*
+import $organization$.util.trace.TraceProvider
 import io.odin.formatter.Formatter
 import io.odin.formatter.options.ThrowableFormat
-import io.odin.syntax._
+import io.odin.syntax.*
 import io.odin.{Level, Logger}
 
 object Loggers {
 
-  def consoleContextLogger[F[_]: Sync: Timer: TraceProvider](minLevel: Level): Logger[F] =
+  def consoleContextLogger[F[_]: Async: TraceProvider](minLevel: Level): Logger[F] =
     io.odin.consoleLogger[F](formatter, minLevel).withContext
 
-  def consoleContextLoggerAsync[F[_]: Concurrent: ContextShift: Timer: TraceProvider](minLevel: Level): Resource[F, Logger[F]] =
+  def consoleContextLoggerAsync[F[_]: Async: TraceProvider](minLevel: Level): Resource[F, Logger[F]] =
     io.odin.consoleLogger[F](formatter, minLevel).withAsync().withContext
 
-  def fileContextLoggerAsync[F[_]: Concurrent: ContextShift: Timer: TraceProvider](
+  def fileContextLoggerAsync[F[_]: Async: TraceProvider](
       fileName: String,
       minLevel: Level
   ): Resource[F, Logger[F]] =
     for {
-      _      <- Resource.liftF(Sync[F].delay(new File(fileName).getParentFile.mkdirs()).attempt)
+      _      <- Resource.eval(Async[F].blocking(new File(fileName).getParentFile.mkdirs()).attempt)
       logger <- io.odin.asyncFileLogger[F](fileName, formatter, minLevel = minLevel).withContext
     } yield logger
 
   def envLogLevel(variable: String): Option[Level] =
     sys.env.get(variable).map(_.toUpperCase(Locale.ENGLISH)).flatMap(stringToLevel.lift)
 
-  private val formatter: Formatter = Formatter.create(
+  val formatter: Formatter = Formatter.create(
     ThrowableFormat(ThrowableFormat.Depth.Full, ThrowableFormat.Indent.Fixed(4), ThrowableFormat.Filter.NoFilter),
     colorful = false
   )

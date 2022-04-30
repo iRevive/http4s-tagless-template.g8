@@ -1,18 +1,13 @@
 package $organization$.persistence
 
-import $organization$.util.instances.render._
-import eu.timepit.refined.auto._
+import $organization$.util.instances.render.*
+import eu.timepit.refined.auto.*
 import eu.timepit.refined.types.numeric.{NonNegInt, PosInt}
+import io.odin.extras.derivation.render.derived
 import io.odin.meta.Render
 
-@scalaz.annotation.deriving(Render)
-sealed trait Pagination
-
-object Pagination {
-
-  final case object NoPagination                             extends Pagination
-  final case class Skip(skip: NonNegInt)                     extends Pagination
-  final case class Limit(limit: PosInt)                      extends Pagination
-  final case class SkipLimit(skip: NonNegInt, limit: PosInt) extends Pagination
-
+enum Pagination derives Render {
+  case Skip(skip: NonNegInt)
+  case Limit(limit: PosInt)
+  case SkipLimit(skip: NonNegInt, limit: PosInt)
 }
